@@ -48,7 +48,7 @@ final class FlightWalletBuilder extends AbstractWalletBuilder
         $originCode = $this->origin->airportIataCode ?? '';
         $destCode = $this->destination->airportIataCode ?? '';
 
-        $headerFields = [] !== $flightNumber
+        $headerFields = '' !== $flightNumber
             ? [new Field(key: 'flight', value: $flightNumber, label: 'Flight')]
             : [];
 
@@ -61,10 +61,10 @@ final class FlightWalletBuilder extends AbstractWalletBuilder
             secondaryFields: [
                 new Field(key: 'passenger', value: $this->passengerName, label: 'Passenger'),
             ],
-            transitType: TransitTypeEnum::Air,
+            transitType: TransitTypeEnum::AIR,
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::BoardingPass, $structure);
+        $applePass = $this->createApplePass(PassTypeEnum::BOARDING_PASS, $structure);
 
         $flightClass = new FlightClass(
             id: $this->context->googleClassId,
@@ -95,7 +95,7 @@ final class FlightWalletBuilder extends AbstractWalletBuilder
 
         return new BuiltWalletPass(
             $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::Flight, $flightClass, $flightObject),
+            new GoogleWalletPair(GoogleVerticalEnum::FLIGHT, $flightClass, $flightObject),
         );
     }
 }

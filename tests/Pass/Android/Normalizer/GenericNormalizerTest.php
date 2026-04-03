@@ -169,8 +169,8 @@ final class GenericNormalizerTest extends TestCase
         $linksModuleData = new LinksModuleData([new Uri('https://example.com', 'Example', null, 'uri-1')]);
         $textModulesData = [new TextModuleData('Header', 'Body', 'text-1')];
         $imageModulesData = [new ImageModuleData(new Image(new ImageUri('https://example.com/module.png')), 'img-1')];
-        $messages = [new Message('Title', 'Body', 'msg-1', MessageTypeEnum::Text)];
-        $securityAnimation = new SecurityAnimation(SecurityAnimationTypeEnum::FoilShimmer);
+        $messages = [new Message('Title', 'Body', 'msg-1', MessageTypeEnum::TEXT)];
+        $securityAnimation = new SecurityAnimation(SecurityAnimationTypeEnum::FOIL_SHIMMER);
         $callbackOptions = new CallbackOptions('https://example.com/callback');
         $appLinkData = new AppLinkData(
             androidAppLinkInfo: new AppLinkInfo(
@@ -187,9 +187,9 @@ final class GenericNormalizerTest extends TestCase
             enableSmartTap: true,
             redemptionIssuers: ['issuer-1', 'issuer-2'],
             securityAnimation: $securityAnimation,
-            multipleDevicesAndHoldersAllowedStatus: MultipleDevicesAndHoldersAllowedStatusEnum::MultipleHolders,
+            multipleDevicesAndHoldersAllowedStatus: MultipleDevicesAndHoldersAllowedStatusEnum::MULTIPLE_HOLDERS,
             callbackOptions: $callbackOptions,
-            viewUnlockRequirement: ViewUnlockRequirementEnum::UnlockNotRequired,
+            viewUnlockRequirement: ViewUnlockRequirementEnum::UNLOCK_NOT_REQUIRED,
             messages: $messages,
             appLinkData: $appLinkData,
         );
@@ -197,7 +197,7 @@ final class GenericNormalizerTest extends TestCase
         $object = new GenericObject(
             id: 'generic-object-001',
             classId: 'generic-class-001',
-            genericType: GenericTypeEnum::GymMembership,
+            genericType: GenericTypeEnum::GYM_MEMBERSHIP,
             cardTitle: new LocalizedString(new TranslatedString('en', 'My Gym Card')),
             subheader: new LocalizedString(new TranslatedString('en', 'Member')),
             header: new LocalizedString(new TranslatedString('en', 'John Doe')),
@@ -209,10 +209,10 @@ final class GenericNormalizerTest extends TestCase
                 upcomingNotification: new UpcomingNotification(true),
             ),
             barcode: new Barcode(
-                type: BarcodeTypeEnum::QrCode,
+                type: BarcodeTypeEnum::QR_CODE,
                 value: 'BARCODE123',
                 alternateText: 'ALT',
-                renderEncoding: BarcodeRenderEncodingEnum::Utf8,
+                renderEncoding: BarcodeRenderEncodingEnum::UTF_8,
             ),
             heroImage: new Image(new ImageUri('https://example.com/hero.png'), new LocalizedString(new TranslatedString('en', 'Hero'))),
             validTimeInterval: new TimeInterval(
@@ -226,13 +226,13 @@ final class GenericNormalizerTest extends TestCase
             groupingInfo: new GroupingInfo('group-1', 1),
             smartTapRedemptionValue: 'smart-tap-123',
             rotatingBarcode: new RotatingBarcode(
-                type: BarcodeTypeEnum::QrCode,
-                renderEncoding: BarcodeRenderEncodingEnum::Utf8,
+                type: BarcodeTypeEnum::QR_CODE,
+                renderEncoding: BarcodeRenderEncodingEnum::UTF_8,
                 valuePattern: 'PATTERN_{0}',
             ),
-            state: StateEnum::Active,
+            state: StateEnum::ACTIVE,
             messages: $messages,
-            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::Eligible, [NfcConstraintEnum::BlockPayment]),
+            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::ELIGIBLE, [NfcConstraintEnum::BLOCK_PAYMENT]),
             linkedObjectIds: ['linked-obj-1', 'linked-obj-2'],
         );
 

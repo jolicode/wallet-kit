@@ -6,11 +6,11 @@ namespace Jolicode\WalletKit\Builder;
 
 enum GoogleVerticalEnum: string
 {
-    case Flight = 'flight';
-    case EventTicket = 'event_ticket';
-    case Generic = 'generic';
-    case GiftCard = 'gift_card';
-    case Loyalty = 'loyalty';
-    case Offer = 'offer';
-    case Transit = 'transit';
+    case FLIGHT = 'flight';
+    case EVENT_TICKET = 'event_ticket';
+    case GENERIC = 'generic';
+    case GIFT_CARD = 'gift_card';
+    case LOYALTY = 'loyalty';
+    case OFFER = 'offer';
+    case TRANSIT = 'transit';
 }

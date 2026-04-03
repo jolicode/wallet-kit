@@ -9,6 +9,6 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Shared;
  */
 enum MessageTypeEnum: string
 {
-    case Text = 'TEXT';
-    case TextAndNotify = 'TEXT_AND_NOTIFY';
+    case TEXT = 'TEXT';
+    case TEXT_AND_NOTIFY = 'TEXT_AND_NOTIFY';
 }

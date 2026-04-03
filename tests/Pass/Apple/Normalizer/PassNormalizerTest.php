@@ -78,7 +78,7 @@ final class PassNormalizerTest extends TestCase
             passTypeIdentifier: 'pass.com.example.boarding',
             formatVersion: 1,
             serialNumber: 'BP-001',
-            passType: PassTypeEnum::BoardingPass,
+            passType: PassTypeEnum::BOARDING_PASS,
             structure: new PassStructure(
                 headerFields: [
                     new Field(key: 'gate', value: 'F12', label: 'Gate'),
@@ -92,8 +92,8 @@ final class PassNormalizerTest extends TestCase
                         key: 'boarding-time',
                         value: '2026-04-03T09:00-07:00',
                         label: 'Boarding',
-                        dateStyle: DateStyleEnum::Short,
-                        timeStyle: DateStyleEnum::Short,
+                        dateStyle: DateStyleEnum::SHORT,
+                        timeStyle: DateStyleEnum::SHORT,
                         isRelative: true,
                     ),
                 ],
@@ -103,13 +103,13 @@ final class PassNormalizerTest extends TestCase
                         key: 'passenger',
                         value: 'John Appleseed',
                         label: 'Passenger',
-                        textAlignment: TextAlignmentEnum::Right,
+                        textAlignment: TextAlignmentEnum::RIGHT,
                     ),
                 ],
                 backFields: [
                     new Field(key: 'terms', value: 'Terms and conditions apply.', label: 'Terms'),
                 ],
-                transitType: TransitTypeEnum::Air,
+                transitType: TransitTypeEnum::AIR,
             ),
             barcodes: [
                 new Barcode(altText: 'BP-001-SFO-LHR', format: BarcodeFormatEnum::QR, message: 'BP001SFOLHR', messageEncoding: 'iso-8859-1'),
@@ -242,7 +242,7 @@ final class PassNormalizerTest extends TestCase
             passTypeIdentifier: 'pass.com.example.coupon',
             formatVersion: 1,
             serialNumber: 'CPN-001',
-            passType: PassTypeEnum::Coupon,
+            passType: PassTypeEnum::COUPON,
             structure: new PassStructure(
                 primaryFields: [
                     new Field(key: 'offer', value: '25% off', label: 'All holiday items.'),
@@ -252,7 +252,7 @@ final class PassNormalizerTest extends TestCase
                         key: 'expires',
                         value: '2026-12-31T23:59-05:00',
                         label: 'EXPIRES',
-                        dateStyle: DateStyleEnum::Short,
+                        dateStyle: DateStyleEnum::SHORT,
                         isRelative: true,
                     ),
                 ],
@@ -262,7 +262,7 @@ final class PassNormalizerTest extends TestCase
                 ],
             ),
             barcodes: [
-                new Barcode(altText: null, format: BarcodeFormatEnum::CODE128, message: 'CPN001', messageEncoding: 'iso-8859-1'),
+                new Barcode(altText: null, format: BarcodeFormatEnum::CODE_128, message: 'CPN001', messageEncoding: 'iso-8859-1'),
             ],
             backgroundColor: 'rgb(34, 107, 72)',
             foregroundColor: 'rgb(245, 237, 95)',
@@ -313,7 +313,7 @@ final class PassNormalizerTest extends TestCase
             passTypeIdentifier: 'pass.com.example.event',
             formatVersion: 1,
             serialNumber: 'EVT-001',
-            passType: PassTypeEnum::EventTicket,
+            passType: PassTypeEnum::EVENT_TICKET,
             structure: new PassStructure(
                 primaryFields: [
                     new Field(key: 'event-name', value: 'The Hectic Glow in concert', label: 'Event'),
@@ -323,15 +323,15 @@ final class PassNormalizerTest extends TestCase
                         key: 'doors-open',
                         value: '2026-08-10T19:30-06:00',
                         label: 'Doors open',
-                        dateStyle: DateStyleEnum::Medium,
-                        timeStyle: DateStyleEnum::Short,
+                        dateStyle: DateStyleEnum::MEDIUM,
+                        timeStyle: DateStyleEnum::SHORT,
                     ),
                     new Field(
                         key: 'section',
                         value: 5,
                         label: 'Seating section',
-                        numberStyle: NumberStyleEnum::SpellOut,
-                        textAlignment: TextAlignmentEnum::Right,
+                        numberStyle: NumberStyleEnum::SPELL_OUT,
+                        textAlignment: TextAlignmentEnum::RIGHT,
                     ),
                 ],
                 auxiliaryFields: [
@@ -354,7 +354,7 @@ final class PassNormalizerTest extends TestCase
             ],
             semantics: new SemanticTags(
                 eventName: 'The Hectic Glow in concert',
-                eventType: EventTypeEnum::LivePerformance,
+                eventType: EventTypeEnum::LIVE_PERFORMANCE,
                 eventStartDate: '2026-08-10T19:30-06:00',
                 eventStartDateInfo: new EventDateInfo(
                     startDate: '2026-08-10T19:30-06:00',
@@ -428,7 +428,7 @@ final class PassNormalizerTest extends TestCase
             passTypeIdentifier: 'pass.com.example.membership',
             formatVersion: 1,
             serialNumber: 'GEN-001',
-            passType: PassTypeEnum::Generic,
+            passType: PassTypeEnum::GENERIC,
             structure: new PassStructure(
                 primaryFields: [
                     new Field(key: 'memberName', value: 'Maria Ruiz', label: 'Name'),
@@ -441,7 +441,7 @@ final class PassNormalizerTest extends TestCase
                         key: 'memberSince',
                         value: '2026-01-02T00:00-07:00',
                         label: 'Joined',
-                        dateStyle: DateStyleEnum::Short,
+                        dateStyle: DateStyleEnum::SHORT,
                     ),
                 ],
                 backFields: [
@@ -524,7 +524,7 @@ final class PassNormalizerTest extends TestCase
             passTypeIdentifier: 'pass.com.example.loyalty',
             formatVersion: 1,
             serialNumber: 'SC-001',
-            passType: PassTypeEnum::StoreCard,
+            passType: PassTypeEnum::STORE_CARD,
             structure: new PassStructure(
                 primaryFields: [
                     new Field(key: 'balance', value: 10, label: 'Rewards Value', currencyCode: 'USD'),

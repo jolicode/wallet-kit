@@ -9,8 +9,8 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Transit;
  */
 enum TicketStatusEnum: string
 {
-    case Unspecified = 'TICKET_STATUS_UNSPECIFIED';
-    case Used = 'USED';
-    case Refunded = 'REFUNDED';
-    case Exchanged = 'EXCHANGED';
+    case UNSPECIFIED = 'TICKET_STATUS_UNSPECIFIED';
+    case USED = 'USED';
+    case REFUNDED = 'REFUNDED';
+    case EXCHANGED = 'EXCHANGED';
 }

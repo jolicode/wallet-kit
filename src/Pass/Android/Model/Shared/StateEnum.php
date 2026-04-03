@@ -9,8 +9,8 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Shared;
  */
 enum StateEnum: string
 {
-    case Active = 'ACTIVE';
-    case Completed = 'COMPLETED';
-    case Expired = 'EXPIRED';
-    case Inactive = 'INACTIVE';
+    case ACTIVE = 'ACTIVE';
+    case COMPLETED = 'COMPLETED';
+    case EXPIRED = 'EXPIRED';
+    case INACTIVE = 'INACTIVE';
 }

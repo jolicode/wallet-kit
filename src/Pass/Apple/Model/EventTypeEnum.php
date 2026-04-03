@@ -9,12 +9,12 @@ namespace Jolicode\WalletKit\Pass\Apple\Model;
  */
 enum EventTypeEnum: string
 {
-    case Generic = 'PKEventTypeGeneric';
-    case LivePerformance = 'PKEventTypeLivePerformance';
-    case Movie = 'PKEventTypeMovie';
-    case Sports = 'PKEventTypeSports';
-    case Conference = 'PKEventTypeConference';
-    case Convention = 'PKEventTypeConvention';
-    case Workshop = 'PKEventTypeWorkshop';
-    case SocialGathering = 'PKEventTypeSocialGathering';
+    case GENERIC = 'PKEventTypeGeneric';
+    case LIVE_PERFORMANCE = 'PKEventTypeLivePerformance';
+    case MOVIE = 'PKEventTypeMovie';
+    case SPORTS = 'PKEventTypeSports';
+    case CONFERENCE = 'PKEventTypeConference';
+    case CONVENTION = 'PKEventTypeConvention';
+    case WORKSHOP = 'PKEventTypeWorkshop';
+    case SOCIAL_GATHERING = 'PKEventTypeSocialGathering';
 }

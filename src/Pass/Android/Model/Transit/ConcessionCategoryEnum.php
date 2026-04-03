@@ -9,8 +9,8 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Transit;
  */
 enum ConcessionCategoryEnum: string
 {
-    case Unspecified = 'CONCESSION_CATEGORY_UNSPECIFIED';
-    case Adult = 'ADULT';
-    case Child = 'CHILD';
-    case Senior = 'SENIOR';
+    case UNSPECIFIED = 'CONCESSION_CATEGORY_UNSPECIFIED';
+    case ADULT = 'ADULT';
+    case CHILD = 'CHILD';
+    case SENIOR = 'SENIOR';
 }

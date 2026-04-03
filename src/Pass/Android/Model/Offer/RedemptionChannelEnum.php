@@ -9,9 +9,9 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Offer;
  */
 enum RedemptionChannelEnum: string
 {
-    case Unspecified = 'REDEMPTION_CHANNEL_UNSPECIFIED';
-    case Instore = 'INSTORE';
-    case Online = 'ONLINE';
-    case Both = 'BOTH';
-    case TemporaryPriceReduction = 'TEMPORARY_PRICE_REDUCTION';
+    case UNSPECIFIED = 'REDEMPTION_CHANNEL_UNSPECIFIED';
+    case INSTORE = 'INSTORE';
+    case ONLINE = 'ONLINE';
+    case BOTH = 'BOTH';
+    case TEMPORARY_PRICE_REDUCTION = 'TEMPORARY_PRICE_REDUCTION';
 }

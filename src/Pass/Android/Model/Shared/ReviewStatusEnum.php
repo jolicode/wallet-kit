@@ -9,7 +9,7 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Shared;
  */
 enum ReviewStatusEnum: string
 {
-    case Draft = 'DRAFT';
-    case UnderReview = 'UNDER_REVIEW';
-    case Approved = 'APPROVED';
+    case DRAFT = 'DRAFT';
+    case UNDER_REVIEW = 'UNDER_REVIEW';
+    case APPROVED = 'APPROVED';
 }

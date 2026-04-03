@@ -156,7 +156,7 @@ final class GiftCardNormalizerTest extends TestCase
         $class = new GiftCardClass(
             id: 'giftcard-class-1',
             issuerName: 'Gift Store',
-            reviewStatus: ReviewStatusEnum::Approved,
+            reviewStatus: ReviewStatusEnum::APPROVED,
             merchantName: 'Gift Store',
             programLogo: new Image(new ImageUri('https://example.com/logo.png')),
             pinLabel: 'PIN',
@@ -167,8 +167,8 @@ final class GiftCardNormalizerTest extends TestCase
             hexBackgroundColor: '#FF6600',
             heroImage: new Image(new ImageUri('https://example.com/hero.png')),
             enableSmartTap: false,
-            securityAnimation: new SecurityAnimation(SecurityAnimationTypeEnum::FoilShimmer),
-            messages: [new Message('Welcome', 'Enjoy your gift card!', 'msg-1', MessageTypeEnum::Text)],
+            securityAnimation: new SecurityAnimation(SecurityAnimationTypeEnum::FOIL_SHIMMER),
+            messages: [new Message('Welcome', 'Enjoy your gift card!', 'msg-1', MessageTypeEnum::TEXT)],
             textModulesData: [new TextModuleData('Terms', 'Gift card terms apply', 'terms-1')],
             linksModuleData: new LinksModuleData([new Uri('https://giftstore.com', 'Gift Store', null, 'uri-1')]),
         );
@@ -176,19 +176,19 @@ final class GiftCardNormalizerTest extends TestCase
         $object = new GiftCardObject(
             id: 'giftcard-object-1',
             classId: 'giftcard-class-1',
-            state: StateEnum::Active,
+            state: StateEnum::ACTIVE,
             cardNumber: '1234567890',
             pin: '1234',
             balance: new Money('50000000', 'USD'),
             balanceUpdateTime: new GoogleDateTime('2025-06-15T10:30:00Z'),
             eventNumber: 'ORD-001',
-            barcode: new Barcode(BarcodeTypeEnum::QrCode, 'GIFT1234567890', 'Gift Card', BarcodeRenderEncodingEnum::Utf8),
+            barcode: new Barcode(BarcodeTypeEnum::QR_CODE, 'GIFT1234567890', 'Gift Card', BarcodeRenderEncodingEnum::UTF_8),
             hexBackgroundColor: '#FF6600',
             messages: [new Message('Balance Update', 'Your balance was updated', 'msg-1')],
             validTimeInterval: new TimeInterval(new GoogleDateTime('2025-01-01T00:00:00Z'), new GoogleDateTime('2026-01-01T00:00:00Z')),
             heroImage: new Image(new ImageUri('https://example.com/hero.png')),
             groupingInfo: new GroupingInfo('gift-group', 1),
-            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::Eligible),
+            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::ELIGIBLE),
         );
 
         $classData = $this->serializer->normalize($class);

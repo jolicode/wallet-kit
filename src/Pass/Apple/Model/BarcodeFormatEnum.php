@@ -12,5 +12,5 @@ enum BarcodeFormatEnum: string
     case QR = 'PKBarcodeFormatQR';
     case PDF417 = 'PKBarcodeFormatPDF417';
     case AZTEC = 'PKBarcodeFormatAztec';
-    case CODE128 = 'PKBarcodeFormatCode128';
+    case CODE_128 = 'PKBarcodeFormatCode128';
 }

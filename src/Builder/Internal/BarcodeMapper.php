@@ -32,10 +32,10 @@ final class BarcodeMapper
     public static function fromAppleBarcode(AppleBarcode $barcode): GoogleBarcode
     {
         $type = match ($barcode->format) {
-            BarcodeFormatEnum::QR => BarcodeTypeEnum::QrCode,
-            BarcodeFormatEnum::PDF417 => BarcodeTypeEnum::Pdf417,
-            BarcodeFormatEnum::AZTEC => BarcodeTypeEnum::Aztec,
-            BarcodeFormatEnum::CODE128 => BarcodeTypeEnum::Code128,
+            BarcodeFormatEnum::QR => BarcodeTypeEnum::QR_CODE,
+            BarcodeFormatEnum::PDF417 => BarcodeTypeEnum::PDF_417,
+            BarcodeFormatEnum::AZTEC => BarcodeTypeEnum::AZTEC,
+            BarcodeFormatEnum::CODE_128 => BarcodeTypeEnum::CODE_128,
         };
 
         return new GoogleBarcode(

@@ -9,7 +9,7 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Shared;
  */
 enum NfcConstraintEnum: string
 {
-    case Unspecified = 'NFC_CONSTRAINT_UNSPECIFIED';
-    case BlockPayment = 'BLOCK_PAYMENT';
-    case BlockClosedLoopTransit = 'BLOCK_CLOSED_LOOP_TRANSIT';
+    case UNSPECIFIED = 'NFC_CONSTRAINT_UNSPECIFIED';
+    case BLOCK_PAYMENT = 'BLOCK_PAYMENT';
+    case BLOCK_CLOSED_LOOP_TRANSIT = 'BLOCK_CLOSED_LOOP_TRANSIT';
 }

@@ -23,6 +23,6 @@ final class ColorMapper
         $g = max(0, min(255, (int) $m[2]));
         $b = max(0, min(255, (int) $m[3]));
 
-        return sprintf('#%02x%02x%02x', $r, $g, $b);
+        return \sprintf('#%02x%02x%02x', $r, $g, $b);
     }
 }

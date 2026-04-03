@@ -47,7 +47,7 @@ final class LoyaltyWalletBuilder extends AbstractWalletBuilder
         }
 
         $structure = new PassStructure(primaryFields: $primaryFields);
-        $applePass = $this->createApplePass(PassTypeEnum::StoreCard, $structure);
+        $applePass = $this->createApplePass(PassTypeEnum::STORE_CARD, $structure);
 
         $loyaltyClass = new LoyaltyClass(
             id: $this->context->googleClassId,
@@ -75,7 +75,7 @@ final class LoyaltyWalletBuilder extends AbstractWalletBuilder
 
         return new BuiltWalletPass(
             $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::Loyalty, $loyaltyClass, $loyaltyObject),
+            new GoogleWalletPair(GoogleVerticalEnum::LOYALTY, $loyaltyClass, $loyaltyObject),
         );
     }
 }

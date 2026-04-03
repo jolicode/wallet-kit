@@ -9,7 +9,7 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Shared;
  */
 enum ScreenshotEligibilityEnum: string
 {
-    case Unspecified = 'SCREENSHOT_ELIGIBILITY_UNSPECIFIED';
-    case Eligible = 'ELIGIBLE';
-    case Ineligible = 'INELIGIBLE';
+    case UNSPECIFIED = 'SCREENSHOT_ELIGIBILITY_UNSPECIFIED';
+    case ELIGIBLE = 'ELIGIBLE';
+    case INELIGIBLE = 'INELIGIBLE';
 }

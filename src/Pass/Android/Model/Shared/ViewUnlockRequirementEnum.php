@@ -9,7 +9,7 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Shared;
  */
 enum ViewUnlockRequirementEnum: string
 {
-    case Unspecified = 'VIEW_UNLOCK_REQUIREMENT_UNSPECIFIED';
-    case UnlockNotRequired = 'UNLOCK_NOT_REQUIRED';
-    case UnlockRequiredToView = 'UNLOCK_REQUIRED_TO_VIEW';
+    case UNSPECIFIED = 'VIEW_UNLOCK_REQUIREMENT_UNSPECIFIED';
+    case UNLOCK_NOT_REQUIRED = 'UNLOCK_NOT_REQUIRED';
+    case UNLOCK_REQUIRED_TO_VIEW = 'UNLOCK_REQUIRED_TO_VIEW';
 }

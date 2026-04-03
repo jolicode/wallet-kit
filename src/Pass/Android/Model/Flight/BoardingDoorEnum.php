@@ -9,7 +9,7 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Flight;
  */
 enum BoardingDoorEnum: string
 {
-    case Unspecified = 'BOARDING_DOOR_UNSPECIFIED';
-    case Front = 'FRONT';
-    case Back = 'BACK';
+    case UNSPECIFIED = 'BOARDING_DOOR_UNSPECIFIED';
+    case FRONT = 'FRONT';
+    case BACK = 'BACK';
 }

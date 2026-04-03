@@ -9,8 +9,8 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Flight;
  */
 enum BoardingPolicyEnum: string
 {
-    case Unspecified = 'BOARDING_POLICY_UNSPECIFIED';
-    case ZoneBased = 'ZONE_BASED';
-    case GroupBased = 'GROUP_BASED';
-    case BoardingPolicyOther = 'BOARDING_POLICY_OTHER';
+    case UNSPECIFIED = 'BOARDING_POLICY_UNSPECIFIED';
+    case ZONE_BASED = 'ZONE_BASED';
+    case GROUP_BASED = 'GROUP_BASED';
+    case BOARDING_POLICY_OTHER = 'BOARDING_POLICY_OTHER';
 }

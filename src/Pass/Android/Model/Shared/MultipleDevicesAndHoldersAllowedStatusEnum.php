@@ -9,8 +9,8 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Shared;
  */
 enum MultipleDevicesAndHoldersAllowedStatusEnum: string
 {
-    case Unspecified = 'STATUS_UNSPECIFIED';
-    case MultipleHolders = 'MULTIPLE_HOLDERS';
-    case OneUserAllDevices = 'ONE_USER_ALL_DEVICES';
-    case OneUserOneDevice = 'ONE_USER_ONE_DEVICE';
+    case UNSPECIFIED = 'STATUS_UNSPECIFIED';
+    case MULTIPLE_HOLDERS = 'MULTIPLE_HOLDERS';
+    case ONE_USER_ALL_DEVICES = 'ONE_USER_ALL_DEVICES';
+    case ONE_USER_ONE_DEVICE = 'ONE_USER_ONE_DEVICE';
 }

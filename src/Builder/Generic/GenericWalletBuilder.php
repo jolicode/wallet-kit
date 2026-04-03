@@ -9,10 +9,10 @@ use Jolicode\WalletKit\Builder\BuiltWalletPass;
 use Jolicode\WalletKit\Builder\GoogleVerticalEnum;
 use Jolicode\WalletKit\Builder\GoogleWalletPair;
 use Jolicode\WalletKit\Builder\Internal\LocalizedStringHelper;
+use Jolicode\WalletKit\Builder\WalletPlatformContext;
 use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericClass;
 use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericObject;
 use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericTypeEnum;
-use Jolicode\WalletKit\Builder\WalletPlatformContext;
 use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum;
 
@@ -56,7 +56,7 @@ final class GenericWalletBuilder extends AbstractWalletBuilder
 
     public function build(): BuiltWalletPass
     {
-        $applePass = $this->createApplePass(PassTypeEnum::Generic, $this->passStructure);
+        $applePass = $this->createApplePass(PassTypeEnum::GENERIC, $this->passStructure);
 
         $googleClass = new GenericClass(
             id: $this->context->googleClassId,
@@ -84,7 +84,7 @@ final class GenericWalletBuilder extends AbstractWalletBuilder
 
         return new BuiltWalletPass(
             $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::Generic, $googleClass, $googleObject),
+            new GoogleWalletPair(GoogleVerticalEnum::GENERIC, $googleClass, $googleObject),
         );
     }
 }

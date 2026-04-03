@@ -162,8 +162,8 @@ final class TransitNormalizerTest extends TestCase
         $class = new TransitClass(
             id: 'transit-class-1',
             issuerName: 'Metro Transit',
-            reviewStatus: ReviewStatusEnum::Approved,
-            transitType: TransitTypeEnum::Rail,
+            reviewStatus: ReviewStatusEnum::APPROVED,
+            transitType: TransitTypeEnum::RAIL,
             localizedIssuerName: new LocalizedString(new TranslatedString('en', 'Metro Transit')),
             transitOperatorName: new LocalizedString(new TranslatedString('en', 'Metro Rail')),
             logo: new Image(new ImageUri('https://example.com/metro-logo.png')),
@@ -171,11 +171,11 @@ final class TransitNormalizerTest extends TestCase
             countryCode: 'US',
             heroImage: new Image(new ImageUri('https://example.com/metro-hero.png')),
             enableSingleLegItinerary: true,
-            messages: [new Message('Service Alert', 'Delays on Line 3', 'msg-1', MessageTypeEnum::TextAndNotify)],
+            messages: [new Message('Service Alert', 'Delays on Line 3', 'msg-1', MessageTypeEnum::TEXT_AND_NOTIFY)],
         );
 
         $ticketSeat = new TicketSeat(
-            fareClass: FareClassEnum::First,
+            fareClass: FareClassEnum::FIRST,
             coach: '3',
             seat: '12A',
             seatAssignment: new LocalizedString(new TranslatedString('en', 'Coach 3, Seat 12A')),
@@ -218,24 +218,24 @@ final class TransitNormalizerTest extends TestCase
         $object = new TransitObject(
             id: 'transit-object-1',
             classId: 'transit-class-1',
-            state: StateEnum::Active,
-            tripType: TripTypeEnum::OneWay,
+            state: StateEnum::ACTIVE,
+            tripType: TripTypeEnum::ONE_WAY,
             ticketNumber: 'TKT-METRO-001',
-            passengerType: PassengerTypeEnum::SinglePassenger,
+            passengerType: PassengerTypeEnum::SINGLE_PASSENGER,
             passengerNames: 'John Doe',
             tripId: 'TRIP-001',
-            ticketStatus: TicketStatusEnum::Used,
-            concessionCategory: ConcessionCategoryEnum::Adult,
+            ticketStatus: TicketStatusEnum::USED,
+            concessionCategory: ConcessionCategoryEnum::ADULT,
             ticketRestrictions: $ticketRestrictions,
             purchaseDetails: $purchaseDetails,
             ticketLeg: $ticketLeg,
             ticketLegs: [$ticketLeg],
             hexBackgroundColor: '#004D40',
-            barcode: new Barcode(BarcodeTypeEnum::QrCode, 'TRANSIT001', 'Metro Ticket', BarcodeRenderEncodingEnum::Utf8),
-            activationStatus: new ActivationStatus(ActivationStateEnum::Activated),
+            barcode: new Barcode(BarcodeTypeEnum::QR_CODE, 'TRANSIT001', 'Metro Ticket', BarcodeRenderEncodingEnum::UTF_8),
+            activationStatus: new ActivationStatus(ActivationStateEnum::ACTIVATED),
             heroImage: new Image(new ImageUri('https://example.com/metro-hero.png')),
             groupingInfo: new GroupingInfo('transit-group', 1),
-            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::Eligible),
+            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::ELIGIBLE),
         );
 
         $classData = $this->serializer->normalize($class);

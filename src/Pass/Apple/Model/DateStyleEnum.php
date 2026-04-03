@@ -9,9 +9,9 @@ namespace Jolicode\WalletKit\Pass\Apple\Model;
  */
 enum DateStyleEnum: string
 {
-    case None = 'PKDateStyleNone';
-    case Short = 'PKDateStyleShort';
-    case Medium = 'PKDateStyleMedium';
-    case Long = 'PKDateStyleLong';
-    case Full = 'PKDateStyleFull';
+    case NONE = 'PKDateStyleNone';
+    case SHORT = 'PKDateStyleShort';
+    case MEDIUM = 'PKDateStyleMedium';
+    case LONG = 'PKDateStyleLong';
+    case FULL = 'PKDateStyleFull';
 }

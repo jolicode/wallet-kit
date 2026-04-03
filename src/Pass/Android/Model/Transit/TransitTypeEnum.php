@@ -9,10 +9,10 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Transit;
  */
 enum TransitTypeEnum: string
 {
-    case Unspecified = 'TRANSIT_TYPE_UNSPECIFIED';
-    case Bus = 'BUS';
-    case Rail = 'RAIL';
-    case Tram = 'TRAM';
-    case Ferry = 'FERRY';
-    case Other = 'OTHER';
+    case UNSPECIFIED = 'TRANSIT_TYPE_UNSPECIFIED';
+    case BUS = 'BUS';
+    case RAIL = 'RAIL';
+    case TRAM = 'TRAM';
+    case FERRY = 'FERRY';
+    case OTHER = 'OTHER';
 }

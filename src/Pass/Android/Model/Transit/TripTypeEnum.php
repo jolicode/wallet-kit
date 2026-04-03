@@ -9,7 +9,7 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Transit;
  */
 enum TripTypeEnum: string
 {
-    case Unspecified = 'TRIP_TYPE_UNSPECIFIED';
-    case RoundTrip = 'ROUND_TRIP';
-    case OneWay = 'ONE_WAY';
+    case UNSPECIFIED = 'TRIP_TYPE_UNSPECIFIED';
+    case ROUND_TRIP = 'ROUND_TRIP';
+    case ONE_WAY = 'ONE_WAY';
 }

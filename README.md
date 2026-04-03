@@ -31,14 +31,6 @@ The **`Jolicode\WalletKit\Builder`** namespace provides a **fluent API** that bu
 ### Example A — coupon / offer (both stores)
 
 ```php
-use Jolicode\WalletKit\Builder\WalletPass;
-use Jolicode\WalletKit\Builder\WalletPlatformContext;
-use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
-use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
-use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
-use Jolicode\WalletKit\Pass\Apple\Model\Barcode;
-use Jolicode\WalletKit\Pass\Apple\Model\BarcodeFormatEnum;
-
 $context = new WalletPlatformContext(
     appleTeamIdentifier: 'ABCDE12345',
     applePassTypeIdentifier: 'pass.com.example.coupon',
@@ -47,15 +39,15 @@ $context = new WalletPlatformContext(
     appleDescription: 'Spring sale coupon',
     googleClassId: '3388000000012345.example_offer_class',
     googleObjectId: '3388000000012345.example_offer_object',
-    defaultGoogleReviewStatus: ReviewStatusEnum::Approved,
-    defaultGoogleObjectState: StateEnum::Active,
+    defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
+    defaultGoogleObjectState: StateEnum::ACTIVE,
 );
 
 $built = WalletPass::offer(
     $context,
     title: '15% off',
     provider: 'Example Shop',
-    redemptionChannel: RedemptionChannelEnum::Both,
+    redemptionChannel: RedemptionChannelEnum::BOTH,
 )
     ->withBackgroundColorRgb('rgb(30, 60, 90)')
     ->addAppleBarcode(new Barcode(
@@ -74,15 +66,6 @@ $built = WalletPass::offer(
 ### Example B — flight boarding (both stores)
 
 ```php
-use Jolicode\WalletKit\Builder\WalletPass;
-use Jolicode\WalletKit\Builder\WalletPlatformContext;
-use Jolicode\WalletKit\Pass\Android\Model\Flight\AirportInfo;
-use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightCarrier;
-use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightHeader;
-use Jolicode\WalletKit\Pass\Android\Model\Flight\ReservationInfo;
-use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
-use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
-
 $flightContext = new WalletPlatformContext(
     appleTeamIdentifier: 'ABCDE12345',
     applePassTypeIdentifier: 'pass.com.example.boarding',
@@ -91,8 +74,8 @@ $flightContext = new WalletPlatformContext(
     appleDescription: 'SFO → LAX',
     googleClassId: '3388000000012345.example_flight_class',
     googleObjectId: '3388000000012345.example_flight_object',
-    defaultGoogleReviewStatus: ReviewStatusEnum::Approved,
-    defaultGoogleObjectState: StateEnum::Active,
+    defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
+    defaultGoogleObjectState: StateEnum::ACTIVE,
 );
 
 $built = WalletPass::flight(

@@ -9,8 +9,8 @@ namespace Jolicode\WalletKit\Pass\Apple\Model;
  */
 enum TextAlignmentEnum: string
 {
-    case Left = 'PKTextAlignmentLeft';
-    case Center = 'PKTextAlignmentCenter';
-    case Right = 'PKTextAlignmentRight';
-    case Natural = 'PKTextAlignmentNatural';
+    case LEFT = 'PKTextAlignmentLeft';
+    case CENTER = 'PKTextAlignmentCenter';
+    case RIGHT = 'PKTextAlignmentRight';
+    case NATURAL = 'PKTextAlignmentNatural';
 }

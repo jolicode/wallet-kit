@@ -36,7 +36,7 @@ final class OfferWalletBuilder extends AbstractWalletBuilder
             ],
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::Coupon, $structure);
+        $applePass = $this->createApplePass(PassTypeEnum::COUPON, $structure);
 
         $offerClass = new OfferClass(
             id: $this->context->googleClassId,
@@ -64,7 +64,7 @@ final class OfferWalletBuilder extends AbstractWalletBuilder
 
         return new BuiltWalletPass(
             $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::Offer, $offerClass, $offerObject),
+            new GoogleWalletPair(GoogleVerticalEnum::OFFER, $offerClass, $offerObject),
         );
     }
 }

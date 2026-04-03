@@ -9,6 +9,6 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Shared;
  */
 enum BarcodeRenderEncodingEnum: string
 {
-    case Unspecified = 'RENDER_ENCODING_UNSPECIFIED';
-    case Utf8 = 'UTF_8';
+    case UNSPECIFIED = 'RENDER_ENCODING_UNSPECIFIED';
+    case UTF_8 = 'UTF_8';
 }

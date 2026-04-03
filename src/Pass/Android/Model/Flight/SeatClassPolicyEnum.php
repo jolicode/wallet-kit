@@ -9,9 +9,9 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Flight;
  */
 enum SeatClassPolicyEnum: string
 {
-    case Unspecified = 'SEAT_CLASS_POLICY_UNSPECIFIED';
-    case CabinBased = 'CABIN_BASED';
-    case ClassBased = 'CLASS_BASED';
-    case TierBased = 'TIER_BASED';
-    case SeatClassPolicyOther = 'SEAT_CLASS_POLICY_OTHER';
+    case UNSPECIFIED = 'SEAT_CLASS_POLICY_UNSPECIFIED';
+    case CABIN_BASED = 'CABIN_BASED';
+    case CLASS_BASED = 'CLASS_BASED';
+    case TIER_BASED = 'TIER_BASED';
+    case SEAT_CLASS_POLICY_OTHER = 'SEAT_CLASS_POLICY_OTHER';
 }

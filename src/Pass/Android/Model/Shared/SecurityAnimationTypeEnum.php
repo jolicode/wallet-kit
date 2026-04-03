@@ -6,9 +6,10 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Shared;
 
 /**
  * @phpstan-type SecurityAnimationAlias 'ANIMATION_UNSPECIFIED'|'FOIL_SHIMMER'
+ * @phpstan-type SecurityAnimationType SecurityAnimationAlias
  */
 enum SecurityAnimationTypeEnum: string
 {
-    case Unspecified = 'ANIMATION_UNSPECIFIED';
-    case FoilShimmer = 'FOIL_SHIMMER';
+    case UNSPECIFIED = 'ANIMATION_UNSPECIFIED';
+    case FOIL_SHIMMER = 'FOIL_SHIMMER';
 }

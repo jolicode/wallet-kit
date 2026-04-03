@@ -49,7 +49,7 @@ final class TransitWalletBuilder extends AbstractWalletBuilder
             transitType: $this->appleTransitType(),
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::BoardingPass, $structure);
+        $applePass = $this->createApplePass(PassTypeEnum::BOARDING_PASS, $structure);
 
         $transitClass = new TransitClass(
             id: $this->context->googleClassId,
@@ -77,18 +77,18 @@ final class TransitWalletBuilder extends AbstractWalletBuilder
 
         return new BuiltWalletPass(
             $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::Transit, $transitClass, $transitObject),
+            new GoogleWalletPair(GoogleVerticalEnum::TRANSIT, $transitClass, $transitObject),
         );
     }
 
     private function appleTransitType(): TransitTypeEnum
     {
         return match ($this->googleTransitType) {
-            GoogleTransitTypeEnum::Bus => TransitTypeEnum::Bus,
-            GoogleTransitTypeEnum::Rail => TransitTypeEnum::Train,
-            GoogleTransitTypeEnum::Tram => TransitTypeEnum::Train,
-            GoogleTransitTypeEnum::Ferry => TransitTypeEnum::Boat,
-            GoogleTransitTypeEnum::Other, GoogleTransitTypeEnum::Unspecified => TransitTypeEnum::Generic,
+            GoogleTransitTypeEnum::BUS => TransitTypeEnum::BUS,
+            GoogleTransitTypeEnum::RAIL => TransitTypeEnum::TRAIN,
+            GoogleTransitTypeEnum::TRAM => TransitTypeEnum::TRAIN,
+            GoogleTransitTypeEnum::FERRY => TransitTypeEnum::BOAT,
+            GoogleTransitTypeEnum::OTHER, GoogleTransitTypeEnum::UNSPECIFIED => TransitTypeEnum::GENERIC,
         };
     }
 }

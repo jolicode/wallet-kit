@@ -167,7 +167,7 @@ final class LoyaltyNormalizerTest extends TestCase
         $linksModuleData = new LinksModuleData([new Uri('https://example.com', 'Example', null, 'uri-1')]);
         $textModulesData = [new TextModuleData('Header', 'Body', 'text-1')];
         $imageModulesData = [new ImageModuleData(new Image(new ImageUri('https://example.com/module.png')), 'img-1')];
-        $messages = [new Message('Title', 'Body', 'msg-1', MessageTypeEnum::Text)];
+        $messages = [new Message('Title', 'Body', 'msg-1', MessageTypeEnum::TEXT)];
         $appLinkData = new AppLinkData(
             androidAppLinkInfo: new AppLinkInfo(
                 title: new LocalizedString(new TranslatedString('en', 'Open App')),
@@ -178,7 +178,7 @@ final class LoyaltyNormalizerTest extends TestCase
         $class = new LoyaltyClass(
             id: 'loyalty-class-001',
             issuerName: 'Coffee Rewards Inc.',
-            reviewStatus: ReviewStatusEnum::Approved,
+            reviewStatus: ReviewStatusEnum::APPROVED,
             programName: 'Coffee Rewards',
             localizedProgramName: new LocalizedString(new TranslatedString('en', 'Coffee Rewards')),
             programLogo: $image,
@@ -189,10 +189,10 @@ final class LoyaltyNormalizerTest extends TestCase
             heroImage: new Image(new ImageUri('https://example.com/hero.png'), new LocalizedString(new TranslatedString('en', 'Hero'))),
             enableSmartTap: true,
             redemptionIssuers: ['issuer-1'],
-            multipleDevicesAndHoldersAllowedStatus: MultipleDevicesAndHoldersAllowedStatusEnum::OneUserAllDevices,
+            multipleDevicesAndHoldersAllowedStatus: MultipleDevicesAndHoldersAllowedStatusEnum::ONE_USER_ALL_DEVICES,
             callbackOptions: new CallbackOptions('https://example.com/callback'),
-            securityAnimation: new SecurityAnimation(SecurityAnimationTypeEnum::FoilShimmer),
-            viewUnlockRequirement: ViewUnlockRequirementEnum::UnlockNotRequired,
+            securityAnimation: new SecurityAnimation(SecurityAnimationTypeEnum::FOIL_SHIMMER),
+            viewUnlockRequirement: ViewUnlockRequirementEnum::UNLOCK_NOT_REQUIRED,
             messages: $messages,
             imageModulesData: $imageModulesData,
             textModulesData: $textModulesData,
@@ -204,7 +204,7 @@ final class LoyaltyNormalizerTest extends TestCase
         $object = new LoyaltyObject(
             id: 'loyalty-object-001',
             classId: 'loyalty-class-001',
-            state: StateEnum::Active,
+            state: StateEnum::ACTIVE,
             accountName: 'Jane Doe',
             accountId: 'ACCT-12345',
             loyaltyPoints: new LoyaltyPoints(
@@ -218,10 +218,10 @@ final class LoyaltyNormalizerTest extends TestCase
             ),
             linkedOfferIds: ['offer-1', 'offer-2'],
             barcode: new Barcode(
-                type: BarcodeTypeEnum::QrCode,
+                type: BarcodeTypeEnum::QR_CODE,
                 value: 'LOYALTY123',
                 alternateText: 'LOYALTY123',
-                renderEncoding: BarcodeRenderEncodingEnum::Utf8,
+                renderEncoding: BarcodeRenderEncodingEnum::UTF_8,
             ),
             hexBackgroundColor: '#4A2F1B',
             messages: $messages,
@@ -236,13 +236,13 @@ final class LoyaltyNormalizerTest extends TestCase
             linksModuleData: $linksModuleData,
             appLinkData: $appLinkData,
             rotatingBarcode: new RotatingBarcode(
-                type: BarcodeTypeEnum::QrCode,
-                renderEncoding: BarcodeRenderEncodingEnum::Utf8,
+                type: BarcodeTypeEnum::QR_CODE,
+                renderEncoding: BarcodeRenderEncodingEnum::UTF_8,
                 valuePattern: 'LOYALTY_{0}',
             ),
             heroImage: new Image(new ImageUri('https://example.com/hero.png')),
             groupingInfo: new GroupingInfo('loyalty-group', 2),
-            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::Eligible, [NfcConstraintEnum::BlockPayment]),
+            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::ELIGIBLE, [NfcConstraintEnum::BLOCK_PAYMENT]),
             linkedObjectIds: ['linked-1'],
         );
 

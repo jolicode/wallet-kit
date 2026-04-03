@@ -44,8 +44,8 @@ final class DualWalletBuilderTest extends TestCase
             appleDescription: 'Test pass',
             googleClassId: '3388000000012345.test_class',
             googleObjectId: '3388000000012345.test_object',
-            defaultGoogleReviewStatus: ReviewStatusEnum::Approved,
-            defaultGoogleObjectState: StateEnum::Active,
+            defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
+            defaultGoogleObjectState: StateEnum::ACTIVE,
         );
     }
 
@@ -55,15 +55,15 @@ final class DualWalletBuilderTest extends TestCase
             ->withPassStructure(new PassStructure(
                 primaryFields: [new Field(key: 'info', value: 'Hello', label: 'Info')],
             ))
-            ->withGenericType(GenericTypeEnum::Unspecified)
+            ->withGenericType(GenericTypeEnum::UNSPECIFIED)
             ->withGoogleCardTitle('Card')
             ->addAppleBarcode(new Barcode(altText: 'x', format: BarcodeFormatEnum::QR, message: 'M1', messageEncoding: 'utf-8'))
             ->withGoogleHexBackgroundColor('#112233')
             ->withGrouping('grp', 1)
             ->build();
 
-        self::assertSame(PassTypeEnum::Generic, $built->apple()->passType);
-        self::assertSame(GoogleVerticalEnum::Generic, $built->googleVertical());
+        self::assertSame(PassTypeEnum::GENERIC, $built->apple()->passType);
+        self::assertSame(GoogleVerticalEnum::GENERIC, $built->googleVertical());
 
         $appleJson = $this->serializer->normalize($built->apple());
         self::assertArrayHasKey('generic', $appleJson);
@@ -83,13 +83,13 @@ final class DualWalletBuilderTest extends TestCase
             $this->context(),
             'Summer sale',
             'Example Provider',
-            RedemptionChannelEnum::Both,
+            RedemptionChannelEnum::BOTH,
         )
             ->withBackgroundColorRgb('rgb(10, 20, 30)')
             ->build();
 
-        self::assertSame(PassTypeEnum::Coupon, $built->apple()->passType);
-        self::assertSame(GoogleVerticalEnum::Offer, $built->googleVertical());
+        self::assertSame(PassTypeEnum::COUPON, $built->apple()->passType);
+        self::assertSame(GoogleVerticalEnum::OFFER, $built->googleVertical());
         $appleJson = $this->serializer->normalize($built->apple());
         self::assertArrayHasKey('coupon', $appleJson);
 
@@ -103,8 +103,8 @@ final class DualWalletBuilderTest extends TestCase
             ->withAccount('Jane Doe', 'ACC-9')
             ->build();
 
-        self::assertSame(PassTypeEnum::StoreCard, $built->apple()->passType);
-        self::assertSame(GoogleVerticalEnum::Loyalty, $built->googleVertical());
+        self::assertSame(PassTypeEnum::STORE_CARD, $built->apple()->passType);
+        self::assertSame(GoogleVerticalEnum::LOYALTY, $built->googleVertical());
         $appleJson = $this->serializer->normalize($built->apple());
         self::assertArrayHasKey('storeCard', $appleJson);
     }
@@ -116,8 +116,8 @@ final class DualWalletBuilderTest extends TestCase
             ->withTicketNumber('TIX-42')
             ->build();
 
-        self::assertSame(PassTypeEnum::EventTicket, $built->apple()->passType);
-        self::assertSame(GoogleVerticalEnum::EventTicket, $built->googleVertical());
+        self::assertSame(PassTypeEnum::EVENT_TICKET, $built->apple()->passType);
+        self::assertSame(GoogleVerticalEnum::EVENT_TICKET, $built->googleVertical());
         $objectJson = $this->serializer->normalize($built->google()->passObject);
         self::assertSame('TIX-42', $objectJson['ticketNumber']);
     }
@@ -137,8 +137,8 @@ final class DualWalletBuilderTest extends TestCase
             new AirportInfo(airportIataCode: 'LAX'),
         )->build();
 
-        self::assertSame(PassTypeEnum::BoardingPass, $built->apple()->passType);
-        self::assertSame(GoogleVerticalEnum::Flight, $built->googleVertical());
+        self::assertSame(PassTypeEnum::BOARDING_PASS, $built->apple()->passType);
+        self::assertSame(GoogleVerticalEnum::FLIGHT, $built->googleVertical());
         $appleJson = $this->serializer->normalize($built->apple());
         self::assertArrayHasKey('boardingPass', $appleJson);
         self::assertSame('PKTransitTypeAir', $appleJson['boardingPass']['transitType']);
@@ -148,14 +148,14 @@ final class DualWalletBuilderTest extends TestCase
     {
         $built = WalletPass::transit(
             $this->context(),
-            TransitTypeEnum::Bus,
-            TripTypeEnum::OneWay,
+            TransitTypeEnum::BUS,
+            TripTypeEnum::ONE_WAY,
         )
             ->withTicketNumber('BUS-7')
             ->build();
 
-        self::assertSame(PassTypeEnum::BoardingPass, $built->apple()->passType);
-        self::assertSame(GoogleVerticalEnum::Transit, $built->googleVertical());
+        self::assertSame(PassTypeEnum::BOARDING_PASS, $built->apple()->passType);
+        self::assertSame(GoogleVerticalEnum::TRANSIT, $built->googleVertical());
         $appleJson = $this->serializer->normalize($built->apple());
         self::assertSame('PKTransitTypeBus', $appleJson['boardingPass']['transitType']);
     }
@@ -166,8 +166,8 @@ final class DualWalletBuilderTest extends TestCase
             ->withPin('1234')
             ->build();
 
-        self::assertSame(PassTypeEnum::StoreCard, $built->apple()->passType);
-        self::assertSame(GoogleVerticalEnum::GiftCard, $built->googleVertical());
+        self::assertSame(PassTypeEnum::STORE_CARD, $built->apple()->passType);
+        self::assertSame(GoogleVerticalEnum::GIFT_CARD, $built->googleVertical());
         $appleJson = $this->serializer->normalize($built->apple());
         self::assertArrayHasKey('storeCard', $appleJson);
         $objectJson = $this->serializer->normalize($built->google()->passObject);
@@ -191,10 +191,10 @@ final class DualWalletBuilderTest extends TestCase
             $this->context(),
             'T',
             'P',
-            RedemptionChannelEnum::Online,
+            RedemptionChannelEnum::ONLINE,
         )
             ->addAppleBarcode(new Barcode(null, BarcodeFormatEnum::QR, 'first', 'utf-8'))
-            ->addAppleBarcode(new Barcode(null, BarcodeFormatEnum::CODE128, 'second', 'utf-8'))
+            ->addAppleBarcode(new Barcode(null, BarcodeFormatEnum::CODE_128, 'second', 'utf-8'))
             ->build();
 
         $objectJson = $this->serializer->normalize($built->google()->passObject);

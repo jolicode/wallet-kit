@@ -14,6 +14,10 @@ Serialize with **Symfony Serializer** and the normalizers from this package (see
 ## Shared context (all examples)
 
 ```php
+<?php
+
+declare(strict_types=1);
+
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
@@ -26,8 +30,8 @@ $context = new WalletPlatformContext(
     appleDescription: 'Boarding pass SFO → LHR',
     googleClassId: '3388000000012345.example_flight_class',
     googleObjectId: '3388000000012345.example_flight_object',
-    defaultGoogleReviewStatus: ReviewStatusEnum::Approved,
-    defaultGoogleObjectState: StateEnum::Active,
+    defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
+    defaultGoogleObjectState: StateEnum::ACTIVE,
 );
 ```
 
@@ -38,6 +42,10 @@ $context = new WalletPlatformContext(
 **Use case:** membership card, insurance card, or any pass that does not fit a specialized vertical.
 
 ```php
+<?php
+
+declare(strict_types=1);
+
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericTypeEnum;
 use Jolicode\WalletKit\Pass\Apple\Model\Barcode;
@@ -54,7 +62,7 @@ $built = WalletPass::generic($context)
             new Field(key: 'id', value: 'MEM-8842', label: 'ID'),
         ],
     ))
-    ->withGenericType(GenericTypeEnum::GymMembership)
+    ->withGenericType(GenericTypeEnum::GYM_MEMBERSHIP)
     ->withGoogleCardTitle('Gym membership')
     ->addAppleBarcode(new Barcode(
         altText: 'Member ID',
@@ -74,6 +82,10 @@ $built = WalletPass::generic($context)
 **Use case:** promotional offer redeemable in store, online, or both.
 
 ```php
+<?php
+
+declare(strict_types=1);
+
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
 use Jolicode\WalletKit\Pass\Apple\Model\Barcode;
@@ -83,7 +95,7 @@ $built = WalletPass::offer(
     $context,
     title: '20% off next visit',
     provider: 'Example Coffee',
-    redemptionChannel: RedemptionChannelEnum::Instore,
+    redemptionChannel: RedemptionChannelEnum::INSTORE,
 )
     ->withBackgroundColorRgb('rgb(40, 80, 120)')
     ->addAppleBarcode(new Barcode(
@@ -103,6 +115,10 @@ $built = WalletPass::offer(
 **Use case:** points program or store loyalty card (Apple `storeCard`, Google `Loyalty`).
 
 ```php
+<?php
+
+declare(strict_types=1);
+
 use Jolicode\WalletKit\Builder\WalletPass;
 
 $built = WalletPass::loyalty($context, programName: 'Gold Rewards')
@@ -122,6 +138,10 @@ $built = WalletPass::loyalty($context, programName: 'Gold Rewards')
 **Use case:** concert, match, or venue ticket.
 
 ```php
+<?php
+
+declare(strict_types=1);
+
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Pass\Apple\Model\Barcode;
 use Jolicode\WalletKit\Pass\Apple\Model\BarcodeFormatEnum;
@@ -145,6 +165,10 @@ $built = WalletPass::eventTicket($context, eventName: 'Indie Fest 2026')
 **Use case:** airline boarding pass (Apple `boardingPass` with air transit, Google `Flight`).
 
 ```php
+<?php
+
+declare(strict_types=1);
+
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\AirportInfo;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\BoardingAndSeatingInfo;
@@ -181,6 +205,10 @@ $built = WalletPass::flight(
 **Use case:** ground or sea transit ticket (Apple `boardingPass` with mapped `transitType`, Google `Transit`).
 
 ```php
+<?php
+
+declare(strict_types=1);
+
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Transit\TransitTypeEnum;
@@ -188,15 +216,15 @@ use Jolicode\WalletKit\Pass\Android\Model\Transit\TripTypeEnum;
 
 $built = WalletPass::transit(
     $context,
-    transitType: TransitTypeEnum::Rail,
-    tripType: TripTypeEnum::OneWay,
+    transitType: TransitTypeEnum::RAIL,
+    tripType: TripTypeEnum::ONE_WAY,
 )
     ->withTicketNumber('TCK-RAIL-884499')
-    ->withGoogleObjectState(StateEnum::Active)
+    ->withGoogleObjectState(StateEnum::ACTIVE)
     ->build();
 ```
 
-Google `TransitTypeEnum` values (`Bus`, `Rail`, `Tram`, `Ferry`, …) are mapped to the closest Apple [`TransitTypeEnum`](../src/Pass/Apple/Model/TransitTypeEnum.php) (for example rail/tram → train).
+Google `TransitTypeEnum` cases (`BUS`, `RAIL`, `TRAM`, `FERRY`, …) are mapped to the closest Apple [`TransitTypeEnum`](../src/Pass/Apple/Model/TransitTypeEnum.php) (for example `RAIL` / `TRAM` → `TRAIN`).
 
 ---
 
@@ -205,6 +233,10 @@ Google `TransitTypeEnum` values (`Bus`, `Rail`, `Tram`, `Ferry`, …) are mapped
 **Use case:** Google **Gift card** object. Apple has no dedicated gift-card type: the builder emits a **`storeCard`** with card-oriented fields.
 
 ```php
+<?php
+
+declare(strict_types=1);
+
 use Jolicode\WalletKit\Builder\WalletPass;
 
 $built = WalletPass::giftCard($context, cardNumber: '6034932523842700')

@@ -21,7 +21,7 @@ use Jolicode\WalletKit\Pass\Apple\Model\Pass;
 /**
  * Portable wallet options shared across vertical builders.
  *
- * @property CommonWalletState $common
+ * @property CommonWalletState     $common
  * @property WalletPlatformContext $context
  */
 trait CommonWalletBuilderTrait

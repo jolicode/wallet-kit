@@ -9,9 +9,9 @@ namespace Jolicode\WalletKit\Pass\Apple\Model;
  */
 enum TransitTypeEnum: string
 {
-    case Air = 'PKTransitTypeAir';
-    case Boat = 'PKTransitTypeBoat';
-    case Bus = 'PKTransitTypeBus';
-    case Generic = 'PKTransitTypeGeneric';
-    case Train = 'PKTransitTypeTrain';
+    case AIR = 'PKTransitTypeAir';
+    case BOAT = 'PKTransitTypeBoat';
+    case BUS = 'PKTransitTypeBus';
+    case GENERIC = 'PKTransitTypeGeneric';
+    case TRAIN = 'PKTransitTypeTrain';
 }

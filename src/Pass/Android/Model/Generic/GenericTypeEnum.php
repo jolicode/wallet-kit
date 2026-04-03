@@ -9,18 +9,18 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Generic;
  */
 enum GenericTypeEnum: string
 {
-    case Unspecified = 'GENERIC_TYPE_UNSPECIFIED';
-    case SeasonPass = 'GENERIC_SEASON_PASS';
-    case UtilityBills = 'GENERIC_UTILITY_BILLS';
-    case ParkingPass = 'GENERIC_PARKING_PASS';
-    case Voucher = 'GENERIC_VOUCHER';
-    case GymMembership = 'GENERIC_GYM_MEMBERSHIP';
-    case LibraryMembership = 'GENERIC_LIBRARY_MEMBERSHIP';
-    case Reservations = 'GENERIC_RESERVATIONS';
-    case AutoInsurance = 'GENERIC_AUTO_INSURANCE';
-    case HomeInsurance = 'GENERIC_HOME_INSURANCE';
-    case EntryTicket = 'GENERIC_ENTRY_TICKET';
-    case Receipt = 'GENERIC_RECEIPT';
-    case LoyaltyCard = 'GENERIC_LOYALTY_CARD';
-    case Other = 'GENERIC_OTHER';
+    case UNSPECIFIED = 'GENERIC_TYPE_UNSPECIFIED';
+    case SEASON_PASS = 'GENERIC_SEASON_PASS';
+    case UTILITY_BILLS = 'GENERIC_UTILITY_BILLS';
+    case PARKING_PASS = 'GENERIC_PARKING_PASS';
+    case VOUCHER = 'GENERIC_VOUCHER';
+    case GYM_MEMBERSHIP = 'GENERIC_GYM_MEMBERSHIP';
+    case LIBRARY_MEMBERSHIP = 'GENERIC_LIBRARY_MEMBERSHIP';
+    case RESERVATIONS = 'GENERIC_RESERVATIONS';
+    case AUTO_INSURANCE = 'GENERIC_AUTO_INSURANCE';
+    case HOME_INSURANCE = 'GENERIC_HOME_INSURANCE';
+    case ENTRY_TICKET = 'GENERIC_ENTRY_TICKET';
+    case RECEIPT = 'GENERIC_RECEIPT';
+    case LOYALTY_CARD = 'GENERIC_LOYALTY_CARD';
+    case OTHER = 'GENERIC_OTHER';
 }

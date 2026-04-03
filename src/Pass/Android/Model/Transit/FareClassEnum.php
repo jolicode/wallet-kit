@@ -9,8 +9,8 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Transit;
  */
 enum FareClassEnum: string
 {
-    case Unspecified = 'FARE_CLASS_UNSPECIFIED';
-    case Economy = 'ECONOMY';
-    case First = 'FIRST';
-    case Business = 'BUSINESS';
+    case UNSPECIFIED = 'FARE_CLASS_UNSPECIFIED';
+    case ECONOMY = 'ECONOMY';
+    case FIRST = 'FIRST';
+    case BUSINESS = 'BUSINESS';
 }

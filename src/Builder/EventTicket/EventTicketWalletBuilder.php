@@ -59,7 +59,7 @@ final class EventTicketWalletBuilder extends AbstractWalletBuilder
             secondaryFields: $secondaryFields,
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::EventTicket, $structure);
+        $applePass = $this->createApplePass(PassTypeEnum::EVENT_TICKET, $structure);
 
         $eventClass = new EventTicketClass(
             id: $this->context->googleClassId,
@@ -87,7 +87,7 @@ final class EventTicketWalletBuilder extends AbstractWalletBuilder
 
         return new BuiltWalletPass(
             $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::EventTicket, $eventClass, $eventObject),
+            new GoogleWalletPair(GoogleVerticalEnum::EVENT_TICKET, $eventClass, $eventObject),
         );
     }
 }

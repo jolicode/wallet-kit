@@ -9,7 +9,7 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Transit;
  */
 enum PassengerTypeEnum: string
 {
-    case Unspecified = 'PASSENGER_TYPE_UNSPECIFIED';
-    case SinglePassenger = 'SINGLE_PASSENGER';
-    case MultiplePassengers = 'MULTIPLE_PASSENGERS';
+    case UNSPECIFIED = 'PASSENGER_TYPE_UNSPECIFIED';
+    case SINGLE_PASSENGER = 'SINGLE_PASSENGER';
+    case MULTIPLE_PASSENGERS = 'MULTIPLE_PASSENGERS';
 }

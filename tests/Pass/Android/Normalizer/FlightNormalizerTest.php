@@ -181,19 +181,19 @@ final class FlightNormalizerTest extends TestCase
         $class = new FlightClass(
             id: 'flight-class-1',
             issuerName: 'Air France',
-            reviewStatus: ReviewStatusEnum::Approved,
+            reviewStatus: ReviewStatusEnum::APPROVED,
             origin: $origin,
             destination: $destination,
             flightHeader: $flightHeader,
             localScheduledDepartureDateTime: '2025-08-15T10:00',
             localScheduledArrivalDateTime: '2025-08-15T14:30',
             localBoardingDateTime: '2025-08-15T09:30',
-            boardingPolicy: BoardingPolicyEnum::ZoneBased,
-            seatClassPolicy: SeatClassPolicyEnum::CabinBased,
+            boardingPolicy: BoardingPolicyEnum::ZONE_BASED,
+            seatClassPolicy: SeatClassPolicyEnum::CABIN_BASED,
             hexBackgroundColor: '#003366',
             countryCode: 'FR',
             heroImage: new Image(new ImageUri('https://example.com/flight-hero.png')),
-            messages: [new Message('Flight Update', 'Gate changed to K32', 'msg-1', MessageTypeEnum::TextAndNotify)],
+            messages: [new Message('Flight Update', 'Gate changed to K32', 'msg-1', MessageTypeEnum::TEXT_AND_NOTIFY)],
         );
 
         $reservationInfo = new ReservationInfo(
@@ -209,18 +209,18 @@ final class FlightNormalizerTest extends TestCase
             boardingGroup: 'Group 2',
             seatNumber: '14A',
             seatClass: 'Economy',
-            boardingDoor: BoardingDoorEnum::Front,
+            boardingDoor: BoardingDoorEnum::FRONT,
             sequenceNumber: '042',
         );
 
         $object = new FlightObject(
             id: 'flight-object-1',
             classId: 'flight-class-1',
-            state: StateEnum::Active,
+            state: StateEnum::ACTIVE,
             passengerName: 'DUPONT/JEAN',
             reservationInfo: $reservationInfo,
             boardingAndSeatingInfo: $boardingInfo,
-            barcode: new Barcode(BarcodeTypeEnum::QrCode, 'M1DUPONT/JEAN  ABC123 CDGJFK AF 0123', null, BarcodeRenderEncodingEnum::Utf8),
+            barcode: new Barcode(BarcodeTypeEnum::QR_CODE, 'M1DUPONT/JEAN  ABC123 CDGJFK AF 0123', null, BarcodeRenderEncodingEnum::UTF_8),
             hexBackgroundColor: '#003366',
             heroImage: new Image(new ImageUri('https://example.com/flight-hero.png')),
             groupingInfo: new GroupingInfo('flight-group', 1),

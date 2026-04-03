@@ -16,7 +16,7 @@ use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum;
 
 /**
- * Google Wallet gift cards map to Apple {@see PassTypeEnum::StoreCard} payloads; Apple has no dedicated gift-card pass type.
+ * Google Wallet gift cards map to Apple {@see PassTypeEnum::STORE_CARD} payloads; Apple has no dedicated gift-card pass type.
  */
 final class GiftCardWalletBuilder extends AbstractWalletBuilder
 {
@@ -50,7 +50,7 @@ final class GiftCardWalletBuilder extends AbstractWalletBuilder
             secondaryFields: $secondaryFields,
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::StoreCard, $structure);
+        $applePass = $this->createApplePass(PassTypeEnum::STORE_CARD, $structure);
 
         $giftClass = new GiftCardClass(
             id: $this->context->googleClassId,
@@ -77,7 +77,7 @@ final class GiftCardWalletBuilder extends AbstractWalletBuilder
 
         return new BuiltWalletPass(
             $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::GiftCard, $giftClass, $giftObject),
+            new GoogleWalletPair(GoogleVerticalEnum::GIFT_CARD, $giftClass, $giftObject),
         );
     }
 }

@@ -9,8 +9,8 @@ namespace Jolicode\WalletKit\Pass\Apple\Model;
  */
 enum NumberStyleEnum: string
 {
-    case Decimal = 'PKNumberStyleDecimal';
-    case Percent = 'PKNumberStylePercent';
-    case Scientific = 'PKNumberStyleScientific';
-    case SpellOut = 'PKNumberStyleSpellOut';
+    case DECIMAL = 'PKNumberStyleDecimal';
+    case PERCENT = 'PKNumberStylePercent';
+    case SCIENTIFIC = 'PKNumberStyleScientific';
+    case SPELL_OUT = 'PKNumberStyleSpellOut';
 }

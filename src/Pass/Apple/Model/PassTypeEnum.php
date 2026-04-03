@@ -6,9 +6,9 @@ namespace Jolicode\WalletKit\Pass\Apple\Model;
 
 enum PassTypeEnum: string
 {
-    case BoardingPass = 'boardingPass';
-    case Coupon = 'coupon';
-    case EventTicket = 'eventTicket';
-    case Generic = 'generic';
-    case StoreCard = 'storeCard';
+    case BOARDING_PASS = 'boardingPass';
+    case COUPON = 'coupon';
+    case EVENT_TICKET = 'eventTicket';
+    case GENERIC = 'generic';
+    case STORE_CARD = 'storeCard';
 }

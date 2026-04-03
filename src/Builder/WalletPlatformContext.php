@@ -21,8 +21,8 @@ final class WalletPlatformContext
         public readonly string $googleClassId,
         public readonly string $googleObjectId,
         public readonly int $appleFormatVersion = 1,
-        public readonly ReviewStatusEnum $defaultGoogleReviewStatus = ReviewStatusEnum::Draft,
-        public readonly StateEnum $defaultGoogleObjectState = StateEnum::Active,
+        public readonly ReviewStatusEnum $defaultGoogleReviewStatus = ReviewStatusEnum::DRAFT,
+        public readonly StateEnum $defaultGoogleObjectState = StateEnum::ACTIVE,
     ) {
     }
 }

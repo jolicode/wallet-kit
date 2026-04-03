@@ -56,5 +56,5 @@ final class CommonWalletState
     public ?LinksModuleData $linksModuleData = null;
 
     /** @var callable(Pass): void|null */
-    public $applePassMutator = null;
+    public $applePassMutator;
 }

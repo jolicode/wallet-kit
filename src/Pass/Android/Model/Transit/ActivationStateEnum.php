@@ -9,7 +9,7 @@ namespace Jolicode\WalletKit\Pass\Android\Model\Transit;
  */
 enum ActivationStateEnum: string
 {
-    case UnknownState = 'UNKNOWN_STATE';
-    case NotActivated = 'NOT_ACTIVATED';
-    case Activated = 'ACTIVATED';
+    case UNKNOWN_STATE = 'UNKNOWN_STATE';
+    case NOT_ACTIVATED = 'NOT_ACTIVATED';
+    case ACTIVATED = 'ACTIVATED';
 }

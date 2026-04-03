@@ -159,7 +159,7 @@ final class EventTicketNormalizerTest extends TestCase
             id: 'event-class-1',
             issuerName: 'Concert Venue',
             eventName: 'Rock Concert 2025',
-            reviewStatus: ReviewStatusEnum::Approved,
+            reviewStatus: ReviewStatusEnum::APPROVED,
             localizedEventName: new LocalizedString(new TranslatedString('en', 'Rock Concert 2025')),
             eventId: 'EVT-001',
             hexBackgroundColor: '#1A1A2E',
@@ -173,8 +173,8 @@ final class EventTicketNormalizerTest extends TestCase
             confirmationCodeLabel: new LocalizedString(new TranslatedString('en', 'Confirmation Code')),
             customSeatLabel: new LocalizedString(new TranslatedString('en', 'Your Seat')),
             enableSmartTap: true,
-            securityAnimation: new SecurityAnimation(SecurityAnimationTypeEnum::FoilShimmer),
-            messages: [new Message('Event Info', 'Doors open at 7 PM', 'msg-1', MessageTypeEnum::TextAndNotify)],
+            securityAnimation: new SecurityAnimation(SecurityAnimationTypeEnum::FOIL_SHIMMER),
+            messages: [new Message('Event Info', 'Doors open at 7 PM', 'msg-1', MessageTypeEnum::TEXT_AND_NOTIFY)],
             textModulesData: [new TextModuleData('Info', 'Bring valid ID', 'text-1')],
             linksModuleData: new LinksModuleData([new Uri('https://venue.com', 'Venue Website', null, 'uri-1')]),
         );
@@ -182,7 +182,7 @@ final class EventTicketNormalizerTest extends TestCase
         $object = new EventTicketObject(
             id: 'event-object-1',
             classId: 'event-class-1',
-            state: StateEnum::Active,
+            state: StateEnum::ACTIVE,
             seatInfo: new EventSeat(
                 seat: new LocalizedString(new TranslatedString('en', '42A')),
                 row: new LocalizedString(new TranslatedString('en', 'R')),
@@ -196,11 +196,11 @@ final class EventTicketNormalizerTest extends TestCase
             faceValue: new Money('15000000', 'USD'),
             groupingInfo: new GroupingInfo('event-group', 1),
             hexBackgroundColor: '#1A1A2E',
-            barcode: new Barcode(BarcodeTypeEnum::QrCode, 'EVT1234567890', 'Event Ticket', BarcodeRenderEncodingEnum::Utf8),
+            barcode: new Barcode(BarcodeTypeEnum::QR_CODE, 'EVT1234567890', 'Event Ticket', BarcodeRenderEncodingEnum::UTF_8),
             messages: [new Message('Reminder', 'Concert is tomorrow!', 'msg-1')],
             validTimeInterval: new TimeInterval(new GoogleDateTime('2025-07-20T00:00:00Z'), new GoogleDateTime('2025-07-21T00:00:00Z')),
             heroImage: new Image(new ImageUri('https://example.com/hero.png')),
-            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::Eligible),
+            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::ELIGIBLE),
         );
 
         $classData = $this->serializer->normalize($class);

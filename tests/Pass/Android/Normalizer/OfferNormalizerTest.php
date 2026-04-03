@@ -166,7 +166,7 @@ final class OfferNormalizerTest extends TestCase
         $linksModuleData = new LinksModuleData([new Uri('https://example.com', 'Example', null, 'uri-1')]);
         $textModulesData = [new TextModuleData('Header', 'Body', 'text-1')];
         $imageModulesData = [new ImageModuleData(new Image(new ImageUri('https://example.com/module.png')), 'img-1')];
-        $messages = [new Message('Title', 'Body', 'msg-1', MessageTypeEnum::Text)];
+        $messages = [new Message('Title', 'Body', 'msg-1', MessageTypeEnum::TEXT)];
         $appLinkData = new AppLinkData(
             androidAppLinkInfo: new AppLinkInfo(
                 title: new LocalizedString(new TranslatedString('en', 'Open App')),
@@ -179,8 +179,8 @@ final class OfferNormalizerTest extends TestCase
             issuerName: 'Deal Store',
             title: '20% Off Everything',
             provider: 'Deal Store Inc.',
-            redemptionChannel: RedemptionChannelEnum::Both,
-            reviewStatus: ReviewStatusEnum::Approved,
+            redemptionChannel: RedemptionChannelEnum::BOTH,
+            reviewStatus: ReviewStatusEnum::APPROVED,
             titleImage: $image,
             wideTitleImage: new Image(new ImageUri('https://example.com/wide-title.png')),
             details: 'Get 20% off on all items in store and online.',
@@ -198,10 +198,10 @@ final class OfferNormalizerTest extends TestCase
             heroImage: new Image(new ImageUri('https://example.com/hero.png'), new LocalizedString(new TranslatedString('en', 'Hero'))),
             enableSmartTap: true,
             redemptionIssuers: ['issuer-1'],
-            multipleDevicesAndHoldersAllowedStatus: MultipleDevicesAndHoldersAllowedStatusEnum::MultipleHolders,
+            multipleDevicesAndHoldersAllowedStatus: MultipleDevicesAndHoldersAllowedStatusEnum::MULTIPLE_HOLDERS,
             callbackOptions: new CallbackOptions('https://example.com/callback'),
-            securityAnimation: new SecurityAnimation(SecurityAnimationTypeEnum::FoilShimmer),
-            viewUnlockRequirement: ViewUnlockRequirementEnum::UnlockNotRequired,
+            securityAnimation: new SecurityAnimation(SecurityAnimationTypeEnum::FOIL_SHIMMER),
+            viewUnlockRequirement: ViewUnlockRequirementEnum::UNLOCK_NOT_REQUIRED,
             messages: $messages,
             imageModulesData: $imageModulesData,
             textModulesData: $textModulesData,
@@ -213,12 +213,12 @@ final class OfferNormalizerTest extends TestCase
         $object = new OfferObject(
             id: 'offer-object-001',
             classId: 'offer-class-001',
-            state: StateEnum::Active,
+            state: StateEnum::ACTIVE,
             barcode: new Barcode(
-                type: BarcodeTypeEnum::Code128,
+                type: BarcodeTypeEnum::CODE_128,
                 value: 'OFFER20PCT',
                 alternateText: 'OFFER20PCT',
-                renderEncoding: BarcodeRenderEncodingEnum::Utf8,
+                renderEncoding: BarcodeRenderEncodingEnum::UTF_8,
             ),
             hexBackgroundColor: '#FF6B35',
             messages: $messages,
@@ -233,13 +233,13 @@ final class OfferNormalizerTest extends TestCase
             linksModuleData: $linksModuleData,
             appLinkData: $appLinkData,
             rotatingBarcode: new RotatingBarcode(
-                type: BarcodeTypeEnum::QrCode,
-                renderEncoding: BarcodeRenderEncodingEnum::Utf8,
+                type: BarcodeTypeEnum::QR_CODE,
+                renderEncoding: BarcodeRenderEncodingEnum::UTF_8,
                 valuePattern: 'OFFER_{0}',
             ),
             heroImage: new Image(new ImageUri('https://example.com/hero.png')),
             groupingInfo: new GroupingInfo('offer-group', 3),
-            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::Eligible, [NfcConstraintEnum::BlockPayment]),
+            passConstraints: new PassConstraints(ScreenshotEligibilityEnum::ELIGIBLE, [NfcConstraintEnum::BLOCK_PAYMENT]),
             linkedObjectIds: ['linked-1', 'linked-2'],
         );
 
