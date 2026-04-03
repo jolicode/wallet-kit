@@ -18,6 +18,23 @@ jobs:
                   PHP_CS_FIXER_IGNORE_ENV: 1
               run: castor qa:cs:check
 
+    spec-check:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout
+              uses: actions/checkout@v4
+            - name: setup-php
+              uses: shivammathur/setup-php@2.32.0
+              with:
+                  php-version: '8.5'
+                  coverage: none
+            - name: setup-castor
+              uses: castor-php/setup-castor@v0.1.0
+            - name: Google discovery revision + Apple phpstan keyset
+              run: |
+                  castor spec:check:google
+                  castor spec:check:apple
+
     phpstan:
         runs-on: ubuntu-latest
         steps:

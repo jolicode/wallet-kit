@@ -36,3 +36,27 @@ function qa_test(): void
 {
     run([__DIR__ . '/vendor/bin/phpunit']);
 }
+
+#[AsTask('check:apple', namespace: 'spec', description: 'Compare Apple pass phpstan keyset to tools/spec/apple-pass-keyset.json')]
+function spec_check_apple(): void
+{
+    run([\PHP_BINARY, __DIR__ . '/tools/spec/apple-pass-keyset.php', 'check']);
+}
+
+#[AsTask('check:google', namespace: 'spec', description: 'Compare live Google Wallet discovery revision to tools/spec/google-wallet-baseline.json')]
+function spec_check_google(): void
+{
+    run([\PHP_BINARY, __DIR__ . '/tools/spec/google-wallet-spec.php', 'check']);
+}
+
+#[AsTask('baseline:apple', namespace: 'spec', description: 'Regenerate tools/spec/apple-pass-keyset.json from Apple Model phpstan types')]
+function spec_baseline_apple(): void
+{
+    run([\PHP_BINARY, __DIR__ . '/tools/spec/apple-pass-keyset.php', 'baseline']);
+}
+
+#[AsTask('baseline:google', namespace: 'spec', description: 'Update tools/spec/google-wallet-baseline.json from live discovery (revision + version)')]
+function spec_baseline_google(): void
+{
+    run([\PHP_BINARY, __DIR__ . '/tools/spec/google-wallet-spec.php', 'baseline']);
+}

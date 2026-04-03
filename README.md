@@ -18,7 +18,7 @@ Wallet Kit helps you build the **JSON payloads** wallet platforms expect. It foc
 - **PHP** 8.5+
 - **symfony/serializer** ^8.0
 
-## Dual-platform builder (highlight)
+## Dual-platform builder
 
 The **`Jolicode\WalletKit\Builder`** namespace provides a **fluent API** that builds **both** an Apple [`Pass`](src/Pass/Apple/Model/Pass.php) and the matching Google Wallet **class + object** in one go. Entry point: [`WalletPass`](src/Builder/WalletPass.php) (`generic`, `offer`, `loyalty`, `eventTicket`, `flight`, `transit`, `giftCard`).
 
@@ -26,7 +26,7 @@ The **`Jolicode\WalletKit\Builder`** namespace provides a **fluent API** that bu
 2. Chain portable options (barcodes, colors, grouping, validity, web service URL, …) via [`CommonWalletBuilderTrait`](src/Builder/CommonWalletBuilderTrait.php).
 3. Call **`build()`** → [`BuiltWalletPass`](src/Builder/BuiltWalletPass.php): `apple()` for `pass.json`, `google()` for the [`GoogleWalletPair`](src/Builder/GoogleWalletPair.php) (issuer class + holder object).
 
-**Full cookbook:** [docs/builder-examples.md](docs/builder-examples.md) — **one worked example per vertical** (generic, offer, loyalty, event ticket, flight, transit, gift card).
+**Full cookbook:** [docs/builder-examples.md](docs/builder-examples.md) — **one real-world example per vertical** (generic, offer, loyalty, event ticket, flight, transit, gift card).
 
 ### Example A — coupon / offer (both stores)
 
@@ -116,9 +116,18 @@ composer require jolicode/wallet-kit
 - `Jolicode\WalletKit\Pass\Android` — Google Wallet class and object payloads
 - `Jolicode\WalletKit\Builder` — Fluent dual-platform builders (`WalletPass`, …)
 
-## Documentation
+## API spec checks (with Castor)
 
-- **[Builder examples (all verticals)](docs/builder-examples.md)**
+When [Castor](https://github.com/jolicode/castor) is available, you can verify that tracked baselines still match the **Google Wallet discovery document** and the **Apple `pass.json` phpstan shapes** in this repo:
+
+| Command | Purpose |
+| --- | --- |
+| `castor spec:check:google` | Fetches the live Wallet Objects discovery and compares its `revision` to [`tools/spec/google-wallet-baseline.json`](tools/spec/google-wallet-baseline.json). |
+| `castor spec:baseline:google` | After you update Android models for a new discovery revision, refreshes that JSON baseline. |
+| `castor spec:check:apple` | Regenerates a key list from `src/Pass/Apple/Model` `@phpstan-type` array shapes and diffs it against [`tools/spec/apple-pass-keyset.json`](tools/spec/apple-pass-keyset.json). |
+| `castor spec:baseline:apple` | Rewrites `apple-pass-keyset.json` from the current phpstan definitions (run after intentional model changes). |
+
+Scripts live under [`tools/spec/`](tools/spec/) and are also invoked by CI (`spec-check` job).
 
 ## License
 
