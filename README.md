@@ -15,8 +15,8 @@
 
 Wallet Kit helps you build the **JSON payloads** wallet platforms expect. It focuses on **modeling and normalization** (via Symfony Serializer): it does **not** sign Apple passes, bundle `.pkpass` files, or call Google Wallet APIs.
 
-- **PHP** 8.5+
-- **symfony/serializer** ^8.0
+- **PHP** 8.3+
+- **symfony/serializer** ^7.4 || ^8.0
 
 ## 🛠️ Builder
 
