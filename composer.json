@@ -8,11 +8,22 @@
             "Jolicode\\WalletKit\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Jolicode\\WalletKit\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Baptiste Leduc",
             "email": "baptiste.leduc@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=8.5",
+        "symfony/serializer": "^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.1"
+    }
 }
