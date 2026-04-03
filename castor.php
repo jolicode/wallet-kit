@@ -8,6 +8,25 @@ use function Castor\PHPQa\php_cs_fixer;
 use function Castor\PHPQa\phpstan;
 use function Castor\run;
 
+/**
+ * PHP binary for spawning spec scripts. Castor's native CLI can run with an empty PHP_BINARY.
+ *
+ * @return non-empty-string
+ */
+function spec_tools_php(): string
+{
+    if (\PHP_BINARY !== '') {
+        return \PHP_BINARY;
+    }
+
+    $fromEnv = getenv('PHP_BINARY');
+    if (\is_string($fromEnv) && $fromEnv !== '') {
+        return $fromEnv;
+    }
+
+    return 'php';
+}
+
 #[AsTask('cs:check', namespace: 'qa', description: 'Check for coding standards without fixing them')]
 function qa_cs_check(): void
 {
@@ -40,23 +59,23 @@ function qa_test(): void
 #[AsTask('check:apple', namespace: 'spec', description: 'Compare Apple pass phpstan keyset to tools/spec/apple-pass-keyset.json')]
 function spec_check_apple(): void
 {
-    run([\PHP_BINARY, __DIR__ . '/tools/spec/apple-pass-keyset.php', 'check']);
+    run([spec_tools_php(), __DIR__ . '/tools/spec/apple-pass-keyset.php', 'check']);
 }
 
 #[AsTask('check:google', namespace: 'spec', description: 'Compare live Google Wallet discovery revision to tools/spec/google-wallet-baseline.json')]
 function spec_check_google(): void
 {
-    run([\PHP_BINARY, __DIR__ . '/tools/spec/google-wallet-spec.php', 'check']);
+    run([spec_tools_php(), __DIR__ . '/tools/spec/google-wallet-spec.php', 'check']);
 }
 
 #[AsTask('baseline:apple', namespace: 'spec', description: 'Regenerate tools/spec/apple-pass-keyset.json from Apple Model phpstan types')]
 function spec_baseline_apple(): void
 {
-    run([\PHP_BINARY, __DIR__ . '/tools/spec/apple-pass-keyset.php', 'baseline']);
+    run([spec_tools_php(), __DIR__ . '/tools/spec/apple-pass-keyset.php', 'baseline']);
 }
 
 #[AsTask('baseline:google', namespace: 'spec', description: 'Update tools/spec/google-wallet-baseline.json from live discovery (revision + version)')]
 function spec_baseline_google(): void
 {
-    run([\PHP_BINARY, __DIR__ . '/tools/spec/google-wallet-spec.php', 'baseline']);
+    run([spec_tools_php(), __DIR__ . '/tools/spec/google-wallet-spec.php', 'baseline']);
 }
