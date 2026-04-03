@@ -49,36 +49,42 @@ final class TransitWalletBuilder extends AbstractWalletBuilder
             transitType: $this->appleTransitType(),
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::BOARDING_PASS, $structure);
+        $applePass = $this->context->hasApple()
+            ? $this->createApplePass(PassTypeEnum::BOARDING_PASS, $structure)
+            : null;
 
-        $transitClass = new TransitClass(
-            id: $this->context->googleClassId,
-            issuerName: $this->context->appleOrganizationName,
-            reviewStatus: $this->resolvedGoogleReviewStatus(),
-            transitType: $this->googleTransitType,
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-        );
+        $googlePair = null;
+        if ($this->context->hasGoogle()) {
+            $g = $this->context->google;
 
-        $transitObject = new TransitObject(
-            id: $this->context->googleObjectId,
-            classId: $this->context->googleClassId,
-            state: $this->resolvedGoogleObjectState(),
-            tripType: $this->tripType,
-            ticketNumber: $this->ticketNumber,
-            barcode: $this->primaryGoogleBarcode(),
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            validTimeInterval: $this->common->validTimeInterval,
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-            groupingInfo: $this->resolvedGoogleGrouping(),
-        );
+            $transitClass = new TransitClass(
+                id: $g->classId,
+                issuerName: $this->context->googleIssuerName(),
+                reviewStatus: $this->resolvedGoogleReviewStatus(),
+                transitType: $this->googleTransitType,
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+            );
 
-        return new BuiltWalletPass(
-            $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::TRANSIT, $transitClass, $transitObject),
-        );
+            $transitObject = new TransitObject(
+                id: $g->objectId,
+                classId: $g->classId,
+                state: $this->resolvedGoogleObjectState(),
+                tripType: $this->tripType,
+                ticketNumber: $this->ticketNumber,
+                barcode: $this->primaryGoogleBarcode(),
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                validTimeInterval: $this->common->validTimeInterval,
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+                groupingInfo: $this->resolvedGoogleGrouping(),
+            );
+
+            $googlePair = new GoogleWalletPair(GoogleVerticalEnum::TRANSIT, $transitClass, $transitObject);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair);
     }
 
     private function appleTransitType(): TransitTypeEnum

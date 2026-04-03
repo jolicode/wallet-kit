@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Jolicode\WalletKit\Tests\Builder;
 
 use Jolicode\WalletKit\Builder\GoogleVerticalEnum;
+use Jolicode\WalletKit\Builder\GoogleWalletContext;
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
+use Jolicode\WalletKit\Exception\ApplePassNotAvailableException;
+use Jolicode\WalletKit\Exception\GoogleWalletPairNotAvailableException;
+use Jolicode\WalletKit\Exception\InvalidWalletPlatformContextException;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\AirportInfo;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightCarrier;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightHeader;
@@ -36,7 +40,7 @@ final class DualWalletBuilderTest extends TestCase
 
     private function context(): WalletPlatformContext
     {
-        return new WalletPlatformContext(
+        return WalletPlatformContext::both(
             appleTeamIdentifier: 'TEAM1',
             applePassTypeIdentifier: 'pass.com.example.test',
             appleSerialNumber: 'SN-001',
@@ -51,7 +55,8 @@ final class DualWalletBuilderTest extends TestCase
 
     public function testGenericBuildNormalizes(): void
     {
-        $built = WalletPass::generic($this->context())
+        $ctx = $this->context();
+        $built = WalletPass::generic($ctx)
             ->withPassStructure(new PassStructure(
                 primaryFields: [new Field(key: 'info', value: 'Hello', label: 'Info')],
             ))
@@ -72,8 +77,8 @@ final class DualWalletBuilderTest extends TestCase
         $pair = $built->google();
         $classJson = $this->serializer->normalize($pair->issuerClass);
         $objectJson = $this->serializer->normalize($pair->passObject);
-        self::assertSame($this->context()->googleClassId, $classJson['id']);
-        self::assertSame($this->context()->googleClassId, $objectJson['classId']);
+        self::assertSame($ctx->google->classId, $classJson['id']);
+        self::assertSame($ctx->google->classId, $objectJson['classId']);
         self::assertSame('QR_CODE', $objectJson['barcode']['type']);
     }
 
@@ -199,5 +204,87 @@ final class DualWalletBuilderTest extends TestCase
 
         $objectJson = $this->serializer->normalize($built->google()->passObject);
         self::assertSame('first', $objectJson['barcode']['value']);
+    }
+
+    public function testEmptyPlatformContextThrows(): void
+    {
+        $this->expectException(InvalidWalletPlatformContextException::class);
+        new WalletPlatformContext(null, null);
+    }
+
+    public function testGoogleOnlyWithoutIssuerThrows(): void
+    {
+        $this->expectException(InvalidWalletPlatformContextException::class);
+        new WalletPlatformContext(null, new GoogleWalletContext(
+            classId: 'c',
+            objectId: 'o',
+            issuerName: null,
+        ));
+    }
+
+    public function testGoogleOnlyBuildAppleAccessorThrows(): void
+    {
+        $ctx = WalletPlatformContext::googleOnly(
+            googleClassId: '3388000000012345.g_only_class',
+            googleObjectId: '3388000000012345.g_only_object',
+            issuerName: 'Issuer Inc.',
+            defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
+            defaultGoogleObjectState: StateEnum::ACTIVE,
+        );
+
+        $built = WalletPass::generic($ctx)
+            ->withPassStructure(new PassStructure(
+                primaryFields: [new Field(key: 'info', value: 'Hello', label: 'Info')],
+            ))
+            ->withGenericType(GenericTypeEnum::UNSPECIFIED)
+            ->withGoogleCardTitle('Card')
+            ->addAppleBarcode(new Barcode(altText: 'x', format: BarcodeFormatEnum::QR, message: 'M1', messageEncoding: 'utf-8'))
+            ->build();
+
+        $this->expectException(ApplePassNotAvailableException::class);
+        $built->apple();
+    }
+
+    public function testGoogleOnlyBuildGoogleNormalizes(): void
+    {
+        $ctx = WalletPlatformContext::googleOnly(
+            googleClassId: '3388000000012345.g_only_class',
+            googleObjectId: '3388000000012345.g_only_object',
+            issuerName: 'Issuer Inc.',
+        );
+
+        $built = WalletPass::offer(
+            $ctx,
+            'Deal',
+            'Shop',
+            RedemptionChannelEnum::INSTORE,
+        )->build();
+
+        self::assertSame(GoogleVerticalEnum::OFFER, $built->googleVertical());
+        $classJson = $this->serializer->normalize($built->google()->issuerClass);
+        self::assertSame('Issuer Inc.', $classJson['issuerName']);
+    }
+
+    public function testAppleOnlyBuildGoogleAccessorThrows(): void
+    {
+        $ctx = WalletPlatformContext::appleOnly(
+            appleTeamIdentifier: 'TEAM1',
+            applePassTypeIdentifier: 'pass.com.example.test',
+            appleSerialNumber: 'SN-A',
+            appleOrganizationName: 'Example Org',
+            appleDescription: 'Apple only',
+        );
+
+        $built = WalletPass::generic($ctx)
+            ->withPassStructure(new PassStructure(
+                primaryFields: [new Field(key: 'k', value: 'v', label: 'L')],
+            ))
+            ->withGenericType(GenericTypeEnum::UNSPECIFIED)
+            ->build();
+
+        self::assertSame('SN-A', $built->apple()->serialNumber);
+
+        $this->expectException(GoogleWalletPairNotAvailableException::class);
+        $built->google();
     }
 }

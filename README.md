@@ -18,20 +18,16 @@ Wallet Kit helps you build the **JSON payloads** wallet platforms expect. It foc
 - **PHP** 8.5+
 - **symfony/serializer** ^8.0
 
-## Dual-platform builder
+## 🛠️ Builder
 
-The **`Jolicode\WalletKit\Builder`** namespace provides a **fluent API** that builds **both** an Apple [`Pass`](src/Pass/Apple/Model/Pass.php) and the matching Google Wallet **class + object** in one go. Entry point: [`WalletPass`](src/Builder/WalletPass.php) (`generic`, `offer`, `loyalty`, `eventTicket`, `flight`, `transit`, `giftCard`).
+The **`Jolicode\WalletKit\Builder`** namespace provides a fluent API centered on [`WalletPass`](src/Builder/WalletPass.php). Whether you need to build passes for **Apple, Google, or both platforms simultaneously**, use [`WalletPlatformContext::both(...)`](src/Builder/WalletPlatformContext.php) and then call `build()` to obtain a [`BuiltWalletPass`](src/Builder/BuiltWalletPass.php) (`apple()`, `google()`). You can then normalize these models using Symfony Serializer along with this package’s normalizers.
 
-1. Create a [`WalletPlatformContext`](src/Builder/WalletPlatformContext.php) with your Apple identifiers (team, pass type, serial, organization, description) and Google IDs (`classId`, `objectId`).
-2. Chain portable options (barcodes, colors, grouping, validity, web service URL, …) via [`CommonWalletBuilderTrait`](src/Builder/CommonWalletBuilderTrait.php).
-3. Call **`build()`** → [`BuiltWalletPass`](src/Builder/BuiltWalletPass.php): `apple()` for `pass.json`, `google()` for the [`GoogleWalletPair`](src/Builder/GoogleWalletPair.php) (issuer class + holder object).
+**Cookbook** (single-store `appleOnly` / `googleOnly`, every vertical, shared options, exceptions): [docs/builder-examples.md](docs/builder-examples.md).
 
-**Full cookbook:** [docs/builder-examples.md](docs/builder-examples.md) — **one real-world example per vertical** (generic, offer, loyalty, event ticket, flight, transit, gift card).
-
-### Example A — coupon / offer (both stores)
+### Example — dual platform
 
 ```php
-$context = new WalletPlatformContext(
+$context = WalletPlatformContext::both(
     appleTeamIdentifier: 'ABCDE12345',
     applePassTypeIdentifier: 'pass.com.example.coupon',
     appleSerialNumber: 'COUPON-001',
@@ -63,39 +59,6 @@ $built = WalletPass::offer(
 // Then normalize with Symfony Serializer + this library’s normalizers.
 ```
 
-### Example B — flight boarding (both stores)
-
-```php
-$flightContext = new WalletPlatformContext(
-    appleTeamIdentifier: 'ABCDE12345',
-    applePassTypeIdentifier: 'pass.com.example.boarding',
-    appleSerialNumber: 'BP-8844',
-    appleOrganizationName: 'Example Airways',
-    appleDescription: 'SFO → LAX',
-    googleClassId: '3388000000012345.example_flight_class',
-    googleObjectId: '3388000000012345.example_flight_object',
-    defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
-    defaultGoogleObjectState: StateEnum::ACTIVE,
-);
-
-$built = WalletPass::flight(
-    $flightContext,
-    passengerName: 'Taylor Lee',
-    reservationInfo: new ReservationInfo(confirmationCode: 'ABC123'),
-    flightHeader: new FlightHeader(
-        carrier: new FlightCarrier(carrierIataCode: 'ZZ'),
-        flightNumber: '101',
-    ),
-    origin: new AirportInfo(airportIataCode: 'SFO'),
-    destination: new AirportInfo(airportIataCode: 'LAX'),
-)
-    ->withGrouping('trip-sfo-lax-2026', 0)
-    ->build();
-
-// $built->apple()  → boardingPass + PKTransitTypeAir
-// $built->google() → FlightClass + FlightObject
-```
-
 ### 🍏 Apple Wallet
 
 Apple’s model maps to a **single** tree: either use the **builder** above or build a `Pass` manually (see `src/Pass/Apple/`) and normalize it to the structure that becomes **`pass.json`** inside a pass package. Images, manifest, and cryptographic signing are still your responsibility.
@@ -114,7 +77,8 @@ composer require jolicode/wallet-kit
 
 - `Jolicode\WalletKit\Pass\Apple` — Apple Wallet `pass.json` payloads
 - `Jolicode\WalletKit\Pass\Android` — Google Wallet class and object payloads
-- `Jolicode\WalletKit\Builder` — Fluent dual-platform builders (`WalletPass`, …)
+- `Jolicode\WalletKit\Builder` — Fluent builders (`WalletPass`, …) for Apple, Google, or both
+- `Jolicode\WalletKit\Exception` — Builder context and `BuiltWalletPass` accessor exceptions
 
 ## API spec checks (with Castor)
 

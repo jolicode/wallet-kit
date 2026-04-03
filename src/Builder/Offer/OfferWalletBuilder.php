@@ -36,35 +36,41 @@ final class OfferWalletBuilder extends AbstractWalletBuilder
             ],
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::COUPON, $structure);
+        $applePass = $this->context->hasApple()
+            ? $this->createApplePass(PassTypeEnum::COUPON, $structure)
+            : null;
 
-        $offerClass = new OfferClass(
-            id: $this->context->googleClassId,
-            issuerName: $this->context->appleOrganizationName,
-            title: $this->title,
-            provider: $this->provider,
-            redemptionChannel: $this->redemptionChannel,
-            reviewStatus: $this->resolvedGoogleReviewStatus(),
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-        );
+        $googlePair = null;
+        if ($this->context->hasGoogle()) {
+            $g = $this->context->google;
 
-        $offerObject = new OfferObject(
-            id: $this->context->googleObjectId,
-            classId: $this->context->googleClassId,
-            state: $this->resolvedGoogleObjectState(),
-            barcode: $this->primaryGoogleBarcode(),
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            validTimeInterval: $this->common->validTimeInterval,
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-            groupingInfo: $this->resolvedGoogleGrouping(),
-        );
+            $offerClass = new OfferClass(
+                id: $g->classId,
+                issuerName: $this->context->googleIssuerName(),
+                title: $this->title,
+                provider: $this->provider,
+                redemptionChannel: $this->redemptionChannel,
+                reviewStatus: $this->resolvedGoogleReviewStatus(),
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+            );
 
-        return new BuiltWalletPass(
-            $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::OFFER, $offerClass, $offerObject),
-        );
+            $offerObject = new OfferObject(
+                id: $g->objectId,
+                classId: $g->classId,
+                state: $this->resolvedGoogleObjectState(),
+                barcode: $this->primaryGoogleBarcode(),
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                validTimeInterval: $this->common->validTimeInterval,
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+                groupingInfo: $this->resolvedGoogleGrouping(),
+            );
+
+            $googlePair = new GoogleWalletPair(GoogleVerticalEnum::OFFER, $offerClass, $offerObject);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair);
     }
 }

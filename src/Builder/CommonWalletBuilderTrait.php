@@ -7,6 +7,8 @@ namespace Jolicode\WalletKit\Builder;
 use Jolicode\WalletKit\Builder\Internal\BarcodeMapper;
 use Jolicode\WalletKit\Builder\Internal\ColorMapper;
 use Jolicode\WalletKit\Builder\Internal\CommonWalletState;
+use Jolicode\WalletKit\Exception\ApplePlatformContextRequiredException;
+use Jolicode\WalletKit\Exception\GooglePlatformContextRequiredException;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Barcode as GoogleBarcode;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\GoogleDateTime;
@@ -200,12 +202,22 @@ trait CommonWalletBuilderTrait
 
     protected function resolvedGoogleReviewStatus(): ReviewStatusEnum
     {
-        return $this->common->googleReviewStatus ?? $this->context->defaultGoogleReviewStatus;
+        $google = $this->context->google;
+        if (null === $google) {
+            throw new GooglePlatformContextRequiredException('resolvedGoogleReviewStatus() requires a Google context.');
+        }
+
+        return $this->common->googleReviewStatus ?? $google->defaultReviewStatus;
     }
 
     protected function resolvedGoogleObjectState(): StateEnum
     {
-        return $this->common->googleObjectState ?? $this->context->defaultGoogleObjectState;
+        $google = $this->context->google;
+        if (null === $google) {
+            throw new GooglePlatformContextRequiredException('resolvedGoogleObjectState() requires a Google context.');
+        }
+
+        return $this->common->googleObjectState ?? $google->defaultObjectState;
     }
 
     protected function resolvedGoogleGrouping(): ?GroupingInfo
@@ -231,13 +243,18 @@ trait CommonWalletBuilderTrait
      */
     protected function createApplePass(\Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum $passType, \Jolicode\WalletKit\Pass\Apple\Model\PassStructure $structure): Pass
     {
+        $apple = $this->context->apple;
+        if (null === $apple) {
+            throw new ApplePlatformContextRequiredException('createApplePass() requires an Apple context.');
+        }
+
         $pass = new Pass(
-            description: $this->context->appleDescription,
-            organizationName: $this->context->appleOrganizationName,
-            teamIdentifier: $this->context->appleTeamIdentifier,
-            passTypeIdentifier: $this->context->applePassTypeIdentifier,
-            formatVersion: $this->context->appleFormatVersion,
-            serialNumber: $this->context->appleSerialNumber,
+            description: $apple->description,
+            organizationName: $apple->organizationName,
+            teamIdentifier: $apple->teamIdentifier,
+            passTypeIdentifier: $apple->passTypeIdentifier,
+            formatVersion: $apple->formatVersion,
+            serialNumber: $apple->serialNumber,
             passType: $passType,
             structure: $structure,
             barcodes: $this->common->appleBarcodes,

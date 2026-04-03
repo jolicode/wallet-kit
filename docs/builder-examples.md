@@ -1,17 +1,31 @@
 # Wallet Kit — Builder examples
 
-This page shows one **end-to-end example** per vertical supported by [`WalletPass`](../src/Builder/WalletPass.php). Each example assumes you already configured a [`WalletPlatformContext`](../src/Builder/WalletPlatformContext.php) with your real Apple and Google identifiers.
+## Contents
+
+- [Shared context (dual-platform examples)](#shared-context-dual-platform-examples)
+- [Apple-only and Google-only snippets](#apple-only-and-google-only-snippets)
+- [1. Generic pass](#1-generic-pass)
+- [2. Offer / coupon](#2-offer--coupon)
+- [3. Loyalty / store card](#3-loyalty--store-card)
+- [4. Event ticket](#4-event-ticket)
+- [5. Flight (boarding pass)](#5-flight-boarding-pass)
+- [6. Transit (bus, rail, ferry, …)](#6-transit-bus-rail-ferry-)
+- [7. Gift card](#7-gift-card)
+- [Portable options (all builders)](#portable-options-all-builders)
+- [Limitations](#limitations)
+
+This page shows one **end-to-end example** per vertical supported by [`WalletPass`](../src/Builder/WalletPass.php). Examples below use a **dual-platform** context; you can also use [`WalletPlatformContext::appleOnly`](../src/Builder/WalletPlatformContext.php) or [`::googleOnly`](../src/Builder/WalletPlatformContext.php) when you only target one store.
 
 After `build()`, you get a [`BuiltWalletPass`](../src/Builder/BuiltWalletPass.php):
 
-- `$built->apple()` → Apple [`Pass`](../src/Pass/Apple/Model/Pass.php) for `pass.json`
-- `$built->google()->issuerClass` / `$built->google()->passObject` → Google class and object for the Wallet API
+- `$built->apple()` → Apple [`Pass`](../src/Pass/Apple/Model/Pass.php) for `pass.json` (throws [`ApplePassNotAvailableException`](../src/Exception/ApplePassNotAvailableException.php) if the context had no Apple slice)
+- `$built->google()->issuerClass` / `$built->google()->passObject` → Google class and object (throws [`GoogleWalletPairNotAvailableException`](../src/Exception/GoogleWalletPairNotAvailableException.php) if there was no Google slice)
 
 Serialize with **Symfony Serializer** and the normalizers from this package (see [`tests/Builder/BuilderTestSerializerFactory.php`](../tests/Builder/BuilderTestSerializerFactory.php) for a full list).
 
 ---
 
-## Shared context (all examples)
+## Shared context (dual-platform examples)
 
 ```php
 <?php
@@ -22,7 +36,7 @@ use Jolicode\WalletKit\Builder\WalletPlatformContext;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 
-$context = new WalletPlatformContext(
+$context = WalletPlatformContext::both(
     appleTeamIdentifier: 'YOUR_TEAM_ID',
     applePassTypeIdentifier: 'pass.com.example.app',
     appleSerialNumber: 'UNIQUE-SERIAL-001',
@@ -33,6 +47,67 @@ $context = new WalletPlatformContext(
     defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
     defaultGoogleObjectState: StateEnum::ACTIVE,
 );
+```
+
+---
+
+## Apple-only and Google-only snippets
+
+**Apple-only** (no Google IDs required). After `build()`, use only `$built->apple()`; `$built->google()` throws.
+
+```php
+use Jolicode\WalletKit\Builder\WalletPlatformContext;
+use Jolicode\WalletKit\Builder\WalletPass;
+use Jolicode\WalletKit\Pass\Apple\Model\Field;
+use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
+use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericTypeEnum;
+
+$appleContext = WalletPlatformContext::appleOnly(
+    appleTeamIdentifier: 'YOUR_TEAM_ID',
+    applePassTypeIdentifier: 'pass.com.example.app',
+    appleSerialNumber: 'SN-APPLE-ONLY',
+    appleOrganizationName: 'Example Org',
+    appleDescription: 'Membership',
+);
+
+$built = WalletPass::generic($appleContext)
+    ->withPassStructure(new PassStructure(
+        primaryFields: [new Field(key: 'member', value: 'Jane', label: 'Member')],
+    ))
+    ->withGenericType(GenericTypeEnum::GYM_MEMBERSHIP)
+    ->build();
+
+$pass = $built->apple();
+```
+
+**Google-only** (requires `issuerName` on the context for class payloads). After `build()`, use `$built->google()`; `$built->apple()` throws. You can still call `addAppleBarcode()` to supply a barcode image for the Google object.
+
+```php
+use Jolicode\WalletKit\Builder\WalletPlatformContext;
+use Jolicode\WalletKit\Builder\WalletPass;
+use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
+use Jolicode\WalletKit\Pass\Apple\Model\Barcode;
+use Jolicode\WalletKit\Pass\Apple\Model\BarcodeFormatEnum;
+
+$googleContext = WalletPlatformContext::googleOnly(
+    googleClassId: '3388000000012345.example_offer_class',
+    googleObjectId: '3388000000012345.example_offer_object',
+    issuerName: 'Example Shop',
+);
+
+$built = WalletPass::offer(
+    $googleContext,
+    title: '10% off',
+    provider: 'Example Shop',
+    redemptionChannel: RedemptionChannelEnum::INSTORE,
+)->addAppleBarcode(new Barcode(
+    altText: 'Promo',
+    format: BarcodeFormatEnum::QR,
+    message: 'SAVE10',
+    messageEncoding: 'utf-8',
+))->build();
+
+$pair = $built->google();
 ```
 
 ---
@@ -273,3 +348,4 @@ These methods come from [`CommonWalletBuilderTrait`](../src/Builder/CommonWallet
 
 - The library does **not** sign `.pkpass` bundles or call Google Wallet REST APIs.
 - Apple and Google models differ: not every field exists on both sides. Use `mutateApple` or adjust the returned Google class/object after `build()` for platform-specific details.
+- A [`WalletPlatformContext`](../src/Builder/WalletPlatformContext.php) with **no** Apple and **no** Google slice throws [`InvalidWalletPlatformContextException`](../src/Exception/InvalidWalletPlatformContextException.php). Google-only contexts must include a non-empty `issuerName` (or use `::googleOnly(...)`, which enforces it).

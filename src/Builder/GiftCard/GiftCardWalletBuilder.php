@@ -50,34 +50,40 @@ final class GiftCardWalletBuilder extends AbstractWalletBuilder
             secondaryFields: $secondaryFields,
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::STORE_CARD, $structure);
+        $applePass = $this->context->hasApple()
+            ? $this->createApplePass(PassTypeEnum::STORE_CARD, $structure)
+            : null;
 
-        $giftClass = new GiftCardClass(
-            id: $this->context->googleClassId,
-            issuerName: $this->context->appleOrganizationName,
-            reviewStatus: $this->resolvedGoogleReviewStatus(),
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-        );
+        $googlePair = null;
+        if ($this->context->hasGoogle()) {
+            $g = $this->context->google;
 
-        $giftObject = new GiftCardObject(
-            id: $this->context->googleObjectId,
-            classId: $this->context->googleClassId,
-            state: $this->resolvedGoogleObjectState(),
-            cardNumber: $this->cardNumber,
-            pin: $this->pin,
-            barcode: $this->primaryGoogleBarcode(),
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            validTimeInterval: $this->common->validTimeInterval,
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-            groupingInfo: $this->resolvedGoogleGrouping(),
-        );
+            $giftClass = new GiftCardClass(
+                id: $g->classId,
+                issuerName: $this->context->googleIssuerName(),
+                reviewStatus: $this->resolvedGoogleReviewStatus(),
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+            );
 
-        return new BuiltWalletPass(
-            $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::GIFT_CARD, $giftClass, $giftObject),
-        );
+            $giftObject = new GiftCardObject(
+                id: $g->objectId,
+                classId: $g->classId,
+                state: $this->resolvedGoogleObjectState(),
+                cardNumber: $this->cardNumber,
+                pin: $this->pin,
+                barcode: $this->primaryGoogleBarcode(),
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                validTimeInterval: $this->common->validTimeInterval,
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+                groupingInfo: $this->resolvedGoogleGrouping(),
+            );
+
+            $googlePair = new GoogleWalletPair(GoogleVerticalEnum::GIFT_CARD, $giftClass, $giftObject);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair);
     }
 }

@@ -56,35 +56,41 @@ final class GenericWalletBuilder extends AbstractWalletBuilder
 
     public function build(): BuiltWalletPass
     {
-        $applePass = $this->createApplePass(PassTypeEnum::GENERIC, $this->passStructure);
-
-        $googleClass = new GenericClass(
-            id: $this->context->googleClassId,
-            appLinkData: $this->common->appLinkData,
-            linksModuleData: $this->common->linksModuleData,
-        );
-
-        $cardTitle = null !== $this->googleCardTitle
-            ? LocalizedStringHelper::en($this->googleCardTitle)
+        $applePass = $this->context->hasApple()
+            ? $this->createApplePass(PassTypeEnum::GENERIC, $this->passStructure)
             : null;
 
-        $googleObject = new GenericObject(
-            id: $this->context->googleObjectId,
-            classId: $this->context->googleClassId,
-            genericType: $this->genericType,
-            cardTitle: $cardTitle,
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            barcode: $this->primaryGoogleBarcode(),
-            validTimeInterval: $this->common->validTimeInterval,
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-            groupingInfo: $this->resolvedGoogleGrouping(),
-            state: $this->resolvedGoogleObjectState(),
-        );
+        $googlePair = null;
+        if ($this->context->hasGoogle()) {
+            $g = $this->context->google;
 
-        return new BuiltWalletPass(
-            $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::GENERIC, $googleClass, $googleObject),
-        );
+            $googleClass = new GenericClass(
+                id: $g->classId,
+                appLinkData: $this->common->appLinkData,
+                linksModuleData: $this->common->linksModuleData,
+            );
+
+            $cardTitle = null !== $this->googleCardTitle
+                ? LocalizedStringHelper::en($this->googleCardTitle)
+                : null;
+
+            $googleObject = new GenericObject(
+                id: $g->objectId,
+                classId: $g->classId,
+                genericType: $this->genericType,
+                cardTitle: $cardTitle,
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                barcode: $this->primaryGoogleBarcode(),
+                validTimeInterval: $this->common->validTimeInterval,
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+                groupingInfo: $this->resolvedGoogleGrouping(),
+                state: $this->resolvedGoogleObjectState(),
+            );
+
+            $googlePair = new GoogleWalletPair(GoogleVerticalEnum::GENERIC, $googleClass, $googleObject);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair);
     }
 }

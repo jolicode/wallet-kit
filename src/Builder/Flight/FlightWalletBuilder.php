@@ -64,38 +64,43 @@ final class FlightWalletBuilder extends AbstractWalletBuilder
             transitType: TransitTypeEnum::AIR,
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::BOARDING_PASS, $structure);
+        $applePass = $this->context->hasApple()
+            ? $this->createApplePass(PassTypeEnum::BOARDING_PASS, $structure)
+            : null;
 
-        $flightClass = new FlightClass(
-            id: $this->context->googleClassId,
-            issuerName: $this->context->appleOrganizationName,
-            reviewStatus: $this->resolvedGoogleReviewStatus(),
-            origin: $this->origin,
-            destination: $this->destination,
-            flightHeader: $this->flightHeader,
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-        );
+        $googlePair = null;
+        if ($this->context->hasGoogle()) {
+            $g = $this->context->google;
+            $flightClass = new FlightClass(
+                id: $g->classId,
+                issuerName: $this->context->googleIssuerName(),
+                reviewStatus: $this->resolvedGoogleReviewStatus(),
+                origin: $this->origin,
+                destination: $this->destination,
+                flightHeader: $this->flightHeader,
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+            );
 
-        $flightObject = new FlightObject(
-            id: $this->context->googleObjectId,
-            classId: $this->context->googleClassId,
-            state: $this->resolvedGoogleObjectState(),
-            passengerName: $this->passengerName,
-            reservationInfo: $this->reservationInfo,
-            boardingAndSeatingInfo: $this->boardingAndSeatingInfo,
-            barcode: $this->primaryGoogleBarcode(),
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            validTimeInterval: $this->common->validTimeInterval,
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-            groupingInfo: $this->resolvedGoogleGrouping(),
-        );
+            $flightObject = new FlightObject(
+                id: $g->objectId,
+                classId: $g->classId,
+                state: $this->resolvedGoogleObjectState(),
+                passengerName: $this->passengerName,
+                reservationInfo: $this->reservationInfo,
+                boardingAndSeatingInfo: $this->boardingAndSeatingInfo,
+                barcode: $this->primaryGoogleBarcode(),
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                validTimeInterval: $this->common->validTimeInterval,
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+                groupingInfo: $this->resolvedGoogleGrouping(),
+            );
 
-        return new BuiltWalletPass(
-            $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::FLIGHT, $flightClass, $flightObject),
-        );
+            $googlePair = new GoogleWalletPair(GoogleVerticalEnum::FLIGHT, $flightClass, $flightObject);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair);
     }
 }

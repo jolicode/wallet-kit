@@ -47,35 +47,41 @@ final class LoyaltyWalletBuilder extends AbstractWalletBuilder
         }
 
         $structure = new PassStructure(primaryFields: $primaryFields);
-        $applePass = $this->createApplePass(PassTypeEnum::STORE_CARD, $structure);
+        $applePass = $this->context->hasApple()
+            ? $this->createApplePass(PassTypeEnum::STORE_CARD, $structure)
+            : null;
 
-        $loyaltyClass = new LoyaltyClass(
-            id: $this->context->googleClassId,
-            issuerName: $this->context->appleOrganizationName,
-            reviewStatus: $this->resolvedGoogleReviewStatus(),
-            programName: $this->programName,
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-        );
+        $googlePair = null;
+        if ($this->context->hasGoogle()) {
+            $g = $this->context->google;
 
-        $loyaltyObject = new LoyaltyObject(
-            id: $this->context->googleObjectId,
-            classId: $this->context->googleClassId,
-            state: $this->resolvedGoogleObjectState(),
-            accountName: $this->accountName,
-            accountId: $this->accountId,
-            barcode: $this->primaryGoogleBarcode(),
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            validTimeInterval: $this->common->validTimeInterval,
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-            groupingInfo: $this->resolvedGoogleGrouping(),
-        );
+            $loyaltyClass = new LoyaltyClass(
+                id: $g->classId,
+                issuerName: $this->context->googleIssuerName(),
+                reviewStatus: $this->resolvedGoogleReviewStatus(),
+                programName: $this->programName,
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+            );
 
-        return new BuiltWalletPass(
-            $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::LOYALTY, $loyaltyClass, $loyaltyObject),
-        );
+            $loyaltyObject = new LoyaltyObject(
+                id: $g->objectId,
+                classId: $g->classId,
+                state: $this->resolvedGoogleObjectState(),
+                accountName: $this->accountName,
+                accountId: $this->accountId,
+                barcode: $this->primaryGoogleBarcode(),
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                validTimeInterval: $this->common->validTimeInterval,
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+                groupingInfo: $this->resolvedGoogleGrouping(),
+            );
+
+            $googlePair = new GoogleWalletPair(GoogleVerticalEnum::LOYALTY, $loyaltyClass, $loyaltyObject);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair);
     }
 }

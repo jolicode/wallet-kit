@@ -59,35 +59,41 @@ final class EventTicketWalletBuilder extends AbstractWalletBuilder
             secondaryFields: $secondaryFields,
         );
 
-        $applePass = $this->createApplePass(PassTypeEnum::EVENT_TICKET, $structure);
+        $applePass = $this->context->hasApple()
+            ? $this->createApplePass(PassTypeEnum::EVENT_TICKET, $structure)
+            : null;
 
-        $eventClass = new EventTicketClass(
-            id: $this->context->googleClassId,
-            issuerName: $this->context->appleOrganizationName,
-            eventName: $this->eventName,
-            reviewStatus: $this->resolvedGoogleReviewStatus(),
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-        );
+        $googlePair = null;
+        if ($this->context->hasGoogle()) {
+            $g = $this->context->google;
 
-        $eventObject = new EventTicketObject(
-            id: $this->context->googleObjectId,
-            classId: $this->context->googleClassId,
-            state: $this->resolvedGoogleObjectState(),
-            ticketHolderName: $this->ticketHolderName,
-            ticketNumber: $this->ticketNumber,
-            barcode: $this->primaryGoogleBarcode(),
-            hexBackgroundColor: $this->resolvedGoogleHex(),
-            validTimeInterval: $this->common->validTimeInterval,
-            linksModuleData: $this->common->linksModuleData,
-            appLinkData: $this->common->appLinkData,
-            groupingInfo: $this->resolvedGoogleGrouping(),
-        );
+            $eventClass = new EventTicketClass(
+                id: $g->classId,
+                issuerName: $this->context->googleIssuerName(),
+                eventName: $this->eventName,
+                reviewStatus: $this->resolvedGoogleReviewStatus(),
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+            );
 
-        return new BuiltWalletPass(
-            $applePass,
-            new GoogleWalletPair(GoogleVerticalEnum::EVENT_TICKET, $eventClass, $eventObject),
-        );
+            $eventObject = new EventTicketObject(
+                id: $g->objectId,
+                classId: $g->classId,
+                state: $this->resolvedGoogleObjectState(),
+                ticketHolderName: $this->ticketHolderName,
+                ticketNumber: $this->ticketNumber,
+                barcode: $this->primaryGoogleBarcode(),
+                hexBackgroundColor: $this->resolvedGoogleHex(),
+                validTimeInterval: $this->common->validTimeInterval,
+                linksModuleData: $this->common->linksModuleData,
+                appLinkData: $this->common->appLinkData,
+                groupingInfo: $this->resolvedGoogleGrouping(),
+            );
+
+            $googlePair = new GoogleWalletPair(GoogleVerticalEnum::EVENT_TICKET, $eventClass, $eventObject);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair);
     }
 }
