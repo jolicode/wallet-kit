@@ -93,6 +93,22 @@ When [Castor](https://github.com/jolicode/castor) is available, you can verify t
 
 Scripts live under [`tools/spec/`](tools/spec/) and are also invoked by CI (`spec-check` job).
 
+## Next steps
+
+The library today stops at **typed payloads and normalization**. Planned extensions include:
+
+- [ ] **Apple `.pkpass` packaging** — assemble the pass bundle (images, `pass.json`, manifest), handle **localized resources** (`*.lproj`, string tables), and optionally integrate **signing** so a complete `.pkpass` can be produced from the models you already build.
+- [ ] **Google Wallet API client** — HTTP integration to **create, update, and patch** classes and objects (REST), including the **service-account JWT** flow Google expects, so you can go from `BuiltWalletPass::google()` to live passes without wiring the client yourself.
+- [ ] **Push notifications & in-wallet updates** — **APNs** integration to trigger **Apple Wallet** pass refreshes (silent/empty push so PassKit pulls a new `pass.json` from your web service), and **Google Wallet** support for **API-driven updates** plus **user-visible messages / notification hooks** where the platform exposes them, so pass changes actually reach holders’ devices.
+
+Other directions that often sit next to “wallet” libraries (for later consideration):
+
+- **Apple PassKit Web Service** — register/update HTTP endpoints, authentication token handling, and glue between your backend and the **APNs** flow above.
+- **Issuance UX helpers** — stable patterns for **Add to Apple Wallet** / **Save to Google Pay** links, deep links, and optional **JWT “generic”** flows where platforms require them.
+- **Operational tooling** — fixtures for integration tests, optional **CLI or Castor tasks** that mirror production steps (e.g. dry-run Google calls, local `.pkpass` inspection).
+
+Contributions or design discussion for any of the above are welcome.
+
 ## License
 
 View the [LICENSE](LICENSE) file attached to this project.
