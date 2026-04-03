@@ -17,7 +17,7 @@ class GenericClassNormalizer implements NormalizerInterface, NormalizerAwareInte
     use NormalizerAwareTrait;
 
     /**
-     * @param GenericClass          $object
+     * @param GenericClass         $object
      * @param array<string, mixed> $context
      *
      * @return GenericClassType

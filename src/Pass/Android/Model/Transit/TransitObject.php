@@ -46,8 +46,8 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
 class TransitObject
 {
     /**
-     * @param list<TicketLeg>|null      $ticketLegs
-     * @param list<Message>|null        $messages
+     * @param list<TicketLeg>|null       $ticketLegs
+     * @param list<Message>|null         $messages
      * @param list<ImageModuleData>|null $imageModulesData
      * @param list<TextModuleData>|null  $textModulesData
      * @param list<string>|null          $linkedObjectIds

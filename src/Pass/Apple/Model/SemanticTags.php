@@ -107,17 +107,17 @@ use Jolicode\WalletKit\Pass\Apple\Model\SemanticTagType\WifiNetwork;
 class SemanticTags
 {
     /**
-     * @param Seat[]|null     $seats
-     * @param string[]|null   $performerNames
-     * @param string[]|null   $artistIDs
-     * @param string[]|null   $departureLocationSecurityPrograms
-     * @param string[]|null   $destinationLocationSecurityPrograms
-     * @param string[]|null   $passengerEligibleSecurityPrograms
-     * @param string[]|null   $passengerAirlineSSRs
-     * @param string[]|null   $passengerCapabilities
-     * @param string[]|null   $passengerInformationSSRs
-     * @param string[]|null   $passengerServiceSSRs
-     * @param string[]|null   $loungePlaceIDs
+     * @param Seat[]|null        $seats
+     * @param string[]|null      $performerNames
+     * @param string[]|null      $artistIDs
+     * @param string[]|null      $departureLocationSecurityPrograms
+     * @param string[]|null      $destinationLocationSecurityPrograms
+     * @param string[]|null      $passengerEligibleSecurityPrograms
+     * @param string[]|null      $passengerAirlineSSRs
+     * @param string[]|null      $passengerCapabilities
+     * @param string[]|null      $passengerInformationSSRs
+     * @param string[]|null      $passengerServiceSSRs
+     * @param string[]|null      $loungePlaceIDs
      * @param WifiNetwork[]|null $wifiAccess
      */
     public function __construct(

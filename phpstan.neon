@@ -1,0 +1,8 @@
+parameters:
+    level: 5
+    tmpDir: .castor/phpstan-tmp
+    paths:
+        - src
+        - tests
+    bootstrapFiles:
+        - vendor/autoload.php

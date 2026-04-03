@@ -53,12 +53,12 @@ namespace Jolicode\WalletKit\Pass\Apple\Model;
 class Pass
 {
     /**
-     * @param Barcode[]       $barcodes
-     * @param list<int>       $associatedStoreIdentifiers
-     * @param Location[]|null $locations
-     * @param Beacon[]|null   $beacons
-     * @param RelevantDate[]|null $relevantDates
-     * @param string[]|null   $preferredStyleSchemes
+     * @param Barcode[]                 $barcodes
+     * @param list<int>                 $associatedStoreIdentifiers
+     * @param Location[]|null           $locations
+     * @param Beacon[]|null             $beacons
+     * @param RelevantDate[]|null       $relevantDates
+     * @param string[]|null             $preferredStyleSchemes
      * @param array<string, mixed>|null $userInfo
      */
     public function __construct(
