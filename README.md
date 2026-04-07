@@ -1,7 +1,9 @@
 <h1 align="center">
-  <a href="https://github.com/jolicode/wallet-kit">Wallet Kit</a>
+  <a href="https://github.com/jolicode/wallet-kit"><img src="https://jolicode.com/media/original/oss/headers/wallet-kit.png" alt="wallet-kit"></a>
   <br />
-  <sub><em><h6>Typed PHP models and Symfony Serializer normalizers for Apple Wallet and Google Wallet payloads.</h6></em></sub>
+  WalletKit
+  <br />
+  <sub><em><h6>One fluent API to model Apple Wallet and Google Wallet payloads in typed PHP.</h6></em></sub>
 </h1>
 
 <div align="center">
