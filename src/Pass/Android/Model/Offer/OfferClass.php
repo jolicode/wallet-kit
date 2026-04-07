@@ -10,12 +10,16 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ImageModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\LinksModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\LocalizedString;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\MerchantLocation;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Message;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\MultipleDevicesAndHoldersAllowedStatusEnum;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\NotifyPreferenceEnum;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\Review;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\SecurityAnimation;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\TextModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Uri;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\ValueAddedModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ViewUnlockRequirementEnum;
 
 /**
@@ -33,6 +37,10 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\ViewUnlockRequirementEnum;
  * @phpstan-import-type TextModuleDataType from TextModuleData
  * @phpstan-import-type LinksModuleDataType from LinksModuleData
  * @phpstan-import-type AppLinkDataType from AppLinkData
+ * @phpstan-import-type MerchantLocationType from MerchantLocation
+ * @phpstan-import-type ValueAddedModuleDataType from ValueAddedModuleData
+ * @phpstan-import-type NotifyPreference from NotifyPreferenceEnum
+ * @phpstan-import-type ReviewType from Review
  *
  * @phpstan-type OfferClassType array{
  *     id: string,
@@ -68,15 +76,21 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\ViewUnlockRequirementEnum;
  *     linksModuleData?: LinksModuleDataType,
  *     homepageUri?: UriType,
  *     appLinkData?: AppLinkDataType,
+ *     merchantLocations?: list<MerchantLocationType>,
+ *     valueAddedModuleData?: list<ValueAddedModuleDataType>,
+ *     notifyPreference?: NotifyPreference,
+ *     review?: ReviewType,
  * }
  */
 class OfferClass
 {
     /**
-     * @param list<string>|null          $redemptionIssuers
-     * @param list<Message>|null         $messages
-     * @param list<ImageModuleData>|null $imageModulesData
-     * @param list<TextModuleData>|null  $textModulesData
+     * @param list<string>|null               $redemptionIssuers
+     * @param list<Message>|null              $messages
+     * @param list<ImageModuleData>|null      $imageModulesData
+     * @param list<TextModuleData>|null       $textModulesData
+     * @param list<MerchantLocation>|null     $merchantLocations
+     * @param list<ValueAddedModuleData>|null $valueAddedModuleData
      */
     public function __construct(
         public string $id,
@@ -112,6 +126,10 @@ class OfferClass
         public ?LinksModuleData $linksModuleData = null,
         public ?Uri $homepageUri = null,
         public ?AppLinkData $appLinkData = null,
+        public ?array $merchantLocations = null,
+        public ?array $valueAddedModuleData = null,
+        public ?NotifyPreferenceEnum $notifyPreference = null,
+        public ?Review $review = null,
     ) {
     }
 }

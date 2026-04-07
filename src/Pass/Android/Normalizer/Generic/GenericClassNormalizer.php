@@ -84,6 +84,26 @@ class GenericClassNormalizer implements NormalizerInterface, NormalizerAwareInte
             $data['appLinkData'] = $this->normalizer->normalize($object->appLinkData, $format, $context);
         }
 
+        if (null !== $object->merchantLocations) {
+            $merchantLocations = [];
+            foreach ($object->merchantLocations as $merchantLocation) {
+                $merchantLocations[] = $this->normalizer->normalize($merchantLocation, $format, $context);
+            }
+            $data['merchantLocations'] = $merchantLocations;
+        }
+
+        if (null !== $object->valueAddedModuleData) {
+            $valueAddedModuleData = [];
+            foreach ($object->valueAddedModuleData as $valueAddedModuleDatum) {
+                $valueAddedModuleData[] = $this->normalizer->normalize($valueAddedModuleDatum, $format, $context);
+            }
+            $data['valueAddedModuleData'] = $valueAddedModuleData;
+        }
+
+        if (null !== $object->notifyPreference) {
+            $data['notifyPreference'] = $object->notifyPreference->value;
+        }
+
         return $data;
     }
 

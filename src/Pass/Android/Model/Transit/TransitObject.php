@@ -11,12 +11,16 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ImageModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\LinksModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\LocalizedString;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\MerchantLocation;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Message;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\NotifyPreferenceEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\PassConstraints;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\RotatingBarcode;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\SaveRestrictions;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\TextModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\ValueAddedModuleData;
 
 /**
  * @phpstan-import-type State from StateEnum
@@ -40,17 +44,23 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
  * @phpstan-import-type ImageType from Image
  * @phpstan-import-type GroupingInfoType from GroupingInfo
  * @phpstan-import-type PassConstraintsType from PassConstraints
+ * @phpstan-import-type MerchantLocationType from MerchantLocation
+ * @phpstan-import-type ValueAddedModuleDataType from ValueAddedModuleData
+ * @phpstan-import-type SaveRestrictionsType from SaveRestrictions
+ * @phpstan-import-type NotifyPreference from NotifyPreferenceEnum
  *
- * @phpstan-type TransitObjectType array{id: string, classId: string, state: State, tripType: TripType, ticketNumber?: string, passengerType?: PassengerType, passengerNames?: string, tripId?: string, ticketStatus?: TicketStatus, customTicketStatus?: LocalizedStringType, concessionCategory?: ConcessionCategory, customConcessionCategory?: LocalizedStringType, ticketRestrictions?: TicketRestrictionsType, purchaseDetails?: PurchaseDetailsType, ticketLeg?: TicketLegType, ticketLegs?: list<TicketLegType>, hexBackgroundColor?: string, barcode?: GoogleBarcodeType, messages?: list<GoogleMessageType>, validTimeInterval?: TimeIntervalType, smartTapRedemptionValue?: string, disableExpirationNotification?: bool, imageModulesData?: list<ImageModuleDataType>, textModulesData?: list<TextModuleDataType>, linksModuleData?: LinksModuleDataType, appLinkData?: AppLinkDataType, activationStatus?: ActivationStatusType, rotatingBarcode?: RotatingBarcodeType, heroImage?: ImageType, groupingInfo?: GroupingInfoType, passConstraints?: PassConstraintsType, linkedObjectIds?: list<string>}
+ * @phpstan-type TransitObjectType array{id: string, classId: string, state: State, tripType: TripType, ticketNumber?: string, passengerType?: PassengerType, passengerNames?: string, tripId?: string, ticketStatus?: TicketStatus, customTicketStatus?: LocalizedStringType, concessionCategory?: ConcessionCategory, customConcessionCategory?: LocalizedStringType, ticketRestrictions?: TicketRestrictionsType, purchaseDetails?: PurchaseDetailsType, ticketLeg?: TicketLegType, ticketLegs?: list<TicketLegType>, hexBackgroundColor?: string, barcode?: GoogleBarcodeType, messages?: list<GoogleMessageType>, validTimeInterval?: TimeIntervalType, smartTapRedemptionValue?: string, disableExpirationNotification?: bool, imageModulesData?: list<ImageModuleDataType>, textModulesData?: list<TextModuleDataType>, linksModuleData?: LinksModuleDataType, appLinkData?: AppLinkDataType, activationStatus?: ActivationStatusType, rotatingBarcode?: RotatingBarcodeType, heroImage?: ImageType, groupingInfo?: GroupingInfoType, passConstraints?: PassConstraintsType, linkedObjectIds?: list<string>, merchantLocations?: list<MerchantLocationType>, valueAddedModuleData?: list<ValueAddedModuleDataType>, saveRestrictions?: SaveRestrictionsType, notifyPreference?: NotifyPreference}
  */
 class TransitObject
 {
     /**
-     * @param list<TicketLeg>|null       $ticketLegs
-     * @param list<Message>|null         $messages
-     * @param list<ImageModuleData>|null $imageModulesData
-     * @param list<TextModuleData>|null  $textModulesData
-     * @param list<string>|null          $linkedObjectIds
+     * @param list<TicketLeg>|null            $ticketLegs
+     * @param list<Message>|null              $messages
+     * @param list<ImageModuleData>|null      $imageModulesData
+     * @param list<TextModuleData>|null       $textModulesData
+     * @param list<string>|null               $linkedObjectIds
+     * @param list<MerchantLocation>|null     $merchantLocations
+     * @param list<ValueAddedModuleData>|null $valueAddedModuleData
      */
     public function __construct(
         public string $id,
@@ -85,6 +95,10 @@ class TransitObject
         public ?GroupingInfo $groupingInfo = null,
         public ?PassConstraints $passConstraints = null,
         public ?array $linkedObjectIds = null,
+        public ?array $merchantLocations = null,
+        public ?array $valueAddedModuleData = null,
+        public ?SaveRestrictions $saveRestrictions = null,
+        public ?NotifyPreferenceEnum $notifyPreference = null,
     ) {
     }
 }

@@ -11,13 +11,17 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ImageModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\LinksModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\LocalizedString;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\MerchantLocation;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Message;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Money;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\NotifyPreferenceEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\PassConstraints;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\RotatingBarcode;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\SaveRestrictions;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\TextModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\ValueAddedModuleData;
 
 /**
  * @phpstan-import-type State from StateEnum
@@ -36,6 +40,10 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
  * @phpstan-import-type RotatingBarcodeType from RotatingBarcode
  * @phpstan-import-type ImageType from Image
  * @phpstan-import-type PassConstraintsType from PassConstraints
+ * @phpstan-import-type MerchantLocationType from MerchantLocation
+ * @phpstan-import-type ValueAddedModuleDataType from ValueAddedModuleData
+ * @phpstan-import-type SaveRestrictionsType from SaveRestrictions
+ * @phpstan-import-type NotifyPreference from NotifyPreferenceEnum
  *
  * @phpstan-type EventTicketObjectType array{
  *     id: string,
@@ -63,16 +71,22 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
  *     heroImage?: ImageType,
  *     passConstraints?: PassConstraintsType,
  *     linkedObjectIds?: list<string>,
+ *     merchantLocations?: list<MerchantLocationType>,
+ *     valueAddedModuleData?: list<ValueAddedModuleDataType>,
+ *     saveRestrictions?: SaveRestrictionsType,
+ *     notifyPreference?: NotifyPreference,
  * }
  */
 class EventTicketObject
 {
     /**
-     * @param list<string>|null          $linkedOfferIds
-     * @param list<Message>|null         $messages
-     * @param list<ImageModuleData>|null $imageModulesData
-     * @param list<TextModuleData>|null  $textModulesData
-     * @param list<string>|null          $linkedObjectIds
+     * @param list<string>|null               $linkedOfferIds
+     * @param list<Message>|null              $messages
+     * @param list<ImageModuleData>|null      $imageModulesData
+     * @param list<TextModuleData>|null       $textModulesData
+     * @param list<string>|null               $linkedObjectIds
+     * @param list<MerchantLocation>|null     $merchantLocations
+     * @param list<ValueAddedModuleData>|null $valueAddedModuleData
      */
     public function __construct(
         public string $id,
@@ -100,6 +114,10 @@ class EventTicketObject
         public ?Image $heroImage = null,
         public ?PassConstraints $passConstraints = null,
         public ?array $linkedObjectIds = null,
+        public ?array $merchantLocations = null,
+        public ?array $valueAddedModuleData = null,
+        public ?SaveRestrictions $saveRestrictions = null,
+        public ?NotifyPreferenceEnum $notifyPreference = null,
     ) {
     }
 }

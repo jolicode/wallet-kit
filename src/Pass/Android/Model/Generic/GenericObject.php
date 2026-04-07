@@ -11,12 +11,16 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ImageModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\LinksModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\LocalizedString;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\MerchantLocation;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Message;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\NotifyPreferenceEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\PassConstraints;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\RotatingBarcode;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\SaveRestrictions;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\TextModuleData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\ValueAddedModuleData;
 
 /**
  * @phpstan-import-type GenericType from GenericTypeEnum
@@ -34,16 +38,22 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
  * @phpstan-import-type State from StateEnum
  * @phpstan-import-type GoogleMessageType from Message
  * @phpstan-import-type PassConstraintsType from PassConstraints
+ * @phpstan-import-type MerchantLocationType from MerchantLocation
+ * @phpstan-import-type ValueAddedModuleDataType from ValueAddedModuleData
+ * @phpstan-import-type SaveRestrictionsType from SaveRestrictions
+ * @phpstan-import-type NotifyPreference from NotifyPreferenceEnum
  *
- * @phpstan-type GenericObjectType array{id: string, classId: string, genericType?: GenericType, cardTitle?: LocalizedStringType, subheader?: LocalizedStringType, header?: LocalizedStringType, logo?: ImageType, wideLogo?: ImageType, hexBackgroundColor?: string, notifications?: NotificationsType, barcode?: GoogleBarcodeType, heroImage?: ImageType, validTimeInterval?: TimeIntervalType, imageModulesData?: list<ImageModuleDataType>, textModulesData?: list<TextModuleDataType>, linksModuleData?: LinksModuleDataType, appLinkData?: AppLinkDataType, groupingInfo?: GroupingInfoType, smartTapRedemptionValue?: string, rotatingBarcode?: RotatingBarcodeType, state?: State, messages?: list<GoogleMessageType>, passConstraints?: PassConstraintsType, linkedObjectIds?: list<string>}
+ * @phpstan-type GenericObjectType array{id: string, classId: string, genericType?: GenericType, cardTitle?: LocalizedStringType, subheader?: LocalizedStringType, header?: LocalizedStringType, logo?: ImageType, wideLogo?: ImageType, hexBackgroundColor?: string, notifications?: NotificationsType, barcode?: GoogleBarcodeType, heroImage?: ImageType, validTimeInterval?: TimeIntervalType, imageModulesData?: list<ImageModuleDataType>, textModulesData?: list<TextModuleDataType>, linksModuleData?: LinksModuleDataType, appLinkData?: AppLinkDataType, groupingInfo?: GroupingInfoType, smartTapRedemptionValue?: string, rotatingBarcode?: RotatingBarcodeType, state?: State, messages?: list<GoogleMessageType>, passConstraints?: PassConstraintsType, linkedObjectIds?: list<string>, merchantLocations?: list<MerchantLocationType>, valueAddedModuleData?: list<ValueAddedModuleDataType>, saveRestrictions?: SaveRestrictionsType, notifyPreference?: NotifyPreference}
  */
 class GenericObject
 {
     /**
-     * @param list<ImageModuleData>|null $imageModulesData
-     * @param list<TextModuleData>|null  $textModulesData
-     * @param list<Message>|null         $messages
-     * @param list<string>|null          $linkedObjectIds
+     * @param list<ImageModuleData>|null      $imageModulesData
+     * @param list<TextModuleData>|null       $textModulesData
+     * @param list<Message>|null              $messages
+     * @param list<string>|null               $linkedObjectIds
+     * @param list<MerchantLocation>|null     $merchantLocations
+     * @param list<ValueAddedModuleData>|null $valueAddedModuleData
      */
     public function __construct(
         public string $id,
@@ -70,6 +80,10 @@ class GenericObject
         public ?array $messages = null,
         public ?PassConstraints $passConstraints = null,
         public ?array $linkedObjectIds = null,
+        public ?array $merchantLocations = null,
+        public ?array $valueAddedModuleData = null,
+        public ?SaveRestrictions $saveRestrictions = null,
+        public ?NotifyPreferenceEnum $notifyPreference = null,
     ) {
     }
 }

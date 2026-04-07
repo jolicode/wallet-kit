@@ -141,6 +141,30 @@ class FlightClassNormalizer implements NormalizerInterface, NormalizerAwareInter
             $data['languageOverride'] = $object->languageOverride;
         }
 
+        if (null !== $object->merchantLocations) {
+            $merchantLocations = [];
+            foreach ($object->merchantLocations as $merchantLocation) {
+                $merchantLocations[] = $this->normalizer->normalize($merchantLocation, $format, $context);
+            }
+            $data['merchantLocations'] = $merchantLocations;
+        }
+
+        if (null !== $object->valueAddedModuleData) {
+            $valueAddedModuleData = [];
+            foreach ($object->valueAddedModuleData as $valueAddedModuleDatum) {
+                $valueAddedModuleData[] = $this->normalizer->normalize($valueAddedModuleDatum, $format, $context);
+            }
+            $data['valueAddedModuleData'] = $valueAddedModuleData;
+        }
+
+        if (null !== $object->notifyPreference) {
+            $data['notifyPreference'] = $object->notifyPreference->value;
+        }
+
+        if (null !== $object->review) {
+            $data['review'] = $this->normalizer->normalize($object->review, $format, $context);
+        }
+
         return $data;
     }
 

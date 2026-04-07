@@ -46,6 +46,14 @@ class RotatingBarcodeNormalizer implements NormalizerInterface, NormalizerAwareI
             $data['showCodeText'] = $this->normalizer->normalize($object->showCodeText, $format, $context);
         }
 
+        if (null !== $object->totpDetails) {
+            $data['totpDetails'] = $this->normalizer->normalize($object->totpDetails, $format, $context);
+        }
+
+        if (null !== $object->values) {
+            $data['values'] = $this->normalizer->normalize($object->values, $format, $context);
+        }
+
         return $data;
     }
 

@@ -4,38 +4,38 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Normalizer\Shared;
 
-use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\MerchantLocation;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
- * @phpstan-import-type AppLinkDataType from AppLinkData
+ * @phpstan-import-type MerchantLocationType from MerchantLocation
  */
-class AppLinkDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
+class MerchantLocationNormalizer implements NormalizerInterface, NormalizerAwareInterface
 {
     use NormalizerAwareTrait;
 
     /**
-     * @param AppLinkData          $object
+     * @param MerchantLocation     $object
      * @param array<string, mixed> $context
      *
-     * @return AppLinkDataType
+     * @return MerchantLocationType
      */
     public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
         $data = [];
 
-        if (null !== $object->androidAppLinkInfo) {
-            $data['androidAppLinkInfo'] = $this->normalizer->normalize($object->androidAppLinkInfo, $format, $context);
+        if (null !== $object->merchantName) {
+            $data['merchantName'] = $this->normalizer->normalize($object->merchantName, $format, $context);
         }
 
-        if (null !== $object->iosAppLinkInfo) {
-            $data['iosAppLinkInfo'] = $this->normalizer->normalize($object->iosAppLinkInfo, $format, $context);
+        if (null !== $object->latitude) {
+            $data['latitude'] = $object->latitude;
         }
 
-        if (null !== $object->webAppLinkInfo) {
-            $data['webAppLinkInfo'] = $this->normalizer->normalize($object->webAppLinkInfo, $format, $context);
+        if (null !== $object->longitude) {
+            $data['longitude'] = $object->longitude;
         }
 
         return $data;
@@ -46,12 +46,12 @@ class AppLinkDataNormalizer implements NormalizerInterface, NormalizerAwareInter
      */
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
-        return $data instanceof AppLinkData;
+        return $data instanceof MerchantLocation;
     }
 
     /** @return array<class-string, bool> */
     public function getSupportedTypes(?string $format): array
     {
-        return [AppLinkData::class => true];
+        return [MerchantLocation::class => true];
     }
 }
