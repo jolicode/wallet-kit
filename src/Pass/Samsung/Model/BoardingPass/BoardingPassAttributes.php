@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Samsung\Model\BoardingPass;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungBarcode;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungImage;
 
@@ -48,7 +49,7 @@ class BoardingPassAttributes
     public function __construct(
         public string $title,
         public string $providerName,
-        public string $bgColor,
+        public Color $bgColor,
         public string $appLinkLogo,
         public string $appLinkName,
         public string $appLinkData,

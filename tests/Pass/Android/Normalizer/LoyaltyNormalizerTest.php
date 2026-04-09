@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Pass\Android\Normalizer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Loyalty\LoyaltyClass;
 use Jolicode\WalletKit\Pass\Android\Model\Loyalty\LoyaltyObject;
 use Jolicode\WalletKit\Pass\Android\Model\Loyalty\LoyaltyPoints;
@@ -183,7 +184,7 @@ final class LoyaltyNormalizerTest extends TestCase
             localizedProgramName: new LocalizedString(new TranslatedString('en', 'Coffee Rewards')),
             programLogo: $image,
             wideProgramLogo: new Image(new ImageUri('https://example.com/wide-logo.png')),
-            hexBackgroundColor: '#4A2F1B',
+            hexBackgroundColor: Color::fromHex('#4A2F1B'),
             localizedIssuerName: new LocalizedString(new TranslatedString('en', 'Coffee Rewards Inc.')),
             countryCode: 'US',
             heroImage: new Image(new ImageUri('https://example.com/hero.png'), new LocalizedString(new TranslatedString('en', 'Hero'))),
@@ -223,7 +224,7 @@ final class LoyaltyNormalizerTest extends TestCase
                 alternateText: 'LOYALTY123',
                 renderEncoding: BarcodeRenderEncodingEnum::UTF_8,
             ),
-            hexBackgroundColor: '#4A2F1B',
+            hexBackgroundColor: Color::fromHex('#4A2F1B'),
             messages: $messages,
             validTimeInterval: new TimeInterval(
                 new GoogleDateTime('2025-01-01T00:00:00Z'),
@@ -252,7 +253,7 @@ final class LoyaltyNormalizerTest extends TestCase
         self::assertSame('Coffee Rewards Inc.', $classData['issuerName']);
         self::assertSame('APPROVED', $classData['reviewStatus']);
         self::assertSame('Coffee Rewards', $classData['programName']);
-        self::assertSame('#4A2F1B', $classData['hexBackgroundColor']);
+        self::assertSame('#4a2f1b', $classData['hexBackgroundColor']);
         self::assertSame('US', $classData['countryCode']);
         self::assertTrue($classData['enableSmartTap']);
         self::assertSame(['issuer-1'], $classData['redemptionIssuers']);
@@ -299,7 +300,7 @@ final class LoyaltyNormalizerTest extends TestCase
         self::assertSame('ACTIVE', $objectData['state']);
         self::assertSame('Jane Doe', $objectData['accountName']);
         self::assertSame('ACCT-12345', $objectData['accountId']);
-        self::assertSame('#4A2F1B', $objectData['hexBackgroundColor']);
+        self::assertSame('#4a2f1b', $objectData['hexBackgroundColor']);
         self::assertSame('loyalty-redeem-123', $objectData['smartTapRedemptionValue']);
         self::assertFalse($objectData['disableExpirationNotification']);
         self::assertSame(['offer-1', 'offer-2'], $objectData['linkedOfferIds']);

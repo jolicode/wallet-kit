@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Model\GiftCard;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\CallbackOptions;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
@@ -103,7 +104,7 @@ class GiftCardClass
         public ?LocalizedString $localizedEventNumberLabel = null,
         public ?string $cardNumberLabel = null,
         public ?LocalizedString $localizedCardNumberLabel = null,
-        public ?string $hexBackgroundColor = null,
+        public ?Color $hexBackgroundColor = null,
         public ?LocalizedString $localizedIssuerName = null,
         public ?string $countryCode = null,
         public ?Image $heroImage = null,

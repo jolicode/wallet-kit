@@ -54,11 +54,11 @@ class CouponAttributesNormalizer implements NormalizerInterface, NormalizerAware
         }
 
         if (null !== $object->bgColor) {
-            $data['bgColor'] = $object->bgColor;
+            $data['bgColor'] = $object->bgColor->hex();
         }
 
         if (null !== $object->fontColor) {
-            $data['fontColor'] = $object->fontColor;
+            $data['fontColor'] = $object->fontColor->hex();
         }
 
         if (null !== $object->balance) {

@@ -9,6 +9,7 @@ use Jolicode\WalletKit\Builder\BuiltWalletPass;
 use Jolicode\WalletKit\Builder\GoogleVerticalEnum;
 use Jolicode\WalletKit\Builder\GoogleWalletPair;
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Transit\TransitClass;
 use Jolicode\WalletKit\Pass\Android\Model\Transit\TransitObject;
 use Jolicode\WalletKit\Pass\Android\Model\Transit\TransitTypeEnum as GoogleTransitTypeEnum;
@@ -64,7 +65,7 @@ final class TransitWalletBuilder extends AbstractWalletBuilder
                 issuerName: $this->context->googleIssuerName(),
                 reviewStatus: $this->resolvedGoogleReviewStatus(),
                 transitType: $this->googleTransitType,
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
             );
@@ -76,7 +77,7 @@ final class TransitWalletBuilder extends AbstractWalletBuilder
                 tripType: $this->tripType,
                 ticketNumber: $this->ticketNumber,
                 barcode: $this->primaryGoogleBarcode(),
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 validTimeInterval: $this->common->validTimeInterval,
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
@@ -93,7 +94,7 @@ final class TransitWalletBuilder extends AbstractWalletBuilder
             $attributes = new BoardingPassAttributes(
                 title: 'Transit',
                 providerName: $this->context->hasApple() ? $this->context->apple->organizationName : ($this->context->hasGoogle() ? $this->context->googleIssuerName() : ''),
-                bgColor: $this->resolvedSamsungHexColor() ?? '#000000',
+                bgColor: $this->resolvedBackgroundColor() ?? Color::fromHex('#000000'),
                 appLinkLogo: $s->appLinkLogo ?? '',
                 appLinkName: $s->appLinkName ?? '',
                 appLinkData: $s->appLinkData ?? '',

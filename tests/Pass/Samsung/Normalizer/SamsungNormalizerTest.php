@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Pass\Samsung\Normalizer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Samsung\Model\BoardingPass\BoardingPassAttributes;
 use Jolicode\WalletKit\Pass\Samsung\Model\Card;
 use Jolicode\WalletKit\Pass\Samsung\Model\CardData;
@@ -62,7 +63,7 @@ final class SamsungNormalizerTest extends TestCase
         $attributes = new BoardingPassAttributes(
             title: 'Flight ZZ412',
             providerName: 'Example Airlines',
-            bgColor: '#1E3C5A',
+            bgColor: Color::fromHex('#1E3C5A'),
             appLinkLogo: 'https://example.com/logo.png',
             appLinkName: 'Example Airlines',
             appLinkData: 'https://example.com',
@@ -97,7 +98,7 @@ final class SamsungNormalizerTest extends TestCase
         $attrs = $cardData['attributes'];
         self::assertSame('Flight ZZ412', $attrs['title']);
         self::assertSame('Example Airlines', $attrs['providerName']);
-        self::assertSame('#1E3C5A', $attrs['bgColor']);
+        self::assertSame('#1e3c5a', $attrs['bgColor']);
         self::assertSame('Jordan Smith', $attrs['user']);
         self::assertSame('ZZ412', $attrs['vehicleNumber']);
         self::assertSame('14A', $attrs['seatNumber']);
@@ -126,7 +127,7 @@ final class SamsungNormalizerTest extends TestCase
             appLinkName: 'Festival App',
             appLinkData: 'https://example.com',
             holderName: 'Sam Rivera',
-            bgColor: '#FF6B35',
+            bgColor: Color::fromHex('#FF6B35'),
             locations: [new Location(48.8566, 2.3522, '123 Rue Example', 'Venue')],
             preventCapture: false,
             noNetworkSupport: true,
@@ -146,7 +147,7 @@ final class SamsungNormalizerTest extends TestCase
         $attrs = $data['card']['data'][0]['attributes'];
         self::assertSame('Indie Fest 2026', $attrs['title']);
         self::assertSame('Sam Rivera', $attrs['holderName']);
-        self::assertSame('#FF6B35', $attrs['bgColor']);
+        self::assertSame('#ff6b35', $attrs['bgColor']);
         self::assertSame('N', $attrs['preventCaptureYn']);
         self::assertSame('Y', $attrs['noNetworkSupportYn']);
         self::assertCount(1, $attrs['locations']);

@@ -70,7 +70,7 @@ class FlightClassNormalizer implements NormalizerInterface, NormalizerAwareInter
         }
 
         if (null !== $object->hexBackgroundColor) {
-            $data['hexBackgroundColor'] = $object->hexBackgroundColor;
+            $data['hexBackgroundColor'] = $object->hexBackgroundColor->hex();
         }
 
         if (null !== $object->countryCode) {

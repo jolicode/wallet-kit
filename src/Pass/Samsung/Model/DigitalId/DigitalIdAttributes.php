@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Samsung\Model\DigitalId;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungBarcode;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungImage;
 
@@ -67,11 +68,11 @@ class DigitalIdAttributes
         public ?string $extraInfo = null,
         public ?string $noticeDesc = null,
         public ?SamsungBarcode $barcode = null,
-        public ?string $bgColor = null,
-        public ?string $fontColor = null,
+        public ?Color $bgColor = null,
+        public ?Color $fontColor = null,
         public ?string $bgImage = null,
         public ?string $coverImage = null,
-        public ?string $blinkColor = null,
+        public ?Color $blinkColor = null,
         public ?string $appLinkLogo = null,
         public ?string $appLinkName = null,
         public ?string $appLinkData = null,

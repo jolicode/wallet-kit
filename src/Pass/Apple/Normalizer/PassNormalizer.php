@@ -64,15 +64,15 @@ class PassNormalizer implements NormalizerInterface, NormalizerAwareInterface
         }
 
         if (null !== $object->backgroundColor) {
-            $data['backgroundColor'] = $object->backgroundColor;
+            $data['backgroundColor'] = $object->backgroundColor->rgb();
         }
 
         if (null !== $object->foregroundColor) {
-            $data['foregroundColor'] = $object->foregroundColor;
+            $data['foregroundColor'] = $object->foregroundColor->rgb();
         }
 
         if (null !== $object->labelColor) {
-            $data['labelColor'] = $object->labelColor;
+            $data['labelColor'] = $object->labelColor->rgb();
         }
 
         if (null !== $object->logoText) {

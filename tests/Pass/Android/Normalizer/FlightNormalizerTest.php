@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Pass\Android\Normalizer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\AirportInfo;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\BoardingAndSeatingInfo;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\BoardingDoorEnum;
@@ -190,7 +191,7 @@ final class FlightNormalizerTest extends TestCase
             localBoardingDateTime: '2025-08-15T09:30',
             boardingPolicy: BoardingPolicyEnum::ZONE_BASED,
             seatClassPolicy: SeatClassPolicyEnum::CABIN_BASED,
-            hexBackgroundColor: '#003366',
+            hexBackgroundColor: Color::fromHex('#003366'),
             countryCode: 'FR',
             heroImage: new Image(new ImageUri('https://example.com/flight-hero.png')),
             messages: [new Message('Flight Update', 'Gate changed to K32', 'msg-1', MessageTypeEnum::TEXT_AND_NOTIFY)],
@@ -221,7 +222,7 @@ final class FlightNormalizerTest extends TestCase
             reservationInfo: $reservationInfo,
             boardingAndSeatingInfo: $boardingInfo,
             barcode: new Barcode(BarcodeTypeEnum::QR_CODE, 'M1DUPONT/JEAN  ABC123 CDGJFK AF 0123', null, BarcodeRenderEncodingEnum::UTF_8),
-            hexBackgroundColor: '#003366',
+            hexBackgroundColor: Color::fromHex('#003366'),
             heroImage: new Image(new ImageUri('https://example.com/flight-hero.png')),
             groupingInfo: new GroupingInfo('flight-group', 1),
         );

@@ -44,7 +44,7 @@ class EventTicketClassNormalizer implements NormalizerInterface, NormalizerAware
         }
 
         if (null !== $object->hexBackgroundColor) {
-            $data['hexBackgroundColor'] = $object->hexBackgroundColor;
+            $data['hexBackgroundColor'] = $object->hexBackgroundColor->hex();
         }
 
         if (null !== $object->countryCode) {

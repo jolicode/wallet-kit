@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Model\Generic;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Barcode;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\GroupingInfo;
@@ -64,7 +65,7 @@ class GenericObject
         public ?LocalizedString $header = null,
         public ?Image $logo = null,
         public ?Image $wideLogo = null,
-        public ?string $hexBackgroundColor = null,
+        public ?Color $hexBackgroundColor = null,
         public ?Notifications $notifications = null,
         public ?Barcode $barcode = null,
         public ?Image $heroImage = null,
