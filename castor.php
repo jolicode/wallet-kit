@@ -79,3 +79,15 @@ function spec_baseline_google(): void
 {
     run([spec_tools_php(), __DIR__ . '/tools/spec/google-wallet-spec.php', 'baseline']);
 }
+
+#[AsTask('check:samsung', namespace: 'spec', description: 'Compare Samsung Wallet phpstan keyset to tools/spec/samsung-wallet-keyset.json')]
+function spec_check_samsung(): void
+{
+    run([spec_tools_php(), __DIR__ . '/tools/spec/samsung-wallet-keyset.php', 'check']);
+}
+
+#[AsTask('baseline:samsung', namespace: 'spec', description: 'Regenerate tools/spec/samsung-wallet-keyset.json from Samsung Model phpstan types')]
+function spec_baseline_samsung(): void
+{
+    run([spec_tools_php(), __DIR__ . '/tools/spec/samsung-wallet-keyset.php', 'baseline']);
+}

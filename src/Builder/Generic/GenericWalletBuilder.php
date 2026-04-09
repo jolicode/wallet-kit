@@ -15,6 +15,9 @@ use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericObject;
 use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericTypeEnum;
 use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Generic\GenericAttributes;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardSubTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardTypeEnum;
 
 final class GenericWalletBuilder extends AbstractWalletBuilder
 {
@@ -91,6 +94,24 @@ final class GenericWalletBuilder extends AbstractWalletBuilder
             $googlePair = new GoogleWalletPair(GoogleVerticalEnum::GENERIC, $googleClass, $googleObject);
         }
 
-        return new BuiltWalletPass($applePass, $googlePair);
+        $samsungCard = null;
+        if ($this->context->hasSamsung()) {
+            $s = $this->context->samsung;
+            $attributes = new GenericAttributes(
+                title: $this->googleCardTitle ?? 'Card',
+                providerName: $this->context->hasApple() ? $this->context->apple->organizationName : ($this->googleCardTitle ?? 'Card'),
+                startDate: (int) (microtime(true) * 1000),
+                noticeDesc: $this->context->hasApple() ? $this->context->apple->description : '',
+                appLinkLogo: $s->appLinkLogo ?? '',
+                appLinkName: $s->appLinkName ?? '',
+                appLinkData: $s->appLinkData ?? '',
+                bgColor: $this->resolvedSamsungHexColor(),
+                serial1: $this->primarySamsungBarcode(),
+                groupingId: $this->common->groupingIdentifier,
+            );
+            $samsungCard = $this->createSamsungCard(CardTypeEnum::GENERIC, CardSubTypeEnum::OTHERS, $attributes);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair, $samsungCard);
     }
 }

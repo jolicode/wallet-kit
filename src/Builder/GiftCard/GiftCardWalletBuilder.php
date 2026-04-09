@@ -14,6 +14,9 @@ use Jolicode\WalletKit\Pass\Android\Model\GiftCard\GiftCardObject;
 use Jolicode\WalletKit\Pass\Apple\Model\Field;
 use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\GiftCard\GiftCardAttributes;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardSubTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardTypeEnum;
 
 /**
  * Google Wallet gift cards map to Apple {@see PassTypeEnum::STORE_CARD} payloads; Apple has no dedicated gift-card pass type.
@@ -84,6 +87,22 @@ final class GiftCardWalletBuilder extends AbstractWalletBuilder
             $googlePair = new GoogleWalletPair(GoogleVerticalEnum::GIFT_CARD, $giftClass, $giftObject);
         }
 
-        return new BuiltWalletPass($applePass, $googlePair);
+        $samsungCard = null;
+        if ($this->context->hasSamsung()) {
+            $s = $this->context->samsung;
+            $attributes = new GiftCardAttributes(
+                title: 'Gift Card',
+                providerName: $this->context->hasApple() ? $this->context->apple->organizationName : ($this->context->hasGoogle() ? $this->context->googleIssuerName() : ''),
+                appLinkLogo: $s->appLinkLogo ?? '',
+                appLinkName: $s->appLinkName ?? '',
+                appLinkData: $s->appLinkData ?? '',
+                barcode: $this->primarySamsungBarcode(),
+                bgColor: $this->resolvedSamsungHexColor(),
+                amount: $this->cardNumber,
+            );
+            $samsungCard = $this->createSamsungCard(CardTypeEnum::GIFT_CARD, CardSubTypeEnum::OTHERS, $attributes);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair, $samsungCard);
     }
 }

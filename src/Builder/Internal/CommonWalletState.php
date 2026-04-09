@@ -12,6 +12,7 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
 use Jolicode\WalletKit\Pass\Apple\Model\Barcode;
 use Jolicode\WalletKit\Pass\Apple\Model\Pass;
+use Jolicode\WalletKit\Pass\Samsung\Model\Card;
 
 final class CommonWalletState
 {
@@ -57,4 +58,7 @@ final class CommonWalletState
 
     /** @var callable(Pass): void|null */
     public $applePassMutator;
+
+    /** @var callable(Card): void|null */
+    public $samsungCardMutator;
 }

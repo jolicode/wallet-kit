@@ -74,6 +74,20 @@ use Jolicode\WalletKit\Pass\Apple\Normalizer\SemanticTagType\PersonNameComponent
 use Jolicode\WalletKit\Pass\Apple\Normalizer\SemanticTagType\SeatNormalizer;
 use Jolicode\WalletKit\Pass\Apple\Normalizer\SemanticTagType\SemanticLocationNormalizer;
 use Jolicode\WalletKit\Pass\Apple\Normalizer\SemanticTagType\WifiNetworkNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\BoardingPass\BoardingPassAttributesNormalizer as SamsungBoardingPassAttributesNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\CardDataNormalizer as SamsungCardDataNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\CardNormalizer as SamsungCardNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\Coupon\CouponAttributesNormalizer as SamsungCouponAttributesNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\DigitalId\DigitalIdAttributesNormalizer as SamsungDigitalIdAttributesNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\EventTicket\EventTicketAttributesNormalizer as SamsungEventTicketAttributesNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\Generic\GenericAttributesNormalizer as SamsungGenericAttributesNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\GiftCard\GiftCardAttributesNormalizer as SamsungGiftCardAttributesNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\LocalizationNormalizer as SamsungLocalizationNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\Loyalty\LoyaltyAttributesNormalizer as SamsungLoyaltyAttributesNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\PayAsYouGo\PayAsYouGoAttributesNormalizer as SamsungPayAsYouGoAttributesNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\Shared\LocationNormalizer as SamsungLocationNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\Shared\SamsungBarcodeNormalizer;
+use Jolicode\WalletKit\Pass\Samsung\Normalizer\Shared\SamsungImageNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
 final class BuilderTestSerializerFactory
@@ -151,6 +165,20 @@ final class BuilderTestSerializerFactory
             new ActivationStatusNormalizer(),
             new TransitClassNormalizer(),
             new TransitObjectNormalizer(),
+            new SamsungImageNormalizer(),
+            new SamsungBarcodeNormalizer(),
+            new SamsungLocationNormalizer(),
+            new SamsungBoardingPassAttributesNormalizer(),
+            new SamsungEventTicketAttributesNormalizer(),
+            new SamsungCouponAttributesNormalizer(),
+            new SamsungGiftCardAttributesNormalizer(),
+            new SamsungLoyaltyAttributesNormalizer(),
+            new SamsungGenericAttributesNormalizer(),
+            new SamsungDigitalIdAttributesNormalizer(),
+            new SamsungPayAsYouGoAttributesNormalizer(),
+            new SamsungLocalizationNormalizer(),
+            new SamsungCardDataNormalizer(),
+            new SamsungCardNormalizer(),
         ]);
     }
 }

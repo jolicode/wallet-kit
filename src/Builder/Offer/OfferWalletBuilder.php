@@ -15,6 +15,9 @@ use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
 use Jolicode\WalletKit\Pass\Apple\Model\Field;
 use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Coupon\CouponAttributes;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardSubTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardTypeEnum;
 
 final class OfferWalletBuilder extends AbstractWalletBuilder
 {
@@ -71,6 +74,24 @@ final class OfferWalletBuilder extends AbstractWalletBuilder
             $googlePair = new GoogleWalletPair(GoogleVerticalEnum::OFFER, $offerClass, $offerObject);
         }
 
-        return new BuiltWalletPass($applePass, $googlePair);
+        $samsungCard = null;
+        if ($this->context->hasSamsung()) {
+            $s = $this->context->samsung;
+            $now = (int) (microtime(true) * 1000);
+            $attributes = new CouponAttributes(
+                title: $this->title,
+                appLinkLogo: $s->appLinkLogo ?? '',
+                appLinkName: $s->appLinkName ?? '',
+                appLinkData: $s->appLinkData ?? '',
+                issueDate: $now,
+                expiry: $now + 86400000 * 365,
+                brandName: $this->provider,
+                barcode: $this->primarySamsungBarcode(),
+                bgColor: $this->resolvedSamsungHexColor(),
+            );
+            $samsungCard = $this->createSamsungCard(CardTypeEnum::COUPON, CardSubTypeEnum::OTHERS, $attributes);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair, $samsungCard);
     }
 }

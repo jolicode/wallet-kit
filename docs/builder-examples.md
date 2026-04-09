@@ -14,12 +14,13 @@
 - [Portable options (all builders)](#portable-options-all-builders)
 - [Limitations](#limitations)
 
-This page shows one **end-to-end example** per vertical supported by [`WalletPass`](../src/Builder/WalletPass.php). Examples below use a **dual-platform** context; you can also use [`WalletPlatformContext::appleOnly`](../src/Builder/WalletPlatformContext.php) or [`::googleOnly`](../src/Builder/WalletPlatformContext.php) when you only target one store.
+This page shows one **end-to-end example** per vertical supported by [`WalletPass`](../src/Builder/WalletPass.php). Examples below use a **dual-platform** context; you can target any combination by chaining [`->withApple(...)`](../src/Builder/WalletPlatformContext.php), [`->withGoogle(...)`](../src/Builder/WalletPlatformContext.php), and/or [`->withSamsung(...)`](../src/Builder/WalletPlatformContext.php).
 
 After `build()`, you get a [`BuiltWalletPass`](../src/Builder/BuiltWalletPass.php):
 
 - `$built->apple()` → Apple [`Pass`](../src/Pass/Apple/Model/Pass.php) for `pass.json` (throws [`ApplePassNotAvailableException`](../src/Exception/ApplePassNotAvailableException.php) if the context had no Apple slice)
 - `$built->google()->issuerClass` / `$built->google()->passObject` → Google class and object (throws [`GoogleWalletPairNotAvailableException`](../src/Exception/GoogleWalletPairNotAvailableException.php) if there was no Google slice)
+- `$built->samsung()` → Samsung [`Card`](../src/Pass/Samsung/Model/Card.php) envelope (throws [`SamsungCardNotAvailableException`](../src/Exception/SamsungCardNotAvailableException.php) if there was no Samsung slice)
 
 Serialize with **Symfony Serializer** and the normalizers from this package (see [`tests/Builder/BuilderTestSerializerFactory.php`](../tests/Builder/BuilderTestSerializerFactory.php) for a full list).
 
@@ -36,24 +37,27 @@ use Jolicode\WalletKit\Builder\WalletPlatformContext;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 
-$context = WalletPlatformContext::both(
-    appleTeamIdentifier: 'YOUR_TEAM_ID',
-    applePassTypeIdentifier: 'pass.com.example.app',
-    appleSerialNumber: 'UNIQUE-SERIAL-001',
-    appleOrganizationName: 'Example Airlines',
-    appleDescription: 'Boarding pass SFO → LHR',
-    googleClassId: '3388000000012345.example_flight_class',
-    googleObjectId: '3388000000012345.example_flight_object',
-    defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
-    defaultGoogleObjectState: StateEnum::ACTIVE,
-);
+$context = (new WalletPlatformContext())
+    ->withApple(
+        teamIdentifier: 'YOUR_TEAM_ID',
+        passTypeIdentifier: 'pass.com.example.app',
+        serialNumber: 'UNIQUE-SERIAL-001',
+        organizationName: 'Example Airlines',
+        description: 'Boarding pass SFO → LHR',
+    )
+    ->withGoogle(
+        classId: '3388000000012345.example_flight_class',
+        objectId: '3388000000012345.example_flight_object',
+        defaultReviewStatus: ReviewStatusEnum::APPROVED,
+        defaultObjectState: StateEnum::ACTIVE,
+    );
 ```
 
 ---
 
 ## Apple-only and Google-only snippets
 
-**Apple-only** (no Google IDs required). After `build()`, use only `$built->apple()`; `$built->google()` throws.
+**Apple-only** (no Google or Samsung needed). After `build()`, use only `$built->apple()`; `$built->google()` and `$built->samsung()` throw.
 
 ```php
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
@@ -62,12 +66,12 @@ use Jolicode\WalletKit\Pass\Apple\Model\Field;
 use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericTypeEnum;
 
-$appleContext = WalletPlatformContext::appleOnly(
-    appleTeamIdentifier: 'YOUR_TEAM_ID',
-    applePassTypeIdentifier: 'pass.com.example.app',
-    appleSerialNumber: 'SN-APPLE-ONLY',
-    appleOrganizationName: 'Example Org',
-    appleDescription: 'Membership',
+$appleContext = (new WalletPlatformContext())->withApple(
+    teamIdentifier: 'YOUR_TEAM_ID',
+    passTypeIdentifier: 'pass.com.example.app',
+    serialNumber: 'SN-APPLE-ONLY',
+    organizationName: 'Example Org',
+    description: 'Membership',
 );
 
 $built = WalletPass::generic($appleContext)
@@ -80,7 +84,7 @@ $built = WalletPass::generic($appleContext)
 $pass = $built->apple();
 ```
 
-**Google-only** (requires `issuerName` on the context for class payloads). After `build()`, use `$built->google()`; `$built->apple()` throws. You can still call `addAppleBarcode()` to supply a barcode image for the Google object.
+**Google-only** (requires `issuerName` for class payloads when no Apple context provides an organization name). After `build()`, use `$built->google()`; `$built->apple()` throws. You can still call `addAppleBarcode()` to supply a barcode for the Google object.
 
 ```php
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
@@ -89,9 +93,9 @@ use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
 use Jolicode\WalletKit\Pass\Apple\Model\Barcode;
 use Jolicode\WalletKit\Pass\Apple\Model\BarcodeFormatEnum;
 
-$googleContext = WalletPlatformContext::googleOnly(
-    googleClassId: '3388000000012345.example_offer_class',
-    googleObjectId: '3388000000012345.example_offer_object',
+$googleContext = (new WalletPlatformContext())->withGoogle(
+    classId: '3388000000012345.example_offer_class',
+    objectId: '3388000000012345.example_offer_object',
     issuerName: 'Example Shop',
 );
 
@@ -108,6 +112,74 @@ $built = WalletPass::offer(
 ))->build();
 
 $pair = $built->google();
+```
+
+**Samsung-only** (Samsung requires `appLinkLogo`, `appLinkName`, `appLinkData` on all card types). After `build()`, use `$built->samsung()`; `$built->apple()` and `$built->google()` throw.
+
+```php
+use Jolicode\WalletKit\Builder\WalletPlatformContext;
+use Jolicode\WalletKit\Builder\WalletPass;
+use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
+use Jolicode\WalletKit\Pass\Apple\Model\Barcode;
+use Jolicode\WalletKit\Pass\Apple\Model\BarcodeFormatEnum;
+
+$samsungContext = (new WalletPlatformContext())->withSamsung(
+    refId: 'coupon-samsung-001',
+    appLinkLogo: 'https://example.com/logo.png',
+    appLinkName: 'Example Shop',
+    appLinkData: 'https://example.com',
+);
+
+$built = WalletPass::offer(
+    $samsungContext,
+    title: '10% off',
+    provider: 'Example Shop',
+    redemptionChannel: RedemptionChannelEnum::INSTORE,
+)->addAppleBarcode(new Barcode(
+    altText: 'Promo',
+    format: BarcodeFormatEnum::QR,
+    message: 'SAVE10',
+    messageEncoding: 'utf-8',
+))->build();
+
+$card = $built->samsung();
+```
+
+**All three platforms** — Apple + Google + Samsung in a single build.
+
+```php
+use Jolicode\WalletKit\Builder\WalletPlatformContext;
+use Jolicode\WalletKit\Builder\WalletPass;
+use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
+use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
+
+$allContext = (new WalletPlatformContext())
+    ->withApple(
+        teamIdentifier: 'YOUR_TEAM_ID',
+        passTypeIdentifier: 'pass.com.example.app',
+        serialNumber: 'SN-ALL-001',
+        organizationName: 'Example Shop',
+        description: 'Promotional offer',
+    )
+    ->withGoogle(
+        classId: '3388000000012345.example_offer_class',
+        objectId: '3388000000012345.example_offer_object',
+        defaultReviewStatus: ReviewStatusEnum::APPROVED,
+        defaultObjectState: StateEnum::ACTIVE,
+    )
+    ->withSamsung(
+        refId: 'offer-samsung-001',
+        appLinkLogo: 'https://example.com/logo.png',
+        appLinkName: 'Example Shop',
+        appLinkData: 'https://example.com',
+    );
+
+$built = WalletPass::offer($allContext, '20% off', 'Example Shop', RedemptionChannelEnum::BOTH)->build();
+
+$applePass = $built->apple();
+$googlePair = $built->google();
+$samsungCard = $built->samsung();
 ```
 
 ---
@@ -341,11 +413,13 @@ These methods come from [`CommonWalletBuilderTrait`](../src/Builder/CommonWallet
 | `withGoogleReviewStatus` / `withGoogleObjectState` | Overrides context defaults for Google class/object lifecycle. |
 | `withAppLinkData` / `withGoogleLinksModuleData` | Links and app deep links (Google; Apple where mapped). |
 | `mutateApple(callable)` | Escape hatch to tweak the Apple `Pass` before `build()` returns. |
+| `mutateSamsung(callable)` | Escape hatch to tweak the Samsung `Card` before `build()` returns. |
 
 ---
 
 ## Limitations
 
-- The library does **not** sign `.pkpass` bundles or call Google Wallet REST APIs.
-- Apple and Google models differ: not every field exists on both sides. Use `mutateApple` or adjust the returned Google class/object after `build()` for platform-specific details.
-- A [`WalletPlatformContext`](../src/Builder/WalletPlatformContext.php) with **no** Apple and **no** Google slice throws [`InvalidWalletPlatformContextException`](../src/Exception/InvalidWalletPlatformContextException.php). Google-only contexts must include a non-empty `issuerName` (or use `::googleOnly(...)`, which enforces it).
+- The library does **not** sign `.pkpass` bundles, call Google Wallet REST APIs, or tokenize Samsung Wallet payloads.
+- Apple, Google, and Samsung models differ: not every field exists on all sides. Use `mutateApple`, `mutateSamsung`, or adjust the returned Google class/object after `build()` for platform-specific details.
+- A [`WalletPlatformContext`](../src/Builder/WalletPlatformContext.php) with **no** platform slice will produce a `BuiltWalletPass` where all accessors throw. Google contexts without an `issuerName` must have an Apple context to fall back on (via `organizationName`).
+- Samsung **Digital ID** and **Pay As You Go** card types have no Apple/Google equivalent and are not exposed through `WalletPass` factory methods. Build them directly via the Samsung model classes under `src/Pass/Samsung/Model/`.

@@ -8,7 +8,7 @@ final class InvalidWalletPlatformContextException extends \InvalidArgumentExcept
 {
     public static function missingPlatformSlice(): self
     {
-        return new self('WalletPlatformContext requires at least one of apple or google.');
+        return new self('WalletPlatformContext requires at least one of apple, google, or samsung.');
     }
 
     public static function googleIssuerNameRequiredWhenAppleAbsent(): self

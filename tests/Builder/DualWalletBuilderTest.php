@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Jolicode\WalletKit\Tests\Builder;
 
 use Jolicode\WalletKit\Builder\GoogleVerticalEnum;
-use Jolicode\WalletKit\Builder\GoogleWalletContext;
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
 use Jolicode\WalletKit\Exception\ApplePassNotAvailableException;
 use Jolicode\WalletKit\Exception\GoogleWalletPairNotAvailableException;
-use Jolicode\WalletKit\Exception\InvalidWalletPlatformContextException;
+use Jolicode\WalletKit\Exception\SamsungCardNotAvailableException;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\AirportInfo;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightCarrier;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightHeader;
@@ -40,17 +39,20 @@ final class DualWalletBuilderTest extends TestCase
 
     private function context(): WalletPlatformContext
     {
-        return WalletPlatformContext::both(
-            appleTeamIdentifier: 'TEAM1',
-            applePassTypeIdentifier: 'pass.com.example.test',
-            appleSerialNumber: 'SN-001',
-            appleOrganizationName: 'Example Org',
-            appleDescription: 'Test pass',
-            googleClassId: '3388000000012345.test_class',
-            googleObjectId: '3388000000012345.test_object',
-            defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
-            defaultGoogleObjectState: StateEnum::ACTIVE,
-        );
+        return (new WalletPlatformContext())
+            ->withApple(
+                teamIdentifier: 'TEAM1',
+                passTypeIdentifier: 'pass.com.example.test',
+                serialNumber: 'SN-001',
+                organizationName: 'Example Org',
+                description: 'Test pass',
+            )
+            ->withGoogle(
+                classId: '3388000000012345.test_class',
+                objectId: '3388000000012345.test_object',
+                defaultReviewStatus: ReviewStatusEnum::APPROVED,
+                defaultObjectState: StateEnum::ACTIVE,
+            );
     }
 
     public function testGenericBuildNormalizes(): void
@@ -206,30 +208,14 @@ final class DualWalletBuilderTest extends TestCase
         self::assertSame('first', $objectJson['barcode']['value']);
     }
 
-    public function testEmptyPlatformContextThrows(): void
-    {
-        $this->expectException(InvalidWalletPlatformContextException::class);
-        new WalletPlatformContext(null, null);
-    }
-
-    public function testGoogleOnlyWithoutIssuerThrows(): void
-    {
-        $this->expectException(InvalidWalletPlatformContextException::class);
-        new WalletPlatformContext(null, new GoogleWalletContext(
-            classId: 'c',
-            objectId: 'o',
-            issuerName: null,
-        ));
-    }
-
     public function testGoogleOnlyBuildAppleAccessorThrows(): void
     {
-        $ctx = WalletPlatformContext::googleOnly(
-            googleClassId: '3388000000012345.g_only_class',
-            googleObjectId: '3388000000012345.g_only_object',
+        $ctx = (new WalletPlatformContext())->withGoogle(
+            classId: '3388000000012345.g_only_class',
+            objectId: '3388000000012345.g_only_object',
             issuerName: 'Issuer Inc.',
-            defaultGoogleReviewStatus: ReviewStatusEnum::APPROVED,
-            defaultGoogleObjectState: StateEnum::ACTIVE,
+            defaultReviewStatus: ReviewStatusEnum::APPROVED,
+            defaultObjectState: StateEnum::ACTIVE,
         );
 
         $built = WalletPass::generic($ctx)
@@ -247,9 +233,9 @@ final class DualWalletBuilderTest extends TestCase
 
     public function testGoogleOnlyBuildGoogleNormalizes(): void
     {
-        $ctx = WalletPlatformContext::googleOnly(
-            googleClassId: '3388000000012345.g_only_class',
-            googleObjectId: '3388000000012345.g_only_object',
+        $ctx = (new WalletPlatformContext())->withGoogle(
+            classId: '3388000000012345.g_only_class',
+            objectId: '3388000000012345.g_only_object',
             issuerName: 'Issuer Inc.',
         );
 
@@ -267,12 +253,12 @@ final class DualWalletBuilderTest extends TestCase
 
     public function testAppleOnlyBuildGoogleAccessorThrows(): void
     {
-        $ctx = WalletPlatformContext::appleOnly(
-            appleTeamIdentifier: 'TEAM1',
-            applePassTypeIdentifier: 'pass.com.example.test',
-            appleSerialNumber: 'SN-A',
-            appleOrganizationName: 'Example Org',
-            appleDescription: 'Apple only',
+        $ctx = (new WalletPlatformContext())->withApple(
+            teamIdentifier: 'TEAM1',
+            passTypeIdentifier: 'pass.com.example.test',
+            serialNumber: 'SN-A',
+            organizationName: 'Example Org',
+            description: 'Apple only',
         );
 
         $built = WalletPass::generic($ctx)
@@ -286,5 +272,176 @@ final class DualWalletBuilderTest extends TestCase
 
         $this->expectException(GoogleWalletPairNotAvailableException::class);
         $built->google();
+    }
+
+    public function testSamsungOnlyContext(): void
+    {
+        $ctx = (new WalletPlatformContext())->withSamsung(
+            refId: 'ref-001',
+            appLinkLogo: 'https://example.com/logo.png',
+            appLinkName: 'App',
+            appLinkData: 'https://example.com',
+        );
+
+        self::assertTrue($ctx->hasSamsung());
+        self::assertFalse($ctx->hasApple());
+        self::assertFalse($ctx->hasGoogle());
+    }
+
+    public function testSamsungOnlyBuildOfferNormalizes(): void
+    {
+        $ctx = (new WalletPlatformContext())->withSamsung(
+            refId: 'ref-samsung-offer',
+            appLinkLogo: 'https://example.com/logo.png',
+            appLinkName: 'Shop',
+            appLinkData: 'https://example.com',
+        );
+
+        $built = WalletPass::offer($ctx, 'Summer sale', 'Example Provider', RedemptionChannelEnum::BOTH)->build();
+
+        $card = $built->samsung();
+        self::assertSame('coupon', $card->type->value);
+        self::assertSame('others', $card->subType->value);
+        self::assertCount(1, $card->data);
+        self::assertSame('ref-samsung-offer', $card->data[0]->refId);
+
+        $cardJson = $this->serializer->normalize($card);
+        self::assertSame('coupon', $cardJson['card']['type']);
+        self::assertSame('Summer sale', $cardJson['card']['data'][0]['attributes']['title']);
+    }
+
+    public function testSamsungOnlyBuildAppleAccessorThrows(): void
+    {
+        $ctx = (new WalletPlatformContext())->withSamsung(refId: 'ref-001');
+
+        $built = WalletPass::generic($ctx)->build();
+
+        $this->expectException(ApplePassNotAvailableException::class);
+        $built->apple();
+    }
+
+    public function testSamsungOnlyBuildGoogleAccessorThrows(): void
+    {
+        $ctx = (new WalletPlatformContext())->withSamsung(refId: 'ref-001');
+
+        $built = WalletPass::generic($ctx)->build();
+
+        $this->expectException(GoogleWalletPairNotAvailableException::class);
+        $built->google();
+    }
+
+    public function testDualWithoutSamsungThrowsOnSamsungAccessor(): void
+    {
+        $built = WalletPass::generic($this->context())->build();
+
+        $this->expectException(SamsungCardNotAvailableException::class);
+        $built->samsung();
+    }
+
+    public function testAllPlatformsContext(): void
+    {
+        $ctx = (new WalletPlatformContext())
+            ->withApple(
+                teamIdentifier: 'TEAM1',
+                passTypeIdentifier: 'pass.com.example.test',
+                serialNumber: 'SN-ALL',
+                organizationName: 'Example Org',
+                description: 'All platforms',
+            )
+            ->withGoogle(
+                classId: '3388000000012345.all_class',
+                objectId: '3388000000012345.all_object',
+            )
+            ->withSamsung(
+                refId: 'ref-all',
+                appLinkLogo: 'https://example.com/logo.png',
+                appLinkName: 'App',
+                appLinkData: 'https://example.com',
+            );
+
+        $built = WalletPass::offer($ctx, 'Deal', 'Shop', RedemptionChannelEnum::INSTORE)->build();
+
+        self::assertSame(PassTypeEnum::COUPON, $built->apple()->passType);
+        self::assertSame(GoogleVerticalEnum::OFFER, $built->googleVertical());
+        self::assertSame('coupon', $built->samsung()->type->value);
+
+        $samsungJson = $this->serializer->normalize($built->samsung());
+        self::assertSame('Deal', $samsungJson['card']['data'][0]['attributes']['title']);
+    }
+
+    public function testMutateSamsung(): void
+    {
+        $ctx = (new WalletPlatformContext())->withSamsung(refId: 'ref-mut');
+
+        $built = WalletPass::generic($ctx)
+            ->mutateSamsung(static function ($card): void {
+                $card->data[0]->refId = 'ref-mutated';
+            })
+            ->build();
+
+        self::assertSame('ref-mutated', $built->samsung()->data[0]->refId);
+    }
+
+    public function testSamsungFlightBoardingPass(): void
+    {
+        $ctx = (new WalletPlatformContext())->withSamsung(
+            refId: 'ref-flight',
+            appLinkLogo: 'https://example.com/logo.png',
+            appLinkName: 'Airlines',
+            appLinkData: 'https://example.com',
+        );
+
+        $built = WalletPass::flight(
+            $ctx,
+            'Pat Lee',
+            new ReservationInfo(confirmationCode: 'ABC'),
+            new FlightHeader(carrier: new FlightCarrier(carrierIataCode: 'ZZ'), flightNumber: '101'),
+            new AirportInfo(airportIataCode: 'SFO'),
+            new AirportInfo(airportIataCode: 'LAX'),
+        )->build();
+
+        $card = $built->samsung();
+        self::assertSame('boardingpass', $card->type->value);
+        self::assertSame('airlines', $card->subType->value);
+
+        $cardJson = $this->serializer->normalize($card);
+        $attrs = $cardJson['card']['data'][0]['attributes'];
+        self::assertSame('Pat Lee', $attrs['user']);
+        self::assertSame('SFO', $attrs['departCode']);
+        self::assertSame('LAX', $attrs['arriveCode']);
+    }
+
+    public function testSamsungTransitBus(): void
+    {
+        $ctx = (new WalletPlatformContext())->withSamsung(
+            refId: 'ref-bus',
+            appLinkLogo: 'https://example.com/logo.png',
+            appLinkName: 'Transit',
+            appLinkData: 'https://example.com',
+        );
+
+        $built = WalletPass::transit($ctx, TransitTypeEnum::BUS, TripTypeEnum::ONE_WAY)
+            ->withTicketNumber('BUS-7')
+            ->build();
+
+        $card = $built->samsung();
+        self::assertSame('boardingpass', $card->type->value);
+        self::assertSame('buses', $card->subType->value);
+    }
+
+    public function testWithMethodsAreImmutable(): void
+    {
+        $base = new WalletPlatformContext();
+        $withApple = $base->withApple(
+            teamIdentifier: 'TEAM1',
+            passTypeIdentifier: 'pass.com.example.test',
+            serialNumber: 'SN-1',
+            organizationName: 'Org',
+            description: 'Desc',
+        );
+
+        self::assertFalse($base->hasApple());
+        self::assertTrue($withApple->hasApple());
+        self::assertNotSame($base, $withApple);
     }
 }
