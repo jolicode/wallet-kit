@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Builder\Internal;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Barcode as GoogleBarcode;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\LinksModuleData;
@@ -21,13 +22,11 @@ final class CommonWalletState
 
     public ?GoogleBarcode $googleBarcodeOverride = null;
 
-    public ?string $appleBackgroundColor = null;
+    public ?Color $backgroundColor = null;
 
-    public ?string $googleHexBackgroundColor = null;
+    public ?Color $foregroundColor = null;
 
-    public ?string $appleForegroundColor = null;
-
-    public ?string $appleLabelColor = null;
+    public ?Color $labelColor = null;
 
     public ?string $groupingIdentifier = null;
 

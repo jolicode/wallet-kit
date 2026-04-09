@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Model\Loyalty;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Barcode;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\GroupingInfo;
@@ -63,7 +64,7 @@ class LoyaltyObject
         public ?LoyaltyPoints $secondaryLoyaltyPoints = null,
         public ?array $linkedOfferIds = null,
         public ?Barcode $barcode = null,
-        public ?string $hexBackgroundColor = null,
+        public ?Color $hexBackgroundColor = null,
         public ?array $messages = null,
         public ?TimeInterval $validTimeInterval = null,
         public ?string $smartTapRedemptionValue = null,

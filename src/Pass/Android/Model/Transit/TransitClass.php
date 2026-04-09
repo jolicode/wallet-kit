@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Model\Transit;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\CallbackOptions;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
@@ -64,7 +65,7 @@ class TransitClass
         public ?LocalizedString $localizedTransitOperatorName = null,
         public ?Image $logo = null,
         public ?Image $wideLogo = null,
-        public ?string $hexBackgroundColor = null,
+        public ?Color $hexBackgroundColor = null,
         public ?string $countryCode = null,
         public ?Image $heroImage = null,
         public ?bool $enableSmartTap = null,

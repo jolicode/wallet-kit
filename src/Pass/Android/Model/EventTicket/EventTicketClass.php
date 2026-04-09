@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Model\EventTicket;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\CallbackOptions;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
@@ -100,7 +101,7 @@ class EventTicketClass
         public ?LocalizedString $localizedEventName = null,
         public ?string $eventId = null,
         public ?LocalizedString $localizedIssuerName = null,
-        public ?string $hexBackgroundColor = null,
+        public ?Color $hexBackgroundColor = null,
         public ?string $countryCode = null,
         public ?Image $logo = null,
         public ?Image $wideLogo = null,

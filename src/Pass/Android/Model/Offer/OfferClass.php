@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Model\Offer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\CallbackOptions;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
@@ -110,7 +111,7 @@ class OfferClass
         public ?LocalizedString $localizedFinePrint = null,
         public ?string $shortTitle = null,
         public ?LocalizedString $localizedShortTitle = null,
-        public ?string $hexBackgroundColor = null,
+        public ?Color $hexBackgroundColor = null,
         public ?LocalizedString $localizedIssuerName = null,
         public ?string $countryCode = null,
         public ?Image $heroImage = null,

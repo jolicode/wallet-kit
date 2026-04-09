@@ -7,6 +7,7 @@ namespace Jolicode\WalletKit\Tests\Builder;
 use Jolicode\WalletKit\Builder\GoogleVerticalEnum;
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Exception\ApplePassNotAvailableException;
 use Jolicode\WalletKit\Exception\GoogleWalletPairNotAvailableException;
 use Jolicode\WalletKit\Exception\SamsungCardNotAvailableException;
@@ -65,7 +66,7 @@ final class DualWalletBuilderTest extends TestCase
             ->withGenericType(GenericTypeEnum::UNSPECIFIED)
             ->withGoogleCardTitle('Card')
             ->addAppleBarcode(new Barcode(altText: 'x', format: BarcodeFormatEnum::QR, message: 'M1', messageEncoding: 'utf-8'))
-            ->withGoogleHexBackgroundColor('#112233')
+            ->withBackgroundColor(Color::fromHex('#112233'))
             ->withGrouping('grp', 1)
             ->build();
 
@@ -92,7 +93,7 @@ final class DualWalletBuilderTest extends TestCase
             'Example Provider',
             RedemptionChannelEnum::BOTH,
         )
-            ->withBackgroundColorRgb('rgb(10, 20, 30)')
+            ->withBackgroundColor(Color::fromRgb(10, 20, 30))
             ->build();
 
         self::assertSame(PassTypeEnum::COUPON, $built->apple()->passType);

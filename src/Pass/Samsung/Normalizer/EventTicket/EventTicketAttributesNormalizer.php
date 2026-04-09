@@ -69,11 +69,11 @@ class EventTicketAttributesNormalizer implements NormalizerInterface, Normalizer
         }
 
         if (null !== $object->bgColor) {
-            $data['bgColor'] = $object->bgColor;
+            $data['bgColor'] = $object->bgColor->hex();
         }
 
         if (null !== $object->fontColor) {
-            $data['fontColor'] = $object->fontColor;
+            $data['fontColor'] = $object->fontColor->hex();
         }
 
         if (null !== $object->locations) {

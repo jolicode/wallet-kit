@@ -27,7 +27,7 @@ class BoardingPassAttributesNormalizer implements NormalizerInterface, Normalize
         $data = [
             'title' => $object->title,
             'providerName' => $object->providerName,
-            'bgColor' => $object->bgColor,
+            'bgColor' => $object->bgColor->hex(),
             'appLinkLogo' => $object->appLinkLogo,
             'appLinkName' => $object->appLinkName,
             'appLinkData' => $object->appLinkData,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Samsung\Model\PayAsYouGo;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\Location;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungBarcode;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungImage;
@@ -56,10 +57,10 @@ class PayAsYouGoAttributes
         public ?string $holderName = null,
         public ?int $startDate = null,
         public ?int $endDate = null,
-        public ?string $bgColor = null,
-        public ?string $fontColor = null,
+        public ?Color $bgColor = null,
+        public ?Color $fontColor = null,
         public ?string $bgImage = null,
-        public ?string $blinkColor = null,
+        public ?Color $blinkColor = null,
         public ?string $csInfo = null,
         public ?string $identifier = null,
         public ?string $grade = null,

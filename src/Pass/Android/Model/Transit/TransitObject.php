@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Model\Transit;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Barcode;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\GroupingInfo;
@@ -79,7 +80,7 @@ class TransitObject
         public ?PurchaseDetails $purchaseDetails = null,
         public ?TicketLeg $ticketLeg = null,
         public ?array $ticketLegs = null,
-        public ?string $hexBackgroundColor = null,
+        public ?Color $hexBackgroundColor = null,
         public ?Barcode $barcode = null,
         public ?array $messages = null,
         public ?TimeInterval $validTimeInterval = null,

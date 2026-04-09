@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Jolicode\WalletKit\Builder;
 
 use Jolicode\WalletKit\Builder\Internal\BarcodeMapper;
-use Jolicode\WalletKit\Builder\Internal\ColorMapper;
 use Jolicode\WalletKit\Builder\Internal\CommonWalletState;
 use Jolicode\WalletKit\Builder\Internal\SamsungBarcodeMapper;
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Exception\ApplePlatformContextRequiredException;
 use Jolicode\WalletKit\Exception\GooglePlatformContextRequiredException;
 use Jolicode\WalletKit\Exception\SamsungPlatformContextRequiredException;
@@ -52,43 +52,23 @@ trait CommonWalletBuilderTrait
         return $this;
     }
 
-    public function withAppleBackgroundColor(?string $color): static
+    public function withBackgroundColor(?Color $color): static
     {
-        $this->common->appleBackgroundColor = $color;
+        $this->common->backgroundColor = $color;
 
         return $this;
     }
 
-    public function withGoogleHexBackgroundColor(?string $hex): static
+    public function withForegroundColor(?Color $color): static
     {
-        $this->common->googleHexBackgroundColor = $hex;
+        $this->common->foregroundColor = $color;
 
         return $this;
     }
 
-    /**
-     * Sets Apple background from RGB and, when parsable, derives Google hex automatically unless hex was set explicitly.
-     */
-    public function withBackgroundColorRgb(string $appleRgb): static
+    public function withLabelColor(?Color $color): static
     {
-        $this->common->appleBackgroundColor = $appleRgb;
-        if (null === $this->common->googleHexBackgroundColor) {
-            $this->common->googleHexBackgroundColor = ColorMapper::appleRgbToGoogleHex($appleRgb);
-        }
-
-        return $this;
-    }
-
-    public function withAppleForegroundColor(?string $color): static
-    {
-        $this->common->appleForegroundColor = $color;
-
-        return $this;
-    }
-
-    public function withAppleLabelColor(?string $color): static
-    {
-        $this->common->appleLabelColor = $color;
+        $this->common->labelColor = $color;
 
         return $this;
     }
@@ -211,10 +191,9 @@ trait CommonWalletBuilderTrait
         return BarcodeMapper::fromFirstAppleBarcode($this->common->appleBarcodes);
     }
 
-    protected function resolvedGoogleHex(): ?string
+    protected function resolvedBackgroundColor(): ?Color
     {
-        return $this->common->googleHexBackgroundColor
-            ?? ColorMapper::appleRgbToGoogleHex($this->common->appleBackgroundColor);
+        return $this->common->backgroundColor;
     }
 
     protected function resolvedGoogleReviewStatus(): ReviewStatusEnum
@@ -279,9 +258,9 @@ trait CommonWalletBuilderTrait
             appLaunchURL: $this->common->appLaunchURL,
             webServiceURL: $this->common->webServiceURL,
             authenticationToken: $this->common->authenticationToken,
-            backgroundColor: $this->common->appleBackgroundColor,
-            foregroundColor: $this->common->appleForegroundColor,
-            labelColor: $this->common->appleLabelColor,
+            backgroundColor: $this->common->backgroundColor,
+            foregroundColor: $this->common->foregroundColor,
+            labelColor: $this->common->labelColor,
             groupingIdentifier: $this->common->groupingIdentifier,
             expirationDate: $this->common->appleExpirationDate,
             voided: $this->common->appleVoided,
@@ -293,12 +272,6 @@ trait CommonWalletBuilderTrait
     protected function primarySamsungBarcode(): ?SamsungBarcode
     {
         return SamsungBarcodeMapper::fromFirstAppleBarcode($this->common->appleBarcodes);
-    }
-
-    protected function resolvedSamsungHexColor(): ?string
-    {
-        return $this->common->googleHexBackgroundColor
-            ?? ColorMapper::appleRgbToGoogleHex($this->common->appleBackgroundColor);
     }
 
     /**
