@@ -90,11 +90,11 @@ class DigitalIdAttributesNormalizer implements NormalizerInterface, NormalizerAw
         }
 
         if (null !== $object->bgColor) {
-            $data['bgColor'] = $object->bgColor;
+            $data['bgColor'] = $object->bgColor->hex();
         }
 
         if (null !== $object->fontColor) {
-            $data['fontColor'] = $object->fontColor;
+            $data['fontColor'] = $object->fontColor->hex();
         }
 
         if (null !== $object->bgImage) {
@@ -106,7 +106,7 @@ class DigitalIdAttributesNormalizer implements NormalizerInterface, NormalizerAw
         }
 
         if (null !== $object->blinkColor) {
-            $data['blinkColor'] = $object->blinkColor;
+            $data['blinkColor'] = $object->blinkColor->hex();
         }
 
         if (null !== $object->appLinkLogo) {

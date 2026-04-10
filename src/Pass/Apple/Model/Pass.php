@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Apple\Model;
 
+use Jolicode\WalletKit\Common\Color;
+
 /**
  * @phpstan-import-type PassStructureType from PassStructure
  * @phpstan-import-type BarcodeType from Barcode
@@ -87,9 +89,9 @@ class Pass
         public ?Nfc $nfc = null,
 
         // -- Visual appearance --
-        public ?string $backgroundColor = null,
-        public ?string $foregroundColor = null,
-        public ?string $labelColor = null,
+        public ?Color $backgroundColor = null,
+        public ?Color $foregroundColor = null,
+        public ?Color $labelColor = null,
         public ?string $logoText = null,
         public ?bool $suppressStripShine = null,
 

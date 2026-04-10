@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Pass\Apple\Normalizer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Apple\Model\Barcode;
 use Jolicode\WalletKit\Pass\Apple\Model\BarcodeFormatEnum;
 use Jolicode\WalletKit\Pass\Apple\Model\Beacon;
@@ -116,9 +117,9 @@ final class PassNormalizerTest extends TestCase
             ],
             webServiceURL: 'https://example.com/passes/',
             authenticationToken: 'auth-token-123',
-            backgroundColor: 'rgb(22, 55, 110)',
-            foregroundColor: 'rgb(255, 255, 255)',
-            labelColor: 'rgb(200, 200, 200)',
+            backgroundColor: Color::fromRgb(22, 55, 110),
+            foregroundColor: Color::fromRgb(255, 255, 255),
+            labelColor: Color::fromRgb(200, 200, 200),
             logoText: 'Example Airlines',
             relevantDate: '2026-04-03T09:00-07:00',
             locations: [
@@ -264,8 +265,8 @@ final class PassNormalizerTest extends TestCase
             barcodes: [
                 new Barcode(altText: null, format: BarcodeFormatEnum::CODE_128, message: 'CPN001', messageEncoding: 'iso-8859-1'),
             ],
-            backgroundColor: 'rgb(34, 107, 72)',
-            foregroundColor: 'rgb(245, 237, 95)',
+            backgroundColor: Color::fromRgb(34, 107, 72),
+            foregroundColor: Color::fromRgb(245, 237, 95),
             logoText: 'My Shop',
             expirationDate: '2026-12-31T23:59-05:00',
             locations: [
@@ -345,9 +346,9 @@ final class PassNormalizerTest extends TestCase
             barcodes: [
                 new Barcode(altText: null, format: BarcodeFormatEnum::AZTEC, message: 'EVT001SEAT9', messageEncoding: 'iso-8859-1'),
             ],
-            backgroundColor: 'rgb(215, 154, 172)',
-            foregroundColor: 'rgb(255, 255, 255)',
-            labelColor: 'rgb(255, 255, 255)',
+            backgroundColor: Color::fromRgb(215, 154, 172),
+            foregroundColor: Color::fromRgb(255, 255, 255),
+            labelColor: Color::fromRgb(255, 255, 255),
             groupingIdentifier: 'Opening night',
             relevantDates: [
                 new RelevantDate(startDate: '2026-08-10T18:00-06:00', endDate: '2026-08-10T23:00-06:00'),
@@ -460,8 +461,8 @@ final class PassNormalizerTest extends TestCase
             ],
             webServiceURL: 'https://example.com/passes/',
             authenticationToken: 'xyz-token',
-            backgroundColor: 'rgb(245, 197, 67)',
-            foregroundColor: 'rgb(0, 0, 0)',
+            backgroundColor: Color::fromRgb(245, 197, 67),
+            foregroundColor: Color::fromRgb(0, 0, 0),
             logoText: 'My Gym',
             locations: [
                 new Location(latitude: 37.3318, longitude: -122.0312),
@@ -547,8 +548,8 @@ final class PassNormalizerTest extends TestCase
             ),
             associatedStoreIdentifiers: [123456789],
             appLaunchURL: 'myapp://loyalty/SC-001',
-            backgroundColor: 'rgb(24, 44, 82)',
-            foregroundColor: 'rgb(222, 173, 40)',
+            backgroundColor: Color::fromRgb(24, 44, 82),
+            foregroundColor: Color::fromRgb(222, 173, 40),
             logoText: 'My Coffee Shop',
             voided: false,
             semantics: new SemanticTags(

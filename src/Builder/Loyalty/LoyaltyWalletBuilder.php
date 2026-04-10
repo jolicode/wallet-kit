@@ -63,7 +63,7 @@ final class LoyaltyWalletBuilder extends AbstractWalletBuilder
                 issuerName: $this->context->googleIssuerName(),
                 reviewStatus: $this->resolvedGoogleReviewStatus(),
                 programName: $this->programName,
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
             );
@@ -75,7 +75,7 @@ final class LoyaltyWalletBuilder extends AbstractWalletBuilder
                 accountName: $this->accountName,
                 accountId: $this->accountId,
                 barcode: $this->primaryGoogleBarcode(),
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 validTimeInterval: $this->common->validTimeInterval,
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
@@ -95,7 +95,7 @@ final class LoyaltyWalletBuilder extends AbstractWalletBuilder
                 appLinkName: $s->appLinkName ?? '',
                 appLinkData: $s->appLinkData ?? '',
                 barcode: $this->primarySamsungBarcode(),
-                bgColor: $this->resolvedSamsungHexColor(),
+                bgColor: $this->resolvedBackgroundColor(),
                 merchantName: $this->programName,
             );
             $samsungCard = $this->createSamsungCard(CardTypeEnum::LOYALTY, CardSubTypeEnum::OTHERS, $attributes);

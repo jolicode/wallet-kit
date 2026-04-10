@@ -75,7 +75,7 @@ final class EventTicketWalletBuilder extends AbstractWalletBuilder
                 issuerName: $this->context->googleIssuerName(),
                 eventName: $this->eventName,
                 reviewStatus: $this->resolvedGoogleReviewStatus(),
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
             );
@@ -87,7 +87,7 @@ final class EventTicketWalletBuilder extends AbstractWalletBuilder
                 ticketHolderName: $this->ticketHolderName,
                 ticketNumber: $this->ticketNumber,
                 barcode: $this->primaryGoogleBarcode(),
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 validTimeInterval: $this->common->validTimeInterval,
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
@@ -114,7 +114,7 @@ final class EventTicketWalletBuilder extends AbstractWalletBuilder
                 holderName: $this->ticketHolderName,
                 seatNumber: null,
                 barcode: $this->primarySamsungBarcode(),
-                bgColor: $this->resolvedSamsungHexColor(),
+                bgColor: $this->resolvedBackgroundColor(),
             );
             $samsungCard = $this->createSamsungCard(CardTypeEnum::TICKET, CardSubTypeEnum::PERFORMANCES, $attributes);
         }

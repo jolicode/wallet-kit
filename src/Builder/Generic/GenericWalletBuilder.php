@@ -82,7 +82,7 @@ final class GenericWalletBuilder extends AbstractWalletBuilder
                 classId: $g->classId,
                 genericType: $this->genericType,
                 cardTitle: $cardTitle,
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 barcode: $this->primaryGoogleBarcode(),
                 validTimeInterval: $this->common->validTimeInterval,
                 linksModuleData: $this->common->linksModuleData,
@@ -105,7 +105,7 @@ final class GenericWalletBuilder extends AbstractWalletBuilder
                 appLinkLogo: $s->appLinkLogo ?? '',
                 appLinkName: $s->appLinkName ?? '',
                 appLinkData: $s->appLinkData ?? '',
-                bgColor: $this->resolvedSamsungHexColor(),
+                bgColor: $this->resolvedBackgroundColor(),
                 serial1: $this->primarySamsungBarcode(),
                 groupingId: $this->common->groupingIdentifier,
             );

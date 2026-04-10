@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Samsung\Model\Coupon;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungBarcode;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungImage;
 
@@ -48,8 +49,8 @@ class CouponAttributes
         public ?string $brandName = null,
         public ?string $noticeDesc = null,
         public ?SamsungBarcode $barcode = null,
-        public ?string $bgColor = null,
-        public ?string $fontColor = null,
+        public ?Color $bgColor = null,
+        public ?Color $fontColor = null,
         public ?string $balance = null,
         public ?string $summaryUrl = null,
         public ?bool $editable = null,

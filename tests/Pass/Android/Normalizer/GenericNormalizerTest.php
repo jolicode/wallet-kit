@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Pass\Android\Normalizer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Generic\ExpiryNotification;
 use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericClass;
 use Jolicode\WalletKit\Pass\Android\Model\Generic\GenericObject;
@@ -203,7 +204,7 @@ final class GenericNormalizerTest extends TestCase
             header: new LocalizedString(new TranslatedString('en', 'John Doe')),
             logo: $image,
             wideLogo: new Image(new ImageUri('https://example.com/wide-logo.png')),
-            hexBackgroundColor: '#4285F4',
+            hexBackgroundColor: Color::fromHex('#4285F4'),
             notifications: new Notifications(
                 expiryNotification: new ExpiryNotification(true),
                 upcomingNotification: new UpcomingNotification(true),
@@ -277,7 +278,7 @@ final class GenericNormalizerTest extends TestCase
         self::assertSame('generic-object-001', $objectData['id']);
         self::assertSame('generic-class-001', $objectData['classId']);
         self::assertSame('GENERIC_GYM_MEMBERSHIP', $objectData['genericType']);
-        self::assertSame('#4285F4', $objectData['hexBackgroundColor']);
+        self::assertSame('#4285f4', $objectData['hexBackgroundColor']);
         self::assertSame('ACTIVE', $objectData['state']);
         self::assertSame('smart-tap-123', $objectData['smartTapRedemptionValue']);
         self::assertSame(['linked-obj-1', 'linked-obj-2'], $objectData['linkedObjectIds']);

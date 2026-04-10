@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Samsung\Model\Generic;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\Location;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungBarcode;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungImage;
@@ -63,9 +64,9 @@ class GenericAttributes
         public ?SamsungImage $logoImage = null,
         public ?string $coverImage = null,
         public ?string $bgImage = null,
-        public ?string $bgColor = null,
-        public ?string $fontColor = null,
-        public ?string $blinkColor = null,
+        public ?Color $bgColor = null,
+        public ?Color $fontColor = null,
+        public ?Color $blinkColor = null,
         public ?SamsungBarcode $serial1 = null,
         public ?SamsungBarcode $serial2 = null,
         public ?string $csInfo = null,

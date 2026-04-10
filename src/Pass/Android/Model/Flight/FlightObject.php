@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Model\Flight;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Barcode;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\GroupingInfo;
@@ -61,7 +62,7 @@ class FlightObject
         public ReservationInfo $reservationInfo,
         public ?BoardingAndSeatingInfo $boardingAndSeatingInfo = null,
         public ?Image $securityProgramLogo = null,
-        public ?string $hexBackgroundColor = null,
+        public ?Color $hexBackgroundColor = null,
         public ?Barcode $barcode = null,
         public ?array $messages = null,
         public ?TimeInterval $validTimeInterval = null,

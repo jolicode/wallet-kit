@@ -65,7 +65,7 @@ final class GiftCardWalletBuilder extends AbstractWalletBuilder
                 id: $g->classId,
                 issuerName: $this->context->googleIssuerName(),
                 reviewStatus: $this->resolvedGoogleReviewStatus(),
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
             );
@@ -77,7 +77,7 @@ final class GiftCardWalletBuilder extends AbstractWalletBuilder
                 cardNumber: $this->cardNumber,
                 pin: $this->pin,
                 barcode: $this->primaryGoogleBarcode(),
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 validTimeInterval: $this->common->validTimeInterval,
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
@@ -97,7 +97,7 @@ final class GiftCardWalletBuilder extends AbstractWalletBuilder
                 appLinkName: $s->appLinkName ?? '',
                 appLinkData: $s->appLinkData ?? '',
                 barcode: $this->primarySamsungBarcode(),
-                bgColor: $this->resolvedSamsungHexColor(),
+                bgColor: $this->resolvedBackgroundColor(),
                 amount: $this->cardNumber,
             );
             $samsungCard = $this->createSamsungCard(CardTypeEnum::GIFT_CARD, CardSubTypeEnum::OTHERS, $attributes);
