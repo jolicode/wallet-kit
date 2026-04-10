@@ -5,30 +5,20 @@ declare(strict_types=1);
 namespace Jolicode\WalletKit\Builder;
 
 use Jolicode\WalletKit\Exception\GooglePlatformContextRequiredException;
-use Jolicode\WalletKit\Exception\InvalidWalletPlatformContextException;
 use Jolicode\WalletKit\Exception\WalletKitInvariantViolationException;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 
 /**
- * Shared identifiers and defaults for wallet payloads. At least one of {@see $apple} or {@see $google} must be set.
+ * Shared identifiers and defaults for wallet payloads. At least one of {@see $apple}, {@see $google}, or {@see $samsung} must be set before passing to a builder.
  */
 final class WalletPlatformContext
 {
     public function __construct(
         public readonly ?AppleWalletContext $apple = null,
         public readonly ?GoogleWalletContext $google = null,
+        public readonly ?SamsungWalletContext $samsung = null,
     ) {
-        if (null === $this->apple && null === $this->google) {
-            throw InvalidWalletPlatformContextException::missingPlatformSlice();
-        }
-
-        if (null !== $this->google && null === $this->apple) {
-            $issuer = $this->google->issuerName;
-            if (null === $issuer || '' === $issuer) {
-                throw InvalidWalletPlatformContextException::googleIssuerNameRequiredWhenAppleAbsent();
-            }
-        }
     }
 
     public function hasApple(): bool
@@ -41,11 +31,16 @@ final class WalletPlatformContext
         return null !== $this->google;
     }
 
+    public function hasSamsung(): bool
+    {
+        return null !== $this->samsung;
+    }
+
     /**
      * Issuer name for Google Wallet *Class* resources. Uses {@see GoogleWalletContext::$issuerName} when set; otherwise Apple {@see AppleWalletContext::$organizationName}.
      *
      * @throws GooglePlatformContextRequiredException when there is no Google context (callers should guard with {@see hasGoogle()})
-     * @throws WalletKitInvariantViolationException   if issuer cannot be resolved despite constructor rules
+     * @throws WalletKitInvariantViolationException   if issuer cannot be resolved
      */
     public function googleIssuerName(): string
     {
@@ -61,75 +56,68 @@ final class WalletPlatformContext
             return $this->apple->organizationName;
         }
 
-        throw new WalletKitInvariantViolationException('Google issuer name is missing; this should have been rejected in the constructor.');
+        throw new WalletKitInvariantViolationException('Google issuer name is missing and no Apple context is available to fall back on.');
     }
 
-    /**
-     * Same parameters as the historical single constructor: dual-platform context with issuer mirrored from Apple organization name.
-     */
-    public static function both(
-        string $appleTeamIdentifier,
-        string $applePassTypeIdentifier,
-        string $appleSerialNumber,
-        string $appleOrganizationName,
-        string $appleDescription,
-        string $googleClassId,
-        string $googleObjectId,
-        int $appleFormatVersion = 1,
-        ReviewStatusEnum $defaultGoogleReviewStatus = ReviewStatusEnum::DRAFT,
-        StateEnum $defaultGoogleObjectState = StateEnum::ACTIVE,
+    public function withApple(
+        string $teamIdentifier,
+        string $passTypeIdentifier,
+        string $serialNumber,
+        string $organizationName,
+        string $description,
+        int $formatVersion = 1,
     ): self {
-        $apple = new AppleWalletContext(
-            teamIdentifier: $appleTeamIdentifier,
-            passTypeIdentifier: $applePassTypeIdentifier,
-            serialNumber: $appleSerialNumber,
-            organizationName: $appleOrganizationName,
-            description: $appleDescription,
-            formatVersion: $appleFormatVersion,
+        return new self(
+            new AppleWalletContext(
+                teamIdentifier: $teamIdentifier,
+                passTypeIdentifier: $passTypeIdentifier,
+                serialNumber: $serialNumber,
+                organizationName: $organizationName,
+                description: $description,
+                formatVersion: $formatVersion,
+            ),
+            $this->google,
+            $this->samsung,
         );
+    }
 
-        $google = new GoogleWalletContext(
-            classId: $googleClassId,
-            objectId: $googleObjectId,
-            defaultReviewStatus: $defaultGoogleReviewStatus,
-            defaultObjectState: $defaultGoogleObjectState,
-            issuerName: $appleOrganizationName,
+    public function withGoogle(
+        string $classId,
+        string $objectId,
+        ReviewStatusEnum $defaultReviewStatus = ReviewStatusEnum::DRAFT,
+        StateEnum $defaultObjectState = StateEnum::ACTIVE,
+        ?string $issuerName = null,
+    ): self {
+        return new self(
+            $this->apple,
+            new GoogleWalletContext(
+                classId: $classId,
+                objectId: $objectId,
+                defaultReviewStatus: $defaultReviewStatus,
+                defaultObjectState: $defaultObjectState,
+                issuerName: $issuerName,
+            ),
+            $this->samsung,
         );
-
-        return new self($apple, $google);
     }
 
-    public static function appleOnly(
-        string $appleTeamIdentifier,
-        string $applePassTypeIdentifier,
-        string $appleSerialNumber,
-        string $appleOrganizationName,
-        string $appleDescription,
-        int $appleFormatVersion = 1,
+    public function withSamsung(
+        string $refId,
+        string $language = 'en',
+        ?string $appLinkLogo = null,
+        ?string $appLinkName = null,
+        ?string $appLinkData = null,
     ): self {
-        return new self(new AppleWalletContext(
-            teamIdentifier: $appleTeamIdentifier,
-            passTypeIdentifier: $applePassTypeIdentifier,
-            serialNumber: $appleSerialNumber,
-            organizationName: $appleOrganizationName,
-            description: $appleDescription,
-            formatVersion: $appleFormatVersion,
-        ), null);
-    }
-
-    public static function googleOnly(
-        string $googleClassId,
-        string $googleObjectId,
-        string $issuerName,
-        ReviewStatusEnum $defaultGoogleReviewStatus = ReviewStatusEnum::DRAFT,
-        StateEnum $defaultGoogleObjectState = StateEnum::ACTIVE,
-    ): self {
-        return new self(null, new GoogleWalletContext(
-            classId: $googleClassId,
-            objectId: $googleObjectId,
-            defaultReviewStatus: $defaultGoogleReviewStatus,
-            defaultObjectState: $defaultGoogleObjectState,
-            issuerName: $issuerName,
-        ));
+        return new self(
+            $this->apple,
+            $this->google,
+            new SamsungWalletContext(
+                refId: $refId,
+                language: $language,
+                appLinkLogo: $appLinkLogo,
+                appLinkName: $appLinkName,
+                appLinkData: $appLinkData,
+            ),
+        );
     }
 }

@@ -14,6 +14,9 @@ use Jolicode\WalletKit\Pass\Android\Model\Loyalty\LoyaltyObject;
 use Jolicode\WalletKit\Pass\Apple\Model\Field;
 use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Loyalty\LoyaltyAttributes;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardSubTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardTypeEnum;
 
 final class LoyaltyWalletBuilder extends AbstractWalletBuilder
 {
@@ -82,6 +85,22 @@ final class LoyaltyWalletBuilder extends AbstractWalletBuilder
             $googlePair = new GoogleWalletPair(GoogleVerticalEnum::LOYALTY, $loyaltyClass, $loyaltyObject);
         }
 
-        return new BuiltWalletPass($applePass, $googlePair);
+        $samsungCard = null;
+        if ($this->context->hasSamsung()) {
+            $s = $this->context->samsung;
+            $attributes = new LoyaltyAttributes(
+                title: $this->programName ?? 'Loyalty',
+                providerName: $this->context->hasApple() ? $this->context->apple->organizationName : ($this->context->hasGoogle() ? $this->context->googleIssuerName() : ''),
+                appLinkLogo: $s->appLinkLogo ?? '',
+                appLinkName: $s->appLinkName ?? '',
+                appLinkData: $s->appLinkData ?? '',
+                barcode: $this->primarySamsungBarcode(),
+                bgColor: $this->resolvedSamsungHexColor(),
+                merchantName: $this->programName,
+            );
+            $samsungCard = $this->createSamsungCard(CardTypeEnum::LOYALTY, CardSubTypeEnum::OTHERS, $attributes);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair, $samsungCard);
     }
 }

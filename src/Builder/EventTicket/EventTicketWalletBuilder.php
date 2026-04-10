@@ -14,6 +14,9 @@ use Jolicode\WalletKit\Pass\Android\Model\EventTicket\EventTicketObject;
 use Jolicode\WalletKit\Pass\Apple\Model\Field;
 use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\EventTicket\EventTicketAttributes;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardSubTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardTypeEnum;
 
 final class EventTicketWalletBuilder extends AbstractWalletBuilder
 {
@@ -94,6 +97,28 @@ final class EventTicketWalletBuilder extends AbstractWalletBuilder
             $googlePair = new GoogleWalletPair(GoogleVerticalEnum::EVENT_TICKET, $eventClass, $eventObject);
         }
 
-        return new BuiltWalletPass($applePass, $googlePair);
+        $samsungCard = null;
+        if ($this->context->hasSamsung()) {
+            $s = $this->context->samsung;
+            $now = (int) (microtime(true) * 1000);
+            $attributes = new EventTicketAttributes(
+                title: $this->eventName,
+                providerName: $this->context->hasApple() ? $this->context->apple->organizationName : ($this->context->hasGoogle() ? $this->context->googleIssuerName() : ''),
+                issueDate: $now,
+                reservationNumber: $this->ticketNumber ?? '',
+                startDate: $now,
+                noticeDesc: $this->context->hasApple() ? $this->context->apple->description : '',
+                appLinkLogo: $s->appLinkLogo ?? '',
+                appLinkName: $s->appLinkName ?? '',
+                appLinkData: $s->appLinkData ?? '',
+                holderName: $this->ticketHolderName,
+                seatNumber: null,
+                barcode: $this->primarySamsungBarcode(),
+                bgColor: $this->resolvedSamsungHexColor(),
+            );
+            $samsungCard = $this->createSamsungCard(CardTypeEnum::TICKET, CardSubTypeEnum::PERFORMANCES, $attributes);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair, $samsungCard);
     }
 }

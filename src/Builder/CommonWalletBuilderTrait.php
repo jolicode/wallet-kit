@@ -7,8 +7,10 @@ namespace Jolicode\WalletKit\Builder;
 use Jolicode\WalletKit\Builder\Internal\BarcodeMapper;
 use Jolicode\WalletKit\Builder\Internal\ColorMapper;
 use Jolicode\WalletKit\Builder\Internal\CommonWalletState;
+use Jolicode\WalletKit\Builder\Internal\SamsungBarcodeMapper;
 use Jolicode\WalletKit\Exception\ApplePlatformContextRequiredException;
 use Jolicode\WalletKit\Exception\GooglePlatformContextRequiredException;
+use Jolicode\WalletKit\Exception\SamsungPlatformContextRequiredException;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Barcode as GoogleBarcode;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\GoogleDateTime;
@@ -19,6 +21,11 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\TimeInterval;
 use Jolicode\WalletKit\Pass\Apple\Model\Barcode as AppleBarcode;
 use Jolicode\WalletKit\Pass\Apple\Model\Pass;
+use Jolicode\WalletKit\Pass\Samsung\Model\Card;
+use Jolicode\WalletKit\Pass\Samsung\Model\CardData;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardSubTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungBarcode;
 
 /**
  * Portable wallet options shared across vertical builders.
@@ -185,6 +192,16 @@ trait CommonWalletBuilderTrait
         return $this;
     }
 
+    /**
+     * @param callable(Card): void $mutator
+     */
+    public function mutateSamsung(callable $mutator): static
+    {
+        $this->common->samsungCardMutator = $mutator;
+
+        return $this;
+    }
+
     protected function primaryGoogleBarcode(): ?GoogleBarcode
     {
         if (null !== $this->common->googleBarcodeOverride) {
@@ -271,5 +288,54 @@ trait CommonWalletBuilderTrait
         );
 
         return $this->finishApplePass($pass);
+    }
+
+    protected function primarySamsungBarcode(): ?SamsungBarcode
+    {
+        return SamsungBarcodeMapper::fromFirstAppleBarcode($this->common->appleBarcodes);
+    }
+
+    protected function resolvedSamsungHexColor(): ?string
+    {
+        return $this->common->googleHexBackgroundColor
+            ?? ColorMapper::appleRgbToGoogleHex($this->common->appleBackgroundColor);
+    }
+
+    /**
+     * Builds the Samsung {@see Card} envelope shared by all verticals.
+     */
+    protected function createSamsungCard(CardTypeEnum $type, CardSubTypeEnum $subType, object $attributes): Card
+    {
+        $samsung = $this->context->samsung;
+        if (null === $samsung) {
+            throw new SamsungPlatformContextRequiredException('createSamsungCard() requires a Samsung context.');
+        }
+
+        $now = (int) (microtime(true) * 1000);
+
+        $card = new Card(
+            type: $type,
+            subType: $subType,
+            data: [
+                new CardData(
+                    refId: $samsung->refId,
+                    createdAt: $now,
+                    updatedAt: $now,
+                    language: $samsung->language,
+                    attributes: $attributes,
+                ),
+            ],
+        );
+
+        return $this->finishSamsungCard($card);
+    }
+
+    protected function finishSamsungCard(Card $card): Card
+    {
+        if (null !== $this->common->samsungCardMutator) {
+            ($this->common->samsungCardMutator)($card);
+        }
+
+        return $card;
     }
 }

@@ -19,6 +19,9 @@ use Jolicode\WalletKit\Pass\Apple\Model\Field;
 use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum;
 use Jolicode\WalletKit\Pass\Apple\Model\TransitTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\BoardingPass\BoardingPassAttributes;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardSubTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardTypeEnum;
 
 final class FlightWalletBuilder extends AbstractWalletBuilder
 {
@@ -101,6 +104,29 @@ final class FlightWalletBuilder extends AbstractWalletBuilder
             $googlePair = new GoogleWalletPair(GoogleVerticalEnum::FLIGHT, $flightClass, $flightObject);
         }
 
-        return new BuiltWalletPass($applePass, $googlePair);
+        $samsungCard = null;
+        if ($this->context->hasSamsung()) {
+            $s = $this->context->samsung;
+            $attributes = new BoardingPassAttributes(
+                title: 'Flight ' . ($this->flightHeader->flightNumber ?? ''),
+                providerName: $this->context->hasApple() ? $this->context->apple->organizationName : ($this->context->hasGoogle() ? $this->context->googleIssuerName() : ''),
+                bgColor: $this->resolvedSamsungHexColor() ?? '#000000',
+                appLinkLogo: $s->appLinkLogo ?? '',
+                appLinkName: $s->appLinkName ?? '',
+                appLinkData: $s->appLinkData ?? '',
+                user: $this->passengerName,
+                vehicleNumber: $this->flightHeader->flightNumber,
+                departCode: $this->origin->airportIataCode,
+                arriveCode: $this->destination->airportIataCode,
+                departTerminal: $this->origin->terminal,
+                arriveTerminal: $this->destination->terminal,
+                gate: $this->origin->gate,
+                reservationNumber: $this->reservationInfo->confirmationCode,
+                barcode: $this->primarySamsungBarcode(),
+            );
+            $samsungCard = $this->createSamsungCard(CardTypeEnum::BOARDING_PASS, CardSubTypeEnum::AIRLINES, $attributes);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair, $samsungCard);
     }
 }

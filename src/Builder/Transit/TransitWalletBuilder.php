@@ -17,6 +17,8 @@ use Jolicode\WalletKit\Pass\Apple\Model\Field;
 use Jolicode\WalletKit\Pass\Apple\Model\PassStructure;
 use Jolicode\WalletKit\Pass\Apple\Model\PassTypeEnum;
 use Jolicode\WalletKit\Pass\Apple\Model\TransitTypeEnum;
+use Jolicode\WalletKit\Pass\Samsung\Model\BoardingPass\BoardingPassAttributes;
+use Jolicode\WalletKit\Pass\Samsung\Model\Shared\CardTypeEnum;
 
 final class TransitWalletBuilder extends AbstractWalletBuilder
 {
@@ -84,7 +86,24 @@ final class TransitWalletBuilder extends AbstractWalletBuilder
             $googlePair = new GoogleWalletPair(GoogleVerticalEnum::TRANSIT, $transitClass, $transitObject);
         }
 
-        return new BuiltWalletPass($applePass, $googlePair);
+        $samsungCard = null;
+        if ($this->context->hasSamsung()) {
+            $s = $this->context->samsung;
+            $samsungSubType = \Jolicode\WalletKit\Builder\Internal\SamsungBoardingPassSubTypeMapper::fromTransitType($this->googleTransitType);
+            $attributes = new BoardingPassAttributes(
+                title: 'Transit',
+                providerName: $this->context->hasApple() ? $this->context->apple->organizationName : ($this->context->hasGoogle() ? $this->context->googleIssuerName() : ''),
+                bgColor: $this->resolvedSamsungHexColor() ?? '#000000',
+                appLinkLogo: $s->appLinkLogo ?? '',
+                appLinkName: $s->appLinkName ?? '',
+                appLinkData: $s->appLinkData ?? '',
+                reservationNumber: $this->ticketNumber,
+                barcode: $this->primarySamsungBarcode(),
+            );
+            $samsungCard = $this->createSamsungCard(CardTypeEnum::BOARDING_PASS, $samsungSubType, $attributes);
+        }
+
+        return new BuiltWalletPass($applePass, $googlePair, $samsungCard);
     }
 
     private function appleTransitType(): TransitTypeEnum
