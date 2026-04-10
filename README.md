@@ -22,7 +22,7 @@ Wallet Kit helps you build the **JSON payloads** wallet platforms expect. It foc
 
 ## 🛠️ Builder
 
-The **`Jolicode\WalletKit\Builder`** namespace provides a fluent API centered on [`WalletPass`](src/Builder/WalletPass.php). Build a [`WalletPlatformContext`](src/Builder/WalletPlatformContext.php) with `->withApple(...)`, `->withGoogle(...)`, and/or `->withSamsung(...)`, then call `build()` to obtain a [`BuiltWalletPass`](src/Builder/BuiltWalletPass.php) (`apple()`, `google()`, `samsung()`). You can then normalize these models using Symfony Serializer along with this package’s normalizers.
+The **`Jolicode\WalletKit\Builder`** namespace provides a fluent API centered on [`WalletPass`](src/Builder/WalletPass.php). Build a [`WalletPlatformContext`](src/Builder/WalletPlatformContext.php) with `->withApple(...)`, `->withGoogle(...)`, and/or `->withSamsung(...)`, then call `build()` to obtain a [`BuiltWalletPass`](src/Builder/BuiltWalletPass.php) (`apple()`, `google()`, `samsung()`). You can then normalize these models using Symfony Serializer along with this package's normalizers.
 
 **Cookbook** (single-store `appleOnly` / `googleOnly`, every vertical, shared options, exceptions): [docs/builder-examples.md](docs/builder-examples.md).
 
@@ -31,53 +31,53 @@ The **`Jolicode\WalletKit\Builder`** namespace provides a fluent API centered on
 ```php
 $context = (new WalletPlatformContext())
     ->withApple(
-        teamIdentifier: ‘ABCDE12345’,
-        passTypeIdentifier: ‘pass.com.example.coupon’,
-        serialNumber: ‘COUPON-001’,
-        organizationName: ‘Example Shop’,
-        description: ‘Spring sale coupon’,
+        teamIdentifier: 'ABCDE12345',
+        passTypeIdentifier: 'pass.com.example.coupon',
+        serialNumber: 'COUPON-001',
+        organizationName: 'Example Shop',
+        description: 'Spring sale coupon',
     )
     ->withGoogle(
-        classId: ‘3388000000012345.example_offer_class’,
-        objectId: ‘3388000000012345.example_offer_object’,
+        classId: '3388000000012345.example_offer_class',
+        objectId: '3388000000012345.example_offer_object',
         defaultReviewStatus: ReviewStatusEnum::APPROVED,
         defaultGoogleObjectState: StateEnum::ACTIVE,
     )
     ->withSamsung(
-        refId: ‘coupon-samsung-001’,
-        appLinkLogo: ‘https://example.com/logo.png’,
-        appLinkName: ‘Example Shop’,
-        appLinkData: ‘https://example.com’,
+        refId: 'coupon-samsung-001',
+        appLinkLogo: 'https://example.com/logo.png',
+        appLinkName: 'Example Shop',
+        appLinkData: 'https://example.com',
     );
 
 $built = WalletPass::offer(
     $context,
-    title: ‘15% off’,
-    provider: ‘Example Shop’,
+    title: '15% off',
+    provider: 'Example Shop',
     redemptionChannel: RedemptionChannelEnum::BOTH,
 )
-    ->withBackgroundColorRgb(‘rgb(30, 60, 90)’)
+    ->withBackgroundColorRgb('rgb(30, 60, 90)')
     ->addAppleBarcode(new Barcode(
-        altText: ‘Coupon’,
+        altText: 'Coupon',
         format: BarcodeFormatEnum::QR,
-        message: ‘SAVE15-2026’,
-        messageEncoding: ‘utf-8’,
+        message: 'SAVE15-2026',
+        messageEncoding: 'utf-8',
     ))
     ->build();
 
 // $built->apple()     → Pass (coupon)
 // $built->google()    → OfferClass + OfferObject
 // $built->samsung()   → Card (coupon)
-// Then normalize with Symfony Serializer + this library’s normalizers.
+// Then normalize with Symfony Serializer + this library's normalizers.
 ```
 
 ### 🍏 Apple Wallet
 
-Apple’s model maps to a **single** tree: either use the **builder** above or build a `Pass` manually (see `src/Pass/Apple/`) and normalize it to the structure that becomes **`pass.json`** inside a pass package. Images, manifest, and cryptographic signing are still your responsibility.
+Apple's model maps to a **single** tree: either use the **builder** above or build a `Pass` manually (see `src/Pass/Apple/`) and normalize it to the structure that becomes **`pass.json`** inside a pass package. Images, manifest, and cryptographic signing are still your responsibility.
 
 ### 🤖 Google Wallet
 
-Google’s API splits each pass type into **two** resources: a **class** (shared template) and an **object** (one per holder). The object references the class through **`classId`**. This library exposes both sides under `src/Pass/Android/` for: EventTicket, Flight, Generic, GiftCard, Loyalty, Offer, and Transit. The **builder** returns that pair from `BuiltWalletPass::google()`.
+Google's API splits each pass type into **two** resources: a **class** (shared template) and an **object** (one per holder). The object references the class through **`classId`**. This library exposes both sides under `src/Pass/Android/` for: EventTicket, Flight, Generic, GiftCard, Loyalty, Offer, and Transit. The **builder** returns that pair from `BuiltWalletPass::google()`.
 
 ### 📱 Samsung Wallet
 
@@ -118,12 +118,13 @@ The library today stops at **typed payloads and normalization**. Planned extensi
 
 - [ ] **Apple `.pkpass` packaging** — assemble the pass bundle (images, `pass.json`, manifest), handle **localized resources** (`*.lproj`, string tables), and optionally integrate **signing** so a complete `.pkpass` can be produced from the models you already build.
 - [ ] **Google Wallet API client** — HTTP integration to **create, update, and patch** classes and objects (REST), including the **service-account JWT** flow Google expects, so you can go from `BuiltWalletPass::google()` to live passes without wiring the client yourself.
-- [ ] **Push notifications & in-wallet updates** — **APNs** integration to trigger **Apple Wallet** pass refreshes (silent/empty push so PassKit pulls a new `pass.json` from your web service), and **Google Wallet** support for **API-driven updates** plus **user-visible messages / notification hooks** where the platform exposes them, so pass changes actually reach holders’ devices.
+- [ ] **Push notifications & in-wallet updates** — **APNs** integration to trigger **Apple Wallet** pass refreshes (silent/empty push so PassKit pulls a new `pass.json` from your web service), **Google Wallet** support for **API-driven updates** plus **user-visible messages / notification hooks** where the platform exposes them, and **Samsung Wallet** push updates via the **Partner API**, so pass changes actually reach holders' devices across all three platforms.
+- [ ] **Samsung Wallet tokenization & Partner API** — JWT token generation for card payloads, HTTP integration with the **Samsung Wallet Partner API** to **create, update, and expire** cards, and card-state lifecycle management, so you can go from `BuiltWalletPass::samsung()` to live cards without wiring the client yourself.
 
 Other directions that often sit next to “wallet” libraries (for later consideration):
 
 - **Apple PassKit Web Service** — register/update HTTP endpoints, authentication token handling, and glue between your backend and the **APNs** flow above.
-- **Issuance UX helpers** — stable patterns for **Add to Apple Wallet** / **Save to Google Pay** links, deep links, and optional **JWT “generic”** flows where platforms require them.
+- **Issuance UX helpers** — stable patterns for **Add to Apple Wallet** / **Save to Google Pay** / **Add to Samsung Wallet** links, deep links, and optional **JWT** flows where platforms require them.
 - **Operational tooling** — fixtures for integration tests, optional **CLI or Castor tasks** that mirror production steps (e.g. dry-run Google calls, local `.pkpass` inspection).
 
 Contributions or design discussion for any of the above are welcome.
