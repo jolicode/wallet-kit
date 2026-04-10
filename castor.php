@@ -80,6 +80,16 @@ function spec_baseline_google(): void
     run([spec_tools_php(), __DIR__ . '/tools/spec/google-wallet-spec.php', 'baseline']);
 }
 
+#[AsTask('diff:google', namespace: 'spec', description: 'Diff live Google Wallet discovery enums/properties against PHP models')]
+function spec_diff_google(bool $properties = false): void
+{
+    $args = [spec_tools_php(), __DIR__ . '/tools/spec/google-wallet-diff.php'];
+    if ($properties) {
+        $args[] = '--properties';
+    }
+    run($args);
+}
+
 #[AsTask('check:samsung', namespace: 'spec', description: 'Compare Samsung Wallet phpstan keyset to tools/spec/samsung-wallet-keyset.json')]
 function spec_check_samsung(): void
 {

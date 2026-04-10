@@ -13,6 +13,7 @@ use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightCarrier;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightClass;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightHeader;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightObject;
+use Jolicode\WalletKit\Pass\Android\Model\Flight\FlightStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\FrequentFlyerInfo;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\ReservationInfo;
 use Jolicode\WalletKit\Pass\Android\Model\Flight\SeatClassPolicyEnum;
@@ -189,6 +190,7 @@ final class FlightNormalizerTest extends TestCase
             localScheduledDepartureDateTime: '2025-08-15T10:00',
             localScheduledArrivalDateTime: '2025-08-15T14:30',
             localBoardingDateTime: '2025-08-15T09:30',
+            flightStatus: FlightStatusEnum::SCHEDULED,
             boardingPolicy: BoardingPolicyEnum::ZONE_BASED,
             seatClassPolicy: SeatClassPolicyEnum::CABIN_BASED,
             hexBackgroundColor: Color::fromHex('#003366'),
@@ -235,6 +237,7 @@ final class FlightNormalizerTest extends TestCase
         self::assertSame('JFK', $classData['destination']['airportIataCode']);
         self::assertSame('AF', $classData['flightHeader']['carrier']['carrierIataCode']);
         self::assertSame('123', $classData['flightHeader']['flightNumber']);
+        self::assertSame('SCHEDULED', $classData['flightStatus']);
         self::assertSame('ZONE_BASED', $classData['boardingPolicy']);
 
         self::assertSame('flight-object-1', $objectData['id']);

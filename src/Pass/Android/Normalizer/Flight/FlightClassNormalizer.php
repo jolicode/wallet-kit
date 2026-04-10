@@ -57,6 +57,10 @@ class FlightClassNormalizer implements NormalizerInterface, NormalizerAwareInter
             $data['localGateClosingDateTime'] = $object->localGateClosingDateTime;
         }
 
+        if (null !== $object->flightStatus) {
+            $data['flightStatus'] = $object->flightStatus->value;
+        }
+
         if (null !== $object->boardingPolicy) {
             $data['boardingPolicy'] = $object->boardingPolicy->value;
         }
