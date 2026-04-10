@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Pass\Android\Normalizer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\GiftCard\GiftCardClass;
 use Jolicode\WalletKit\Pass\Android\Model\GiftCard\GiftCardObject;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Barcode;
@@ -164,7 +165,7 @@ final class GiftCardNormalizerTest extends TestCase
             allowBarcodeRedemption: true,
             localizedMerchantName: new LocalizedString(new TranslatedString('en', 'Gift Store')),
             cardNumberLabel: 'Card Number',
-            hexBackgroundColor: '#FF6600',
+            hexBackgroundColor: Color::fromHex('#FF6600'),
             heroImage: new Image(new ImageUri('https://example.com/hero.png')),
             enableSmartTap: false,
             securityAnimation: new SecurityAnimation(SecurityAnimationTypeEnum::FOIL_SHIMMER),
@@ -183,7 +184,7 @@ final class GiftCardNormalizerTest extends TestCase
             balanceUpdateTime: new GoogleDateTime('2025-06-15T10:30:00Z'),
             eventNumber: 'ORD-001',
             barcode: new Barcode(BarcodeTypeEnum::QR_CODE, 'GIFT1234567890', 'Gift Card', BarcodeRenderEncodingEnum::UTF_8),
-            hexBackgroundColor: '#FF6600',
+            hexBackgroundColor: Color::fromHex('#FF6600'),
             messages: [new Message('Balance Update', 'Your balance was updated', 'msg-1')],
             validTimeInterval: new TimeInterval(new GoogleDateTime('2025-01-01T00:00:00Z'), new GoogleDateTime('2026-01-01T00:00:00Z')),
             heroImage: new Image(new ImageUri('https://example.com/hero.png')),

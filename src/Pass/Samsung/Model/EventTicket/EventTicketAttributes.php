@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Samsung\Model\EventTicket;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\Location;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungBarcode;
 use Jolicode\WalletKit\Pass\Samsung\Model\Shared\SamsungImage;
@@ -62,8 +63,8 @@ class EventTicketAttributes
         public ?string $seatNumber = null,
         public ?string $entrance = null,
         public ?SamsungBarcode $barcode = null,
-        public ?string $bgColor = null,
-        public ?string $fontColor = null,
+        public ?Color $bgColor = null,
+        public ?Color $fontColor = null,
         public ?array $locations = null,
         public ?bool $preventCapture = null,
         public ?bool $noNetworkSupport = null,

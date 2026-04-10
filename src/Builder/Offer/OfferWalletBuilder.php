@@ -54,7 +54,7 @@ final class OfferWalletBuilder extends AbstractWalletBuilder
                 provider: $this->provider,
                 redemptionChannel: $this->redemptionChannel,
                 reviewStatus: $this->resolvedGoogleReviewStatus(),
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
             );
@@ -64,7 +64,7 @@ final class OfferWalletBuilder extends AbstractWalletBuilder
                 classId: $g->classId,
                 state: $this->resolvedGoogleObjectState(),
                 barcode: $this->primaryGoogleBarcode(),
-                hexBackgroundColor: $this->resolvedGoogleHex(),
+                hexBackgroundColor: $this->resolvedBackgroundColor(),
                 validTimeInterval: $this->common->validTimeInterval,
                 linksModuleData: $this->common->linksModuleData,
                 appLinkData: $this->common->appLinkData,
@@ -87,7 +87,7 @@ final class OfferWalletBuilder extends AbstractWalletBuilder
                 expiry: $now + 86400000 * 365,
                 brandName: $this->provider,
                 barcode: $this->primarySamsungBarcode(),
-                bgColor: $this->resolvedSamsungHexColor(),
+                bgColor: $this->resolvedBackgroundColor(),
             );
             $samsungCard = $this->createSamsungCard(CardTypeEnum::COUPON, CardSubTypeEnum::OTHERS, $attributes);
         }

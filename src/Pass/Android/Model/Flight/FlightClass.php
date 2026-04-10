@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Pass\Android\Model\Flight;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\AppLinkData;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\CallbackOptions;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
@@ -71,7 +72,7 @@ class FlightClass
         public ?BoardingPolicyEnum $boardingPolicy = null,
         public ?SeatClassPolicyEnum $seatClassPolicy = null,
         public ?LocalizedString $localizedIssuerName = null,
-        public ?string $hexBackgroundColor = null,
+        public ?Color $hexBackgroundColor = null,
         public ?string $countryCode = null,
         public ?Image $heroImage = null,
         public ?bool $enableSmartTap = null,

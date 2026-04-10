@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Pass\Android\Normalizer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Barcode;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\BarcodeRenderEncodingEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\BarcodeTypeEnum;
@@ -167,7 +168,7 @@ final class TransitNormalizerTest extends TestCase
             localizedIssuerName: new LocalizedString(new TranslatedString('en', 'Metro Transit')),
             transitOperatorName: new LocalizedString(new TranslatedString('en', 'Metro Rail')),
             logo: new Image(new ImageUri('https://example.com/metro-logo.png')),
-            hexBackgroundColor: '#004D40',
+            hexBackgroundColor: Color::fromHex('#004D40'),
             countryCode: 'US',
             heroImage: new Image(new ImageUri('https://example.com/metro-hero.png')),
             enableSingleLegItinerary: true,
@@ -230,7 +231,7 @@ final class TransitNormalizerTest extends TestCase
             purchaseDetails: $purchaseDetails,
             ticketLeg: $ticketLeg,
             ticketLegs: [$ticketLeg],
-            hexBackgroundColor: '#004D40',
+            hexBackgroundColor: Color::fromHex('#004D40'),
             barcode: new Barcode(BarcodeTypeEnum::QR_CODE, 'TRANSIT001', 'Metro Ticket', BarcodeRenderEncodingEnum::UTF_8),
             activationStatus: new ActivationStatus(ActivationStateEnum::ACTIVATED),
             heroImage: new Image(new ImageUri('https://example.com/metro-hero.png')),

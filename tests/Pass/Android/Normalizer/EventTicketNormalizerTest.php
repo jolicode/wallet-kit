@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Pass\Android\Normalizer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\EventTicket\EventReservationInfo;
 use Jolicode\WalletKit\Pass\Android\Model\EventTicket\EventSeat;
 use Jolicode\WalletKit\Pass\Android\Model\EventTicket\EventTicketClass;
@@ -162,7 +163,7 @@ final class EventTicketNormalizerTest extends TestCase
             reviewStatus: ReviewStatusEnum::APPROVED,
             localizedEventName: new LocalizedString(new TranslatedString('en', 'Rock Concert 2025')),
             eventId: 'EVT-001',
-            hexBackgroundColor: '#1A1A2E',
+            hexBackgroundColor: Color::fromHex('#1A1A2E'),
             countryCode: 'US',
             logo: new Image(new ImageUri('https://example.com/logo.png')),
             heroImage: new Image(new ImageUri('https://example.com/hero.png')),
@@ -195,7 +196,7 @@ final class EventTicketNormalizerTest extends TestCase
             ticketType: new LocalizedString(new TranslatedString('en', 'VIP')),
             faceValue: new Money('15000000', 'USD'),
             groupingInfo: new GroupingInfo('event-group', 1),
-            hexBackgroundColor: '#1A1A2E',
+            hexBackgroundColor: Color::fromHex('#1A1A2E'),
             barcode: new Barcode(BarcodeTypeEnum::QR_CODE, 'EVT1234567890', 'Event Ticket', BarcodeRenderEncodingEnum::UTF_8),
             messages: [new Message('Reminder', 'Concert is tomorrow!', 'msg-1')],
             validTimeInterval: new TimeInterval(new GoogleDateTime('2025-07-20T00:00:00Z'), new GoogleDateTime('2025-07-21T00:00:00Z')),

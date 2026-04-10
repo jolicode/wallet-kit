@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Pass\Android\Normalizer;
 
+use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Offer\OfferClass;
 use Jolicode\WalletKit\Pass\Android\Model\Offer\OfferObject;
 use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
@@ -192,7 +193,7 @@ final class OfferNormalizerTest extends TestCase
             localizedFinePrint: new LocalizedString(new TranslatedString('en', 'Cannot be combined with other offers.')),
             shortTitle: '20% Off',
             localizedShortTitle: new LocalizedString(new TranslatedString('en', '20% Off')),
-            hexBackgroundColor: '#FF6B35',
+            hexBackgroundColor: Color::fromHex('#FF6B35'),
             localizedIssuerName: new LocalizedString(new TranslatedString('en', 'Deal Store')),
             countryCode: 'US',
             heroImage: new Image(new ImageUri('https://example.com/hero.png'), new LocalizedString(new TranslatedString('en', 'Hero'))),
@@ -220,7 +221,7 @@ final class OfferNormalizerTest extends TestCase
                 alternateText: 'OFFER20PCT',
                 renderEncoding: BarcodeRenderEncodingEnum::UTF_8,
             ),
-            hexBackgroundColor: '#FF6B35',
+            hexBackgroundColor: Color::fromHex('#FF6B35'),
             messages: $messages,
             validTimeInterval: new TimeInterval(
                 new GoogleDateTime('2025-06-01T00:00:00Z'),
@@ -254,7 +255,7 @@ final class OfferNormalizerTest extends TestCase
         self::assertSame('Get 20% off on all items in store and online.', $classData['details']);
         self::assertSame('Cannot be combined with other offers. Valid until Dec 31.', $classData['finePrint']);
         self::assertSame('20% Off', $classData['shortTitle']);
-        self::assertSame('#FF6B35', $classData['hexBackgroundColor']);
+        self::assertSame('#ff6b35', $classData['hexBackgroundColor']);
         self::assertSame('US', $classData['countryCode']);
         self::assertTrue($classData['enableSmartTap']);
         self::assertSame(['issuer-1'], $classData['redemptionIssuers']);
@@ -315,7 +316,7 @@ final class OfferNormalizerTest extends TestCase
         self::assertSame('offer-object-001', $objectData['id']);
         self::assertSame('offer-class-001', $objectData['classId']);
         self::assertSame('ACTIVE', $objectData['state']);
-        self::assertSame('#FF6B35', $objectData['hexBackgroundColor']);
+        self::assertSame('#ff6b35', $objectData['hexBackgroundColor']);
         self::assertSame('offer-redeem-001', $objectData['smartTapRedemptionValue']);
         self::assertFalse($objectData['disableExpirationNotification']);
         self::assertSame(['linked-1', 'linked-2'], $objectData['linkedObjectIds']);
