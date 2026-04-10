@@ -39,12 +39,13 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\ViewUnlockRequirementEnum;
  * @phpstan-import-type AppLinkDataType from AppLinkData
  * @phpstan-import-type BoardingPolicy from BoardingPolicyEnum
  * @phpstan-import-type SeatClassPolicy from SeatClassPolicyEnum
+ * @phpstan-import-type FlightStatus from FlightStatusEnum
  * @phpstan-import-type MerchantLocationType from MerchantLocation
  * @phpstan-import-type ValueAddedModuleDataType from ValueAddedModuleData
  * @phpstan-import-type NotifyPreference from NotifyPreferenceEnum
  * @phpstan-import-type ReviewType from Review
  *
- * @phpstan-type FlightClassType array{id: string, issuerName: string, reviewStatus: ReviewStatus, origin: AirportInfoType, destination: AirportInfoType, flightHeader: FlightHeaderType, localScheduledDepartureDateTime?: string, localEstimatedOrActualDepartureDateTime?: string, localBoardingDateTime?: string, localScheduledArrivalDateTime?: string, localEstimatedOrActualArrivalDateTime?: string, localGateClosingDateTime?: string, boardingPolicy?: BoardingPolicy, seatClassPolicy?: SeatClassPolicy, localizedIssuerName?: LocalizedStringType, hexBackgroundColor?: string, countryCode?: string, heroImage?: ImageType, enableSmartTap?: bool, redemptionIssuers?: list<string>, multipleDevicesAndHoldersAllowedStatus?: MultipleDevicesAndHoldersAllowedStatus, callbackOptions?: CallbackOptionsType, securityAnimation?: SecurityAnimationType, viewUnlockRequirement?: ViewUnlockRequirement, messages?: list<GoogleMessageType>, imageModulesData?: list<ImageModuleDataType>, textModulesData?: list<TextModuleDataType>, linksModuleData?: LinksModuleDataType, appLinkData?: AppLinkDataType, languageOverride?: string, merchantLocations?: list<MerchantLocationType>, valueAddedModuleData?: list<ValueAddedModuleDataType>, notifyPreference?: NotifyPreference, review?: ReviewType}
+ * @phpstan-type FlightClassType array{id: string, issuerName: string, reviewStatus: ReviewStatus, origin: AirportInfoType, destination: AirportInfoType, flightHeader: FlightHeaderType, localScheduledDepartureDateTime?: string, localEstimatedOrActualDepartureDateTime?: string, localBoardingDateTime?: string, localScheduledArrivalDateTime?: string, localEstimatedOrActualArrivalDateTime?: string, localGateClosingDateTime?: string, flightStatus?: FlightStatus, boardingPolicy?: BoardingPolicy, seatClassPolicy?: SeatClassPolicy, localizedIssuerName?: LocalizedStringType, hexBackgroundColor?: string, countryCode?: string, heroImage?: ImageType, enableSmartTap?: bool, redemptionIssuers?: list<string>, multipleDevicesAndHoldersAllowedStatus?: MultipleDevicesAndHoldersAllowedStatus, callbackOptions?: CallbackOptionsType, securityAnimation?: SecurityAnimationType, viewUnlockRequirement?: ViewUnlockRequirement, messages?: list<GoogleMessageType>, imageModulesData?: list<ImageModuleDataType>, textModulesData?: list<TextModuleDataType>, linksModuleData?: LinksModuleDataType, appLinkData?: AppLinkDataType, languageOverride?: string, merchantLocations?: list<MerchantLocationType>, valueAddedModuleData?: list<ValueAddedModuleDataType>, notifyPreference?: NotifyPreference, review?: ReviewType}
  */
 class FlightClass
 {
@@ -69,6 +70,7 @@ class FlightClass
         public ?string $localScheduledArrivalDateTime = null,
         public ?string $localEstimatedOrActualArrivalDateTime = null,
         public ?string $localGateClosingDateTime = null,
+        public ?FlightStatusEnum $flightStatus = null,
         public ?BoardingPolicyEnum $boardingPolicy = null,
         public ?SeatClassPolicyEnum $seatClassPolicy = null,
         public ?LocalizedString $localizedIssuerName = null,

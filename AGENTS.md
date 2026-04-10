@@ -30,6 +30,8 @@ castor spec:check:samsung   # Samsung model keyset
 castor spec:baseline:google # Refresh Google baseline
 castor spec:baseline:apple  # Refresh Apple keyset
 castor spec:baseline:samsung # Refresh Samsung keyset
+castor spec:diff:google     # Diff live discovery enums against PHP models
+castor spec:diff:google --properties # Include schema property comparison
 ```
 
 CI runs 4 jobs: cs-check, spec-check, phpstan, and tests (PHP 8.3/8.4/8.5 matrix).
