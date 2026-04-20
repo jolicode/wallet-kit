@@ -15,7 +15,7 @@
 
 ## Overview
 
-Wallet Kit helps you build the **JSON payloads** wallet platforms expect. It focuses on **modeling and normalization** (via Symfony Serializer): it does **not** sign Apple passes, bundle `.pkpass` files, call Google Wallet APIs, or tokenize Samsung Wallet payloads.
+Wallet Kit helps you build, package, and manage wallet passes across Apple Wallet, Google Wallet, and Samsung Wallet. It covers **modeling and normalization** (via Symfony Serializer), **`.pkpass` signing and packaging**, **API clients** for Google and Samsung, **push notifications** for Apple, and an optional **Symfony Bundle** for full integration.
 
 - **PHP** 8.3+
 - **symfony/serializer** ^7.4 || ^8.0
@@ -94,8 +94,27 @@ composer require jolicode/wallet-kit
 - `Jolicode\WalletKit\Pass\Apple` — Apple Wallet `pass.json` payloads
 - `Jolicode\WalletKit\Pass\Android` — Google Wallet class and object payloads
 - `Jolicode\WalletKit\Pass\Samsung` — Samsung Wallet card payloads
-- `Jolicode\WalletKit\Builder` — Fluent builders (`WalletPass`, …) for Apple, Google, Samsung, or all
-- `Jolicode\WalletKit\Exception` — Builder context and `BuiltWalletPass` accessor exceptions
+- `Jolicode\WalletKit\Builder` — Fluent builders (`WalletPass`, ...) for Apple, Google, Samsung, or all
+- `Jolicode\WalletKit\Api\Apple` — `.pkpass` packaging, APNs push notifications
+- `Jolicode\WalletKit\Api\Google` — Google Wallet REST API client, save link generation
+- `Jolicode\WalletKit\Api\Samsung` — Samsung Wallet Partner API client
+- `Jolicode\WalletKit\Api\Auth` — OAuth2/JWT authenticators for Google, Samsung, Apple APNs
+- `Jolicode\WalletKit\Api\Credentials` — Credential value objects for each platform
+- `Jolicode\WalletKit\Bundle` — Symfony Bundle with DI, routes, controllers, and throttled dispatchers
+- `Jolicode\WalletKit\Exception` — Typed exceptions for builders, API, and packaging
+
+## Beyond payloads
+
+The library also handles the operational side of wallet passes:
+
+- **Apple `.pkpass` packaging** — sign and bundle passes into `.pkpass` files with localization support
+- **Google Wallet API** — create, update, and patch classes and objects, generate "Add to Google Wallet" save links
+- **Samsung Wallet API** — create, update, and manage card lifecycle via the Partner API
+- **Apple push notifications** — trigger pass refreshes via APNs HTTP/2 with batch support
+- **Throttled bulk operations** — DB-backed queue with configurable batch size and interval for large-scale operations
+- **Symfony Bundle** — auto-configured services, Apple Web Service endpoints, Google/Samsung callbacks, and a context factory that pre-fills infrastructure values
+
+See platform-specific guides: [Apple](docs/apple.md) | [Google](docs/google.md) | [Samsung](docs/samsung.md) | [Symfony Bundle](docs/bundle.md)
 
 ## API spec checks (with Castor)
 
@@ -114,20 +133,11 @@ Scripts live under [`tools/spec/`](tools/spec/) and are also invoked by CI (`spe
 
 ## Next steps
 
-The library today stops at **typed payloads and normalization**. Planned extensions include:
+Potential future additions:
 
-- [ ] **Apple `.pkpass` packaging** — assemble the pass bundle (images, `pass.json`, manifest), handle **localized resources** (`*.lproj`, string tables), and optionally integrate **signing** so a complete `.pkpass` can be produced from the models you already build.
-- [ ] **Google Wallet API client** — HTTP integration to **create, update, and patch** classes and objects (REST), including the **service-account JWT** flow Google expects, so you can go from `BuiltWalletPass::google()` to live passes without wiring the client yourself.
-- [ ] **Push notifications & in-wallet updates** — **APNs** integration to trigger **Apple Wallet** pass refreshes (silent/empty push so PassKit pulls a new `pass.json` from your web service), **Google Wallet** support for **API-driven updates** plus **user-visible messages / notification hooks** where the platform exposes them, and **Samsung Wallet** push updates via the **Partner API**, so pass changes actually reach holders' devices across all three platforms.
-- [ ] **Samsung Wallet tokenization & Partner API** — JWT token generation for card payloads, HTTP integration with the **Samsung Wallet Partner API** to **create, update, and expire** cards, and card-state lifecycle management, so you can go from `BuiltWalletPass::samsung()` to live cards without wiring the client yourself.
+- **Operational tooling** — fixtures for integration tests, CLI or Castor tasks for dry-run API calls and local `.pkpass` inspection.
 
-Other directions that often sit next to “wallet” libraries (for later consideration):
-
-- **Apple PassKit Web Service** — register/update HTTP endpoints, authentication token handling, and glue between your backend and the **APNs** flow above.
-- **Issuance UX helpers** — stable patterns for **Add to Apple Wallet** / **Save to Google Pay** / **Add to Samsung Wallet** links, deep links, and optional **JWT** flows where platforms require them.
-- **Operational tooling** — fixtures for integration tests, optional **CLI or Castor tasks** that mirror production steps (e.g. dry-run Google calls, local `.pkpass` inspection).
-
-Contributions or design discussion for any of the above are welcome.
+Contributions and design discussion are welcome.
 
 ## License
 
