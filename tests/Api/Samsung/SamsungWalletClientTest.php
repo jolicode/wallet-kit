@@ -41,7 +41,7 @@ final class SamsungWalletClientTest extends TestCase
         $credentials = new SamsungCredentials('partner-123', $this->privateKeyPath);
         $authenticator = new SamsungJwtAuthenticator($credentials);
 
-        return new SamsungWalletClient($httpClient, $normalizer, $authenticator);
+        return new SamsungWalletClient($httpClient, $normalizer, $authenticator, $credentials);
     }
 
     private function createCard(): Card

@@ -12,7 +12,13 @@ final class SamsungApiResponse
     public function __construct(
         private readonly int $statusCode,
         private readonly array $data,
+        private readonly string $rawBody = '',
     ) {
+    }
+
+    public function getRawBody(): string
+    {
+        return $this->rawBody;
     }
 
     public function isSuccessful(): bool

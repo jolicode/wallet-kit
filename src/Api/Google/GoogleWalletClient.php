@@ -92,18 +92,20 @@ final class GoogleWalletClient
      */
     public function createOrUpdatePass(GoogleWalletPair $pair): void
     {
-        // Create class — ignore 409 (already exists)
         $classResponse = $this->createClass($pair);
-        if (!$classResponse->isSuccessful() && 409 !== $classResponse->getStatusCode()) {
-            throw new ApiResponseException($classResponse->getStatusCode(), json_encode($classResponse->getData(), \JSON_THROW_ON_ERROR), \sprintf('Failed to create class for vertical "%s".', $pair->vertical->value));
+        if (409 === $classResponse->getStatusCode()) {
+            $classResponse = $this->updateClass($pair);
+        }
+        if (!$classResponse->isSuccessful()) {
+            throw new ApiResponseException($classResponse->getStatusCode(), $classResponse->getRawBody(), \sprintf('Failed to create or update class for vertical "%s".', $pair->vertical->value));
         }
 
-        // Try to create object, update on 409
         $objectResponse = $this->createObject($pair);
         if (409 === $objectResponse->getStatusCode()) {
-            $this->updateObject($pair);
-        } elseif (!$objectResponse->isSuccessful()) {
-            throw new ApiResponseException($objectResponse->getStatusCode(), json_encode($objectResponse->getData(), \JSON_THROW_ON_ERROR), \sprintf('Failed to create object for vertical "%s".', $pair->vertical->value));
+            $objectResponse = $this->updateObject($pair);
+        }
+        if (!$objectResponse->isSuccessful()) {
+            throw new ApiResponseException($objectResponse->getStatusCode(), $objectResponse->getRawBody(), \sprintf('Failed to create or update object for vertical "%s".', $pair->vertical->value));
         }
     }
 
@@ -133,8 +135,9 @@ final class GoogleWalletClient
             throw new HttpRequestException(\sprintf('Google Wallet API request failed: %s', $e->getMessage()), $e);
         }
 
+        $decoded = '' !== $content ? json_decode($content, true, 512, \JSON_THROW_ON_ERROR) : [];
         /** @var array<string, mixed> $data */
-        $data = '' !== $content ? (array) json_decode($content, true, 512, \JSON_THROW_ON_ERROR) : [];
+        $data = \is_array($decoded) ? $decoded : [];
 
         if (429 === $statusCode) {
             $retryAfter = $response->getHeaders(false)['retry-after'][0] ?? null;
@@ -142,7 +145,7 @@ final class GoogleWalletClient
             throw new RateLimitException($content, null !== $retryAfter ? (int) $retryAfter : null);
         }
 
-        return new GoogleApiResponse($statusCode, $data);
+        return new GoogleApiResponse($statusCode, $data, $content);
     }
 
     private static function classSegment(GoogleVerticalEnum $vertical): string

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Jolicode\WalletKit\Api\Samsung;
 
 use Jolicode\WalletKit\Api\Auth\SamsungJwtAuthenticator;
+use Jolicode\WalletKit\Api\Credentials\SamsungCredentials;
 use Jolicode\WalletKit\Exception\Api\HttpRequestException;
 use Jolicode\WalletKit\Exception\Api\RateLimitException;
 use Jolicode\WalletKit\Pass\Samsung\Model\Card;
@@ -14,37 +15,39 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class SamsungWalletClient
 {
-    private const BASE_URL = 'https://api-us1.mpay.samsung.com/wallet/v2.1/';
+    private readonly string $baseUrl;
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly NormalizerInterface $normalizer,
         private readonly SamsungJwtAuthenticator $authenticator,
+        SamsungCredentials $credentials,
     ) {
+        $this->baseUrl = $credentials->region->getBaseUrl();
     }
 
     public function createCard(Card $card): SamsungApiResponse
     {
         $body = $this->normalizer->normalize($card);
 
-        return $this->request('POST', self::BASE_URL . 'cards', $body);
+        return $this->request('POST', $this->baseUrl . 'cards', $body);
     }
 
     public function getCard(string $cardId): SamsungApiResponse
     {
-        return $this->request('GET', self::BASE_URL . 'cards/' . $cardId);
+        return $this->request('GET', $this->baseUrl . 'cards/' . $cardId);
     }
 
     public function updateCard(Card $card, string $cardId): SamsungApiResponse
     {
         $body = $this->normalizer->normalize($card);
 
-        return $this->request('PUT', self::BASE_URL . 'cards/' . $cardId, $body);
+        return $this->request('PUT', $this->baseUrl . 'cards/' . $cardId, $body);
     }
 
     public function updateCardState(string $cardId, string $state): SamsungApiResponse
     {
-        return $this->request('PATCH', self::BASE_URL . 'cards/' . $cardId, [
+        return $this->request('PATCH', $this->baseUrl . 'cards/' . $cardId, [
             'state' => $state,
         ]);
     }
@@ -56,7 +59,7 @@ final class SamsungWalletClient
      */
     public function pushCardUpdate(string $cardId): SamsungApiResponse
     {
-        return $this->request('POST', self::BASE_URL . 'cards/' . $cardId . '/push');
+        return $this->request('POST', $this->baseUrl . 'cards/' . $cardId . '/push');
     }
 
     /**
@@ -85,8 +88,9 @@ final class SamsungWalletClient
             throw new HttpRequestException(\sprintf('Samsung Wallet API request failed: %s', $e->getMessage()), $e);
         }
 
+        $decoded = '' !== $content ? json_decode($content, true, 512, \JSON_THROW_ON_ERROR) : [];
         /** @var array<string, mixed> $data */
-        $data = '' !== $content ? (array) json_decode($content, true, 512, \JSON_THROW_ON_ERROR) : [];
+        $data = \is_array($decoded) ? $decoded : [];
 
         if (429 === $statusCode) {
             $retryAfter = $response->getHeaders(false)['retry-after'][0] ?? null;
@@ -94,6 +98,6 @@ final class SamsungWalletClient
             throw new RateLimitException($content, null !== $retryAfter ? (int) $retryAfter : null);
         }
 
-        return new SamsungApiResponse($statusCode, $data);
+        return new SamsungApiResponse($statusCode, $data, $content);
     }
 }
