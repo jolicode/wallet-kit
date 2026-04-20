@@ -62,6 +62,7 @@ final class WalletKitExtension extends Extension
             $container->setParameter('wallet_kit.samsung.partner_id', $samsungConfig['partnerId']);
             $container->setParameter('wallet_kit.samsung.private_key_path', $samsungConfig['privateKeyPath']);
             $container->setParameter('wallet_kit.samsung.service_id', $samsungConfig['serviceId']);
+            $container->setParameter('wallet_kit.samsung.region', $samsungConfig['region']);
 
             $loader->load('samsung.php');
 

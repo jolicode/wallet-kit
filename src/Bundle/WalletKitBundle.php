@@ -13,16 +13,31 @@ final class WalletKitBundle extends AbstractBundle
     {
         $routesDir = __DIR__ . '/Resources/config/routes/';
 
-        if ($this->container->hasParameter('wallet_kit.apple.certificate_path')) {
+        if ($this->hasAppleConfig()) {
             $routes->import($routesDir . 'apple.php');
         }
 
-        if ($this->container->hasParameter('wallet_kit.google.service_account_json_path')) {
+        if ($this->hasGoogleConfig()) {
             $routes->import($routesDir . 'google.php');
         }
 
-        if ($this->container->hasParameter('wallet_kit.samsung.partner_id')) {
+        if ($this->hasSamsungConfig()) {
             $routes->import($routesDir . 'samsung.php');
         }
+    }
+
+    private function hasAppleConfig(): bool
+    {
+        return $this->container->hasParameter('wallet_kit.apple.certificate_path');
+    }
+
+    private function hasGoogleConfig(): bool
+    {
+        return $this->container->hasParameter('wallet_kit.google.service_account_json_path');
+    }
+
+    private function hasSamsungConfig(): bool
+    {
+        return $this->container->hasParameter('wallet_kit.samsung.partner_id');
     }
 }
