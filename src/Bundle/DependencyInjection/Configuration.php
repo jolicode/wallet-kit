@@ -42,6 +42,7 @@ final class Configuration implements ConfigurationInterface
                         ->scalarNode('partnerId')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('privateKeyPath')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('serviceId')->defaultNull()->end()
+                        ->enumNode('region')->values(['us', 'eu', 'kr'])->defaultValue('eu')->end()
                         ->integerNode('apiBatchSize')->defaultValue(100)->end()
                         ->integerNode('apiBatchInterval')->defaultValue(30)->end()
                     ->end()

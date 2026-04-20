@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 use Jolicode\WalletKit\Api\Auth\SamsungJwtAuthenticator;
 use Jolicode\WalletKit\Api\Credentials\SamsungCredentials;
+use Jolicode\WalletKit\Api\Samsung\SamsungRegionEnum;
 use Jolicode\WalletKit\Api\Samsung\SamsungWalletClient;
 use Jolicode\WalletKit\Bundle\Controller\Samsung\SamsungCallbackController;
 use Jolicode\WalletKit\Bundle\Samsung\SamsungCallbackHandlerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
+use function Symfony\Component\DependencyInjection\Loader\Configurator\inline_service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
@@ -20,6 +22,9 @@ return static function (ContainerConfigurator $container): void {
             param('wallet_kit.samsung.partner_id'),
             param('wallet_kit.samsung.private_key_path'),
             param('wallet_kit.samsung.service_id'),
+            inline_service(SamsungRegionEnum::class)
+                ->factory([SamsungRegionEnum::class, 'from'])
+                ->args([param('wallet_kit.samsung.region')]),
         ])
     ;
     $services->alias(SamsungCredentials::class, 'wallet_kit.credentials.samsung');
@@ -36,6 +41,7 @@ return static function (ContainerConfigurator $container): void {
             service('http_client'),
             service('serializer'),
             service('wallet_kit.auth.samsung_jwt'),
+            service('wallet_kit.credentials.samsung'),
         ])
     ;
     $services->alias(SamsungWalletClient::class, 'wallet_kit.samsung.client');
