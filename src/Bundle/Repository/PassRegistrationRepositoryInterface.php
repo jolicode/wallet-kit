@@ -6,7 +6,10 @@ namespace Jolicode\WalletKit\Bundle\Repository;
 
 interface PassRegistrationRepositoryInterface
 {
-    public function register(string $deviceId, string $passTypeId, string $serialNumber, string $pushToken): void;
+    /**
+     * @return bool true if a new registration was created, false if it already existed
+     */
+    public function register(string $deviceId, string $passTypeId, string $serialNumber, string $pushToken): bool;
 
     public function unregister(string $deviceId, string $passTypeId, string $serialNumber): void;
 

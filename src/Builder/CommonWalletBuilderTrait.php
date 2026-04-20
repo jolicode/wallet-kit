@@ -84,6 +84,9 @@ trait CommonWalletBuilderTrait
     public function withAppleWebService(?string $url, ?string $authenticationToken = null): static
     {
         $this->common->webServiceURL = $url;
+        if (null !== $url && null === $authenticationToken) {
+            $authenticationToken = hash('xxh128', random_bytes(10));
+        }
         $this->common->authenticationToken = $authenticationToken;
 
         return $this;
