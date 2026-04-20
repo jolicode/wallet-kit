@@ -9,7 +9,7 @@ use Jolicode\WalletKit\Bundle\WalletPlatformEnum;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'wallet_kit_pending_operation')]
-#[ORM\Index(columns: ['batch_group_id', 'id'])]
+#[ORM\Index(columns: ['batch_group_id', 'status', 'id'])]
 final class PendingOperation
 {
     #[ORM\Id]
@@ -29,6 +29,18 @@ final class PendingOperation
     #[ORM\Column(type: 'datetime_immutable')]
     public \DateTimeImmutable $createdAt;
 
+    #[ORM\Column(type: 'string', length: 20, enumType: PendingOperationStatusEnum::class)]
+    public PendingOperationStatusEnum $status;
+
+    #[ORM\Column(type: 'integer')]
+    public int $attempts = 0;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    public ?string $lastError = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    public ?\DateTimeImmutable $processingStartedAt = null;
+
     /**
      * @param array<string, mixed> $payload
      */
@@ -41,5 +53,6 @@ final class PendingOperation
         $this->batchGroupId = $batchGroupId;
         $this->payload = $payload;
         $this->createdAt = new \DateTimeImmutable();
+        $this->status = PendingOperationStatusEnum::PENDING;
     }
 }

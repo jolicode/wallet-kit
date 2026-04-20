@@ -14,6 +14,8 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
 #[AsMessageHandler]
 final class ProcessPendingOperationsHandler
 {
+    private const MAX_ATTEMPTS = 5;
+
     /** @var array<string, PendingOperationProcessorInterface> */
     private readonly array $processorMap;
 
@@ -61,6 +63,8 @@ final class ProcessPendingOperationsHandler
             }
         }
 
+        $this->repository->resetStaleProcessing(new \DateTimeImmutable('-10 minutes'));
+
         $operations = $this->repository->dequeue($message->batchGroupId, $batchSize);
 
         if (0 === \count($operations)) {
@@ -69,7 +73,10 @@ final class ProcessPendingOperationsHandler
 
         try {
             $processor->process($operations);
+            $this->repository->markSuccess($operations);
         } catch (RateLimitException $e) {
+            // Rate-limited: put operations back in the queue and retry after delay.
+            $this->repository->markFailed($operations, 'rate-limited', \PHP_INT_MAX);
             $retryAfter = $e->retryAfterSeconds ?? $batchInterval;
 
             $this->messageBus->dispatch(
@@ -78,6 +85,10 @@ final class ProcessPendingOperationsHandler
             );
 
             return;
+        } catch (\Throwable $e) {
+            $this->repository->markFailed($operations, $e->getMessage(), self::MAX_ATTEMPTS);
+
+            throw $e;
         }
 
         $remaining = $this->repository->countPending($message->batchGroupId);
