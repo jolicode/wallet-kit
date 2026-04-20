@@ -208,7 +208,7 @@ final class ApplePassPackager
 
     /**
      * @param Pass                  $pass   The Apple pass model
-     * @param array<string, string> $images Filename => binary content (icon.png, logo.png, etc.)
+     * @param array<string, string> $images Filename => local path or URL (icon.png, logo.png, etc.). Loaded via file_get_contents; requires allow_url_fopen=On for remote URLs.
      * @param array<string, array<string, string>> $localizations Locale => [key => value] for .lproj/pass.strings
      * @return string Raw .pkpass binary (ZIP)
      */
@@ -755,7 +755,7 @@ interface ApplePassProviderInterface
     /** Build the current version of this pass */
     public function getPass(string $passTypeIdentifier, string $serialNumber): BuiltWalletPass;
 
-    /** @return array<string, string> filename => binary content */
+    /** @return array<string, string> filename => local path or URL (loaded via file_get_contents) */
     public function getPassImages(string $passTypeIdentifier, string $serialNumber): array;
 
     /** @return string[] Serial numbers updated since $since */
