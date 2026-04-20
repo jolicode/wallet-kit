@@ -87,8 +87,12 @@ final class IssuanceHelperTest extends TestCase
 
         $url = $helper->samsungAddToWalletUrl('card-123', 'partner-456');
 
-        self::assertStringStartsWith('https://a.]wallet.samsung.com/wallet/card', $url);
+        self::assertStringStartsWith('https://a.wallet.samsung.com/wallet/card', $url);
         self::assertStringContainsString('cardId=card-123', $url);
         self::assertStringContainsString('partnerId=partner-456', $url);
+
+        $parsed = parse_url($url);
+        self::assertIsArray($parsed);
+        self::assertSame('a.wallet.samsung.com', $parsed['host'] ?? null);
     }
 }

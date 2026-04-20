@@ -250,6 +250,55 @@ final class ApplePassPackagerTest extends TestCase
         }
     }
 
+    public function testPackageThrowsWhenIconMissing(): void
+    {
+        $packager = $this->createPackager();
+
+        $this->expectException(PackagingException::class);
+        $this->expectExceptionMessage('icon.png');
+
+        $packager->package($this->createPass(), []);
+    }
+
+    public function testPassStringsEscapesSpecialCharacters(): void
+    {
+        $packager = $this->createPackager();
+        $iconPath = $this->createTempImage('icon');
+
+        try {
+            $pkpass = $packager->package($this->createPass(), ['icon.png' => $iconPath], [
+                'en' => [
+                    'quote' => 'He said "hi"',
+                    'back\\slash' => 'value\\with\\backslashes',
+                    'newline' => "line1\nline2",
+                    'tab' => "a\tb",
+                    'cr' => "x\ry",
+                ],
+            ]);
+
+            $tmpZip = tempnam(sys_get_temp_dir(), 'wallet_kit_test_zip_');
+            self::assertNotFalse($tmpZip);
+            file_put_contents($tmpZip, $pkpass);
+
+            $zip = new \ZipArchive();
+            self::assertTrue($zip->open($tmpZip));
+            $strings = $zip->getFromName('en.lproj/pass.strings');
+            self::assertNotFalse($strings);
+
+            self::assertStringContainsString('"quote" = "He said \\"hi\\"";', $strings);
+            self::assertStringContainsString('"back\\\\slash" = "value\\\\with\\\\backslashes";', $strings);
+            self::assertStringContainsString('"newline" = "line1\\nline2";', $strings);
+            self::assertStringContainsString('"tab" = "a\\tb";', $strings);
+            self::assertStringContainsString('"cr" = "x\\ry";', $strings);
+            self::assertStringEndsWith("\n", $strings);
+
+            $zip->close();
+            @unlink($tmpZip);
+        } finally {
+            @unlink($iconPath);
+        }
+    }
+
     public function testPackageThrowsOnUnreadableImage(): void
     {
         $packager = $this->createPackager();

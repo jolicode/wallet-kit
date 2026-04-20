@@ -38,6 +38,10 @@ final class ApplePassPackager
      */
     public function package(Pass $pass, array $images, array $localizations = []): string
     {
+        if (!\array_key_exists('icon.png', $images)) {
+            throw new PackagingException('Apple requires at least "icon.png" in the pass bundle.');
+        }
+
         // 1. Serialize pass to JSON
         $passJson = $this->serializer->serialize($pass, 'json');
 
@@ -84,12 +88,21 @@ final class ApplePassPackager
     {
         $lines = [];
         foreach ($strings as $key => $value) {
-            $escapedKey = str_replace(['"', '\\'], ['\\"', '\\\\'], $key);
-            $escapedValue = str_replace(['"', '\\'], ['\\"', '\\\\'], $value);
-            $lines[] = \sprintf('"%s" = "%s";', $escapedKey, $escapedValue);
+            $lines[] = \sprintf('"%s" = "%s";', self::escapeStringValue($key), self::escapeStringValue($value));
         }
 
-        return implode("\n", $lines);
+        return implode("\n", $lines) . "\n";
+    }
+
+    private static function escapeStringValue(string $value): string
+    {
+        return strtr($value, [
+            '\\' => '\\\\',
+            '"' => '\\"',
+            "\n" => '\\n',
+            "\r" => '\\r',
+            "\t" => '\\t',
+        ]);
     }
 
     private function signManifest(string $manifestJson): string
@@ -149,39 +162,68 @@ final class ApplePassPackager
                 throw new PackagingException('Unable to read the generated signature.');
             }
 
-            // openssl_pkcs7_sign outputs S/MIME format.
-            // Extract the base64-encoded PKCS7 signature from the last MIME part.
-            $smime = $signatureContent;
-
-            // Find the signature block after Content-Transfer-Encoding: base64
-            $separator = "\n\n";
-            $lastPartStart = strrpos($smime, $separator);
-
-            if (false === $lastPartStart) {
-                throw new PackagingException('Unable to extract DER signature from S/MIME output.');
-            }
-
-            // Extract the base64 content (last block before the closing boundary)
-            $base64Block = substr($smime, $lastPartStart + \strlen($separator));
-
-            // Remove the trailing MIME boundary line (e.g. "------BOUNDARY--\n")
-            $base64Block = preg_replace('/\r?\n------[^\n]+--\s*$/', '', $base64Block);
-
-            if (null === $base64Block) {
-                throw new PackagingException('Unable to clean DER signature.');
-            }
-
-            $der = base64_decode(trim($base64Block), true);
-
-            if (false === $der) {
-                throw new PackagingException('Unable to decode DER signature.');
-            }
-
-            return $der;
+            return $this->extractDerFromSmime($signatureContent);
         } finally {
             @unlink($manifestTmp);
             @unlink($signatureTmp);
         }
+    }
+
+    /**
+     * Extracts the binary DER signature from the S/MIME output produced by openssl_pkcs7_sign().
+     *
+     * Supports both PEM-style blocks (-----BEGIN PKCS7-----) and the multipart/signed
+     * structure with an application/x-pkcs7-signature attachment, normalizing CRLF/LF.
+     */
+    private function extractDerFromSmime(string $smime): string
+    {
+        $normalized = str_replace("\r\n", "\n", $smime);
+
+        // Case 1: explicit PEM-style block (rare with PKCS7_BINARY but handled defensively).
+        if (1 === preg_match('/-----BEGIN PKCS7-----(.*?)-----END PKCS7-----/s', $normalized, $m)) {
+            $der = base64_decode(preg_replace('/\s+/', '', $m[1]) ?? '', true);
+            if (false === $der || '' === $der) {
+                throw new PackagingException('Unable to decode PEM PKCS7 block.');
+            }
+
+            return $der;
+        }
+
+        // Case 2: multipart/signed S/MIME with application/x-pkcs7-signature attachment.
+        if (1 === preg_match(
+            '/Content-Type:\s*application\/(?:x-)?pkcs7-signature[^\n]*\n(?:[^\n]+\n)*\n(.*?)(?:\n------|$)/s',
+            $normalized,
+            $m,
+        )) {
+            $der = base64_decode(preg_replace('/\s+/', '', $m[1]) ?? '', true);
+            if (false === $der || '' === $der) {
+                throw new PackagingException('Unable to decode PKCS7 attachment.');
+            }
+
+            return $der;
+        }
+
+        // Fallback: last block after blank line, strip trailing boundary.
+        $separator = "\n\n";
+        $lastPartStart = strrpos($normalized, $separator);
+        if (false === $lastPartStart) {
+            throw new PackagingException('Unable to extract DER signature from S/MIME output.');
+        }
+
+        $base64Block = substr($normalized, $lastPartStart + \strlen($separator));
+        $base64Block = preg_replace('/\n------[^\n]+--\s*$/', '', $base64Block);
+
+        if (null === $base64Block) {
+            throw new PackagingException('Unable to clean DER signature.');
+        }
+
+        $der = base64_decode(trim($base64Block), true);
+
+        if (false === $der || '' === $der) {
+            throw new PackagingException('Unable to decode DER signature.');
+        }
+
+        return $der;
     }
 
     /**

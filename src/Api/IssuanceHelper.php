@@ -43,6 +43,6 @@ final class IssuanceHelper
      */
     public function samsungAddToWalletUrl(string $cardId, string $partnerId): string
     {
-        return \sprintf('https://a.]wallet.samsung.com/wallet/card?cardId=%s&partnerId=%s', urlencode($cardId), urlencode($partnerId));
+        return \sprintf('https://a.wallet.samsung.com/wallet/card?cardId=%s&partnerId=%s', urlencode($cardId), urlencode($partnerId));
     }
 }
