@@ -45,6 +45,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             service(GoogleWalletClient::class),
             service('serializer'),
+            service('logger')->nullOnInvalid(),
         ])
         ->tag('wallet_kit.pending_operation_processor')
     ;
@@ -53,6 +54,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             service(SamsungWalletClient::class),
             service('serializer'),
+            service('logger')->nullOnInvalid(),
         ])
         ->tag('wallet_kit.pending_operation_processor')
     ;
