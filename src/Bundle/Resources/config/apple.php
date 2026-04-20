@@ -60,6 +60,7 @@ return static function (ContainerConfigurator $container): void {
             service(PassRegistrationRepositoryInterface::class),
             service(ApplePassProviderInterface::class),
             service('wallet_kit.apple.packager'),
+            service('logger')->nullOnInvalid(),
         ])
         ->tag('controller.service_arguments')
     ;

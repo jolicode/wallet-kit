@@ -14,12 +14,24 @@ final class DoctrinePassRegistrationRepository implements PassRegistrationReposi
     ) {
     }
 
-    public function register(string $deviceId, string $passTypeId, string $serialNumber, string $pushToken): void
+    public function register(string $deviceId, string $passTypeId, string $serialNumber, string $pushToken): bool
     {
+        $existing = $this->entityManager->getRepository(PassRegistration::class)->findOneBy([
+            'deviceId' => $deviceId,
+            'passTypeId' => $passTypeId,
+            'serialNumber' => $serialNumber,
+        ]);
+
+        if (null !== $existing) {
+            return false;
+        }
+
         $registration = new PassRegistration($deviceId, $passTypeId, $serialNumber, $pushToken);
 
         $this->entityManager->persist($registration);
         $this->entityManager->flush();
+
+        return true;
     }
 
     public function unregister(string $deviceId, string $passTypeId, string $serialNumber): void
