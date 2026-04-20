@@ -88,6 +88,7 @@ use Jolicode\WalletKit\Pass\Samsung\Normalizer\PayAsYouGo\PayAsYouGoAttributesNo
 use Jolicode\WalletKit\Pass\Samsung\Normalizer\Shared\LocationNormalizer as SamsungLocationNormalizer;
 use Jolicode\WalletKit\Pass\Samsung\Normalizer\Shared\SamsungBarcodeNormalizer;
 use Jolicode\WalletKit\Pass\Samsung\Normalizer\Shared\SamsungImageNormalizer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Serializer;
 
 final class BuilderTestSerializerFactory
@@ -179,6 +180,8 @@ final class BuilderTestSerializerFactory
             new SamsungLocalizationNormalizer(),
             new SamsungCardDataNormalizer(),
             new SamsungCardNormalizer(),
+        ], [
+            new JsonEncoder(),
         ]);
     }
 }

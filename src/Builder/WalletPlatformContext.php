@@ -59,6 +59,27 @@ final class WalletPlatformContext
         throw new WalletKitInvariantViolationException('Google issuer name is missing and no Apple context is available to fall back on.');
     }
 
+    public function withAppleDefaults(
+        string $teamIdentifier,
+        string $passTypeIdentifier,
+        ?string $webServiceURL = null,
+        ?string $authenticationToken = null,
+    ): self {
+        return new self(
+            new AppleWalletContext(
+                teamIdentifier: $teamIdentifier,
+                passTypeIdentifier: $passTypeIdentifier,
+                serialNumber: '',
+                organizationName: '',
+                description: '',
+                webServiceURL: $webServiceURL,
+                authenticationToken: $authenticationToken,
+            ),
+            $this->google,
+            $this->samsung,
+        );
+    }
+
     public function withApple(
         string $teamIdentifier,
         string $passTypeIdentifier,
@@ -75,6 +96,8 @@ final class WalletPlatformContext
                 organizationName: $organizationName,
                 description: $description,
                 formatVersion: $formatVersion,
+                webServiceURL: $this->apple?->webServiceURL,
+                authenticationToken: $this->apple?->authenticationToken,
             ),
             $this->google,
             $this->samsung,
