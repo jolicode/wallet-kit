@@ -95,7 +95,7 @@ final class GoogleOAuth2Authenticator
 
         return new CachedToken(
             $data['access_token'],
-            new \DateTimeImmutable(\sprintf('+%d seconds', $expiresIn - 60)),
+            new \DateTimeImmutable(\sprintf('+%d seconds', max(60, $expiresIn - 60))),
         );
     }
 
