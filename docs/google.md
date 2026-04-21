@@ -2,6 +2,8 @@
 
 This page covers authentication, CRUD operations, and save-link generation for Google Wallet passes using the library's API layer.
 
+> Need to provision a Google Cloud project, Issuer ID, or service-account key first? See the [Google setup guide](setup/google.md).
+
 ---
 
 ## Authentication

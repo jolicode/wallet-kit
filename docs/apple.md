@@ -2,6 +2,8 @@
 
 This page covers Apple-specific APIs: `.pkpass` packaging, APNS push notifications, and credentials setup. For the cross-platform builder that produces Apple `Pass` models, see [builder-examples.md](builder-examples.md).
 
+> Need to provision an Apple Developer account, Pass Type ID, or P12 certificate first? See the [Apple setup guide](setup/apple.md).
+
 ## Contents
 
 - [`.pkpass` packaging](#pkpass-packaging)
