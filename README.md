@@ -114,7 +114,7 @@ The library also handles the operational side of wallet passes:
 - **Throttled bulk operations** — DB-backed queue with configurable batch size and interval for large-scale operations
 - **Symfony Bundle** — auto-configured services, Apple Web Service endpoints, Google/Samsung callbacks, and a context factory that pre-fills infrastructure values
 
-See platform-specific guides: [Apple](docs/apple.md) | [Google](docs/google.md) | [Samsung](docs/samsung.md) | [Symfony Bundle](docs/bundle.md)
+See platform-specific guides: [Apple](docs/apple.md) ([setup](docs/setup/apple.md)) | [Google](docs/google.md) ([setup](docs/setup/google.md)) | [Samsung](docs/samsung.md) ([setup](docs/setup/samsung.md)) | [Symfony Bundle](docs/bundle.md)
 
 ## API spec checks (with Castor)
 

@@ -1,5 +1,7 @@
 # Wallet Kit -- Samsung Wallet
 
+> Need to provision a Samsung Wallet Partners account, service ID, or signing key first? See the [Samsung setup guide](setup/samsung.md).
+
 ## Contents
 
 - [Authentication](#authentication)
