@@ -1,0 +1,22 @@
+{
+    "require": {
+        "php": ">=8.3",
+        "jolicode/wallet-kit": "*",
+        "symfony/dotenv": "^8.0",
+        "symfony/http-client": "^8.0",
+        "symfony/serializer": "^8.0",
+        "symfony/property-access": "^8.0",
+        "symfony/property-info": "^8.0"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -1,9 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
-(new \Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
+(new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
 
 use Jolicode\WalletKit\Api\Auth\GoogleOAuth2Authenticator;
 use Jolicode\WalletKit\Api\Credentials\GoogleCredentials;
@@ -18,10 +19,10 @@ use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 use Symfony\Component\HttpClient\HttpClient;
 
-$issuerId           = $_ENV['GOOGLE_WALLET_ISSUER_ID'] ?? throw new \RuntimeException('Missing GOOGLE_WALLET_ISSUER_ID in .env');
-$serviceAccountPath = $_ENV['GOOGLE_WALLET_SERVICE_ACCOUNT_PATH'] ?? throw new \RuntimeException('Missing GOOGLE_WALLET_SERVICE_ACCOUNT_PATH in .env');
+$issuerId = $_ENV['GOOGLE_WALLET_ISSUER_ID'] ?? throw new RuntimeException('Missing GOOGLE_WALLET_ISSUER_ID in .env');
+$serviceAccountPath = $_ENV['GOOGLE_WALLET_SERVICE_ACCOUNT_PATH'] ?? throw new RuntimeException('Missing GOOGLE_WALLET_SERVICE_ACCOUNT_PATH in .env');
 
-$classId  = $issuerId . '.api_test_class_' . date('Ymd');
+$classId = $issuerId . '.api_test_class_' . date('Ymd');
 $objectId = $issuerId . '.api_test_object_' . uniqid();
 
 $serializer = WalletSerializerFactory::create();
@@ -46,10 +47,10 @@ $built->google()->issuerClass->programLogo = new Image(
 );
 
 // === API client ===
-$http        = HttpClient::create();
+$http = HttpClient::create();
 $credentials = new GoogleCredentials($serviceAccountPath);
-$auth        = new GoogleOAuth2Authenticator($http, $credentials);
-$client      = new GoogleWalletClient($http, $serializer, $auth);
+$auth = new GoogleOAuth2Authenticator($http, $credentials);
+$client = new GoogleWalletClient($http, $serializer, $auth);
 
 echo "→ Creating class and object via API...\n";
 
@@ -59,12 +60,12 @@ try {
     echo "   GOOGLE_WALLET_CLASS_ID={$classId}\n";
     echo "   GOOGLE_WALLET_OBJECT_ID={$objectId}\n";
     echo "   (copy these into your .env.local to use test-update.php)\n\n";
-} catch (\Jolicode\WalletKit\Exception\Api\ApiResponseException $e) {
-    echo "✗ API call failed: " . $e->getMessage() . "\n";
-    echo "  HTTP " . $e->statusCode . ": " . $e->responseBody . "\n";
+} catch (Jolicode\WalletKit\Exception\Api\ApiResponseException $e) {
+    echo '✗ API call failed: ' . $e->getMessage() . "\n";
+    echo '  HTTP ' . $e->statusCode . ': ' . $e->responseBody . "\n";
     exit(1);
-} catch (\Throwable $e) {
-    echo "✗ API call failed: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo '✗ API call failed: ' . $e->getMessage() . "\n";
     exit(1);
 }
 
