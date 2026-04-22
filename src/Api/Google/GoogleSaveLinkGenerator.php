@@ -36,8 +36,10 @@ final class GoogleSaveLinkGenerator
             throw new AuthenticationException('Service account JSON must contain "client_email" and "private_key" fields.');
         }
 
+        $normalizedClass = $this->normalizer->normalize($pair->issuerClass);
         $normalizedObject = $this->normalizer->normalize($pair->passObject);
-        $payloadKey = self::objectsPayloadKey($pair->vertical);
+        $classesKey = self::classesPayloadKey($pair->vertical);
+        $objectsKey = self::objectsPayloadKey($pair->vertical);
 
         $header = self::base64UrlEncode(json_encode(['alg' => 'RS256', 'typ' => 'JWT'], \JSON_THROW_ON_ERROR));
         $claims = self::base64UrlEncode(json_encode([
@@ -45,7 +47,8 @@ final class GoogleSaveLinkGenerator
             'aud' => 'google',
             'typ' => 'savetowallet',
             'payload' => [
-                $payloadKey => [$normalizedObject],
+                $classesKey => [$normalizedClass],
+                $objectsKey => [$normalizedObject],
             ],
         ], \JSON_THROW_ON_ERROR));
 
@@ -78,6 +81,19 @@ final class GoogleSaveLinkGenerator
             GoogleVerticalEnum::LOYALTY => 'loyaltyObjects',
             GoogleVerticalEnum::OFFER => 'offerObjects',
             GoogleVerticalEnum::TRANSIT => 'transitObjects',
+        };
+    }
+
+    private static function classesPayloadKey(GoogleVerticalEnum $vertical): string
+    {
+        return match ($vertical) {
+            GoogleVerticalEnum::FLIGHT => 'flightClasses',
+            GoogleVerticalEnum::EVENT_TICKET => 'eventTicketClasses',
+            GoogleVerticalEnum::GENERIC => 'genericClasses',
+            GoogleVerticalEnum::GIFT_CARD => 'giftCardClasses',
+            GoogleVerticalEnum::LOYALTY => 'loyaltyClasses',
+            GoogleVerticalEnum::OFFER => 'offerClasses',
+            GoogleVerticalEnum::TRANSIT => 'transitClasses',
         };
     }
 

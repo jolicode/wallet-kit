@@ -85,6 +85,8 @@ final class GoogleSaveLinkGeneratorTest extends TestCase
         self::assertSame('test@test-project.iam.gserviceaccount.com', $claims['iss']);
         self::assertSame('google', $claims['aud']);
         self::assertSame('savetowallet', $claims['typ']);
+        self::assertArrayHasKey('genericClasses', $claims['payload']);
+        self::assertCount(1, $claims['payload']['genericClasses']);
         self::assertArrayHasKey('genericObjects', $claims['payload']);
         self::assertCount(1, $claims['payload']['genericObjects']);
     }
@@ -116,6 +118,7 @@ final class GoogleSaveLinkGeneratorTest extends TestCase
         $parts = explode('.', $jwt);
 
         $claims = json_decode(base64_decode(strtr($parts[1], '-_', '+/'), true), true);
+        self::assertArrayHasKey('loyaltyClasses', $claims['payload']);
         self::assertArrayHasKey('loyaltyObjects', $claims['payload']);
     }
 }

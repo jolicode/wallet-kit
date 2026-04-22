@@ -11,6 +11,7 @@ use Jolicode\WalletKit\Api\Google\GoogleSaveLinkGenerator;
 use Jolicode\WalletKit\Api\Google\GoogleWalletClient;
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
+use Jolicode\WalletKit\Builder\WalletSerializerFactory;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\Image;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ImageUri;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
@@ -23,7 +24,7 @@ $serviceAccountPath = $_ENV['GOOGLE_WALLET_SERVICE_ACCOUNT_PATH'] ?? throw new \
 $classId  = $issuerId . '.api_test_class_' . date('Ymd');
 $objectId = $issuerId . '.api_test_object_' . uniqid();
 
-$serializer = \Jolicode\WalletKit\Tests\Builder\BuilderTestSerializerFactory::create();
+$serializer = WalletSerializerFactory::create();
 
 $context = (new WalletPlatformContext())
     ->withGoogle(
