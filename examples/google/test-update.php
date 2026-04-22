@@ -10,6 +10,7 @@ use Jolicode\WalletKit\Api\Credentials\GoogleCredentials;
 use Jolicode\WalletKit\Api\Google\GoogleWalletClient;
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
+use Jolicode\WalletKit\Builder\WalletSerializerFactory;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
 use Symfony\Component\HttpClient\HttpClient;
@@ -19,7 +20,7 @@ $serviceAccountPath = $_ENV['GOOGLE_WALLET_SERVICE_ACCOUNT_PATH'] ?? throw new \
 $classId            = $_ENV['GOOGLE_WALLET_CLASS_ID'] ?? throw new \RuntimeException('Missing GOOGLE_WALLET_CLASS_ID in .env (use the one printed by test-api.php)');
 $objectId           = $_ENV['GOOGLE_WALLET_OBJECT_ID'] ?? throw new \RuntimeException('Missing GOOGLE_WALLET_OBJECT_ID in .env (use the one printed by test-api.php)');
 
-$serializer = \Jolicode\WalletKit\Tests\Builder\BuilderTestSerializerFactory::create();
+$serializer = WalletSerializerFactory::create();
 
 $context = (new WalletPlatformContext())
     ->withGoogle(

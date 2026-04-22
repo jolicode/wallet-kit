@@ -10,6 +10,7 @@ use Jolicode\WalletKit\Api\Google\GoogleSaveLinkGenerator;
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
 use Jolicode\WalletKit\Common\Color;
+use Jolicode\WalletKit\Builder\WalletSerializerFactory;
 use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
@@ -25,8 +26,7 @@ $classId  = $issuerId . '.' . $classSuffix;
 $objectId = $issuerId . '.' . $objectSuffix;
 
 // === Serializer ===
-// Use the library's test serializer factory (easier than wiring everything manually)
-$serializer = \Jolicode\WalletKit\Tests\Builder\BuilderTestSerializerFactory::create();
+$serializer = WalletSerializerFactory::create();
 
 // === Build the pass ===
 $context = (new WalletPlatformContext())
