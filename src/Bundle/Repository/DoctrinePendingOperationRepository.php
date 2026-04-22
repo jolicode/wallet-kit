@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Bundle\Repository;
 
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\ORM\EntityManagerInterface;
@@ -54,7 +55,7 @@ final class DoctrinePendingOperationRepository implements PendingOperationReposi
                 'pending' => PendingOperationStatusEnum::PENDING->value,
                 'limit' => $limit,
             ], [
-                'limit' => \PDO::PARAM_INT,
+                'limit' => ParameterType::INTEGER,
             ]);
 
             if (0 === \count($ids)) {
@@ -76,7 +77,7 @@ final class DoctrinePendingOperationRepository implements PendingOperationReposi
                 ],
             );
 
-            $this->entityManager->clear(PendingOperation::class);
+            $this->entityManager->clear();
 
             /** @var PendingOperation[] $operations */
             $operations = $this->entityManager->getRepository(PendingOperation::class)
