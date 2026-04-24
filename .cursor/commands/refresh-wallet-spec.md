@@ -1,0 +1,1 @@
+../../.agents/skills/refresh-wallet-spec.md

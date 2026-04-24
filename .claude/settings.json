@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:*)",
+      "Bash(wc -l *)",
+      "Bash(castor tests*)",
+      "Bash(castor qa:phpstan:*)",
+      "Bash(castor qa:cs:check:*)",
+      "Bash(castor qa:cs:fix:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.agents/scripts/guard-protected-paths.sh\""
+          }
+        ]
+      }
+    ]
+  },
+  "prefersReducedMotion": false
+}
