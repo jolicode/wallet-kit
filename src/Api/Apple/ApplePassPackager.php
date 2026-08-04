@@ -26,7 +26,33 @@ final class ApplePassPackager
             throw new MissingExtensionException('The "zip" PHP extension is required for Apple .pkpass packaging.');
         }
 
-        $this->wwdrCertificatePath = $credentials->wwdrCertificatePath ?? __DIR__ . '/Resources/AppleWWDRCAG4.cer';
+        $rawWwdrPath = $credentials->wwdrCertificatePath ?? __DIR__ . '/Resources/AppleWWDRCAG4.cer';
+        $this->wwdrCertificatePath = $this->ensurePemWwdrCertificate($rawWwdrPath);
+    }
+
+    private function ensurePemWwdrCertificate(string $path): string
+    {
+        $content = @file_get_contents($path);
+
+        if (false === $content) {
+            throw new PackagingException(\sprintf('Unable to read WWDR certificate at "%s".', $path));
+        }
+
+        if (str_starts_with($content, '-----BEGIN CERTIFICATE-----')) {
+            return $path;
+        }
+
+        $pem = "-----BEGIN CERTIFICATE-----\n" . chunk_split(base64_encode($content), 64, "\n") . "-----END CERTIFICATE-----\n";
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'wallet_kit_wwdr_pem_');
+
+        if (false === $tmpPath) {
+            throw new PackagingException('Unable to create temporary file for WWDR certificate conversion.');
+        }
+
+        file_put_contents($tmpPath, $pem);
+
+        return $tmpPath;
     }
 
     /**
@@ -148,7 +174,7 @@ final class ApplePassPackager
                 $certResource,
                 $privateKey,
                 [],
-                \PKCS7_BINARY | \PKCS7_DETACHED | \PKCS7_NOATTR,
+                \PKCS7_BINARY | \PKCS7_DETACHED,
                 $this->wwdrCertificatePath,
             );
 

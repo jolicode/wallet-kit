@@ -61,7 +61,11 @@ $packager = new ApplePassPackager($serializer, $credentials);
 
 $pkpassBinary = $packager->package(
     $built->apple(),
-    images: ['icon.png' => $iconPath],
+    images: [
+        'icon.png' => $iconPath,
+        'icon@2x.png' => __DIR__ . '/assets/icon@2x.png',
+        'icon@3x.png' => __DIR__ . '/assets/icon@3x.png',
+    ],
 );
 
 // === Write to disk ===
