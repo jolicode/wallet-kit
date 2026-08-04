@@ -1,0 +1,4 @@
+vendor/
+composer.lock
+google-sa.json
+.env.local
