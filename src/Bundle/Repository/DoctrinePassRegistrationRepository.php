@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Jolicode\WalletKit\Bundle\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\UniqueConstraintViolationException;
 use Jolicode\WalletKit\Bundle\Entity\PassRegistration;
 
 final class DoctrinePassRegistrationRepository implements PassRegistrationRepositoryInterface
@@ -16,20 +17,42 @@ final class DoctrinePassRegistrationRepository implements PassRegistrationReposi
 
     public function register(string $deviceId, string $passTypeId, string $serialNumber, string $pushToken): bool
     {
-        $existing = $this->entityManager->getRepository(PassRegistration::class)->findOneBy([
+        $repository = $this->entityManager->getRepository(PassRegistration::class);
+        $existing = $repository->findOneBy([
             'deviceId' => $deviceId,
             'passTypeId' => $passTypeId,
             'serialNumber' => $serialNumber,
         ]);
 
         if (null !== $existing) {
+            // iOS re-registers with the same identifiers but a rotated push token.
+            $existing->updatePushToken($pushToken);
+            $this->entityManager->flush();
+
             return false;
         }
 
-        $registration = new PassRegistration($deviceId, $passTypeId, $serialNumber, $pushToken);
+        $this->entityManager->persist(new PassRegistration($deviceId, $passTypeId, $serialNumber, $pushToken));
 
-        $this->entityManager->persist($registration);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException) {
+            // Concurrent duplicate: treat as already-registered and still refresh the token.
+            $this->entityManager->clear();
+            $existing = $repository->findOneBy([
+                'deviceId' => $deviceId,
+                'passTypeId' => $passTypeId,
+                'serialNumber' => $serialNumber,
+            ]);
+
+            if (null !== $existing) {
+                $existing->updatePushToken($pushToken);
+                $this->entityManager->flush();
+                $this->entityManager->refresh($existing);
+            }
+
+            return false;
+        }
 
         return true;
     }

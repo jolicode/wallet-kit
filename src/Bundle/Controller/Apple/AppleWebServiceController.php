@@ -33,7 +33,12 @@ final class AppleWebServiceController
         }
 
         /** @var array<string, mixed> $body */
-        $body = json_decode($request->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        try {
+            $body = json_decode($request->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            // Malformed payloads must not surface as 500 — Apple (or anything else) may send garbage.
+            return new Response('', Response::HTTP_BAD_REQUEST);
+        }
 
         $pushToken = '';
         if (\array_key_exists('pushToken', $body)) {
@@ -56,20 +61,29 @@ final class AppleWebServiceController
         return new Response('', Response::HTTP_NO_CONTENT);
     }
 
-    public function getSerialNumbers(Request $request, string $deviceId, string $passTypeId): JsonResponse
+    public function getSerialNumbers(Request $request, string $deviceId, string $passTypeId): Response
     {
+        if (!$this->authenticateDeviceRequest($request, $deviceId, $passTypeId)) {
+            return new Response('', Response::HTTP_UNAUTHORIZED);
+        }
+
         $passesUpdatedSince = $request->query->get('passesUpdatedSince');
         $serialNumbers = [];
 
         if (\is_string($passesUpdatedSince) && '' !== $passesUpdatedSince) {
-            $since = new \DateTimeImmutable($passesUpdatedSince);
+            try {
+                $since = new \DateTimeImmutable($passesUpdatedSince);
+            } catch (\Exception) {
+                return new Response('', Response::HTTP_BAD_REQUEST);
+            }
+
             $serialNumbers = $this->passProvider->getUpdatedSerialNumbers($passTypeId, $since);
         } else {
             $serialNumbers = $this->registrationRepository->findSerialNumbers($deviceId, $passTypeId);
         }
 
         if (0 === \count($serialNumbers)) {
-            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+            return new Response('', Response::HTTP_NO_CONTENT);
         }
 
         $lastUpdated = $this->computeLastUpdated($passTypeId, $serialNumbers);
@@ -141,13 +155,43 @@ final class AppleWebServiceController
             return false;
         }
 
-        $header = $request->headers->get('Authorization') ?? '';
+        $token = $this->extractApplePassToken($request);
 
-        if (1 !== preg_match('/^ApplePass\s+(.+)$/', $header, $m)) {
+        return null !== $token && hash_equals($expected, $token);
+    }
+
+    /**
+     * The serial-numbers endpoint has no serial in the URL: Apple authenticates
+     * with the token of any pass the device is registered to for this pass type.
+     */
+    private function authenticateDeviceRequest(Request $request, string $deviceId, string $passTypeId): bool
+    {
+        $token = $this->extractApplePassToken($request);
+
+        if (null === $token) {
             return false;
         }
 
-        return hash_equals($expected, trim($m[1]));
+        foreach ($this->registrationRepository->findSerialNumbers($deviceId, $passTypeId) as $serialNumber) {
+            $expected = $this->passProvider->getAuthenticationToken($passTypeId, $serialNumber);
+
+            if (null !== $expected && hash_equals($expected, $token)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function extractApplePassToken(Request $request): ?string
+    {
+        $header = $request->headers->get('Authorization') ?? '';
+
+        if (1 !== preg_match('/^ApplePass\s+(.+)$/', $header, $m)) {
+            return null;
+        }
+
+        return trim($m[1]);
     }
 
     /**

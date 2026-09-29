@@ -57,10 +57,11 @@ final class WalletContextFactory
                 UrlGeneratorInterface::ABSOLUTE_URL,
             );
 
-            // Strip the placeholder path segments to get the base web service URL
+            // Apple appends "v1/devices/…" directly to webServiceURL (trailing slash expected),
+            // so keep everything up to "/apple" and let the device append the versioned path.
             $webServiceURL = str_replace(
-                '/apple/v1/devices/__DEVICE_ID__/registrations/' . $this->appleCredentials->passTypeIdentifier . '/__SERIAL_NUMBER__',
-                '',
+                '/v1/devices/__DEVICE_ID__/registrations/' . $this->appleCredentials->passTypeIdentifier . '/__SERIAL_NUMBER__',
+                '/',
                 $webServiceURL,
             );
 

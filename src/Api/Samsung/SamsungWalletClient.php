@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Api\Samsung;
 
-use Jolicode\WalletKit\Api\Auth\SamsungJwtAuthenticator;
+use Jolicode\WalletKit\Api\Auth\SamsungRequestAuthenticator;
 use Jolicode\WalletKit\Api\Credentials\SamsungCredentials;
 use Jolicode\WalletKit\Exception\Api\HttpRequestException;
 use Jolicode\WalletKit\Exception\Api\RateLimitException;
@@ -13,71 +13,129 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+/**
+ * Samsung Wallet Partner API client.
+ *
+ * Endpoints follow the public docs (developer.samsung.com/wallet). Every call carries:
+ * - Authorization: a fresh, per-request JWS (bound to the API method + path);
+ * - x-smcs-partner-id: the partner identifier;
+ * - x-request-id: a random per-request identifier (<= 32 chars).
+ *
+ * @see https://developer.samsung.com/wallet/addtosamsungwallet/apiguidelines.html
+ */
 final class SamsungWalletClient
 {
-    private readonly string $baseUrl;
+    private readonly SamsungCardTokenizer $cardTokenizer;
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly NormalizerInterface $normalizer,
-        private readonly SamsungJwtAuthenticator $authenticator,
-        SamsungCredentials $credentials,
+        private readonly SamsungRequestAuthenticator $authenticator,
+        private readonly SamsungCredentials $credentials,
     ) {
-        $this->baseUrl = $credentials->region->getBaseUrl();
+        $this->cardTokenizer = new SamsungCardTokenizer($credentials);
     }
 
+    /**
+     * Create a card template: POST /partner/v1/card/template with "ctemplate".
+     */
     public function createCard(Card $card): SamsungApiResponse
     {
         $body = $this->normalizer->normalize($card);
 
-        return $this->request('POST', $this->baseUrl . 'cards', $body);
+        return $this->request('POST', '/partner/v1/card/template', 'CARD', 'ctemplate', ['card' => $body]);
     }
 
-    public function getCard(string $cardId): SamsungApiResponse
-    {
-        return $this->request('GET', $this->baseUrl . 'cards/' . $cardId);
-    }
-
+    /**
+     * Update a card template: POST /partner/v1/card/template/{cardId} with "ctemplate".
+     */
     public function updateCard(Card $card, string $cardId): SamsungApiResponse
     {
         $body = $this->normalizer->normalize($card);
 
-        return $this->request('PUT', $this->baseUrl . 'cards/' . $cardId, $body);
-    }
-
-    public function updateCardState(string $cardId, string $state): SamsungApiResponse
-    {
-        return $this->request('PATCH', $this->baseUrl . 'cards/' . $cardId, [
-            'state' => $state,
-        ]);
+        return $this->request('POST', \sprintf('/partner/v1/card/template/%s', $cardId), 'CARD', 'ctemplate', ['card' => $body]);
     }
 
     /**
-     * Send push notification to update card on user's device.
-     * Samsung handles push delivery when cards are updated via the Partner API,
-     * but explicit push can be triggered for state changes.
+     * Notify Samsung that card data changed for registered users, so devices pull fresh
+     * card data from the partner server: POST /wltex/cards/{cardId}?eventId=…&type=….
      */
-    public function pushCardUpdate(string $cardId): SamsungApiResponse
+    public function pushCardUpdate(string $cardId, string $eventId, string $type): SamsungApiResponse
     {
-        return $this->request('POST', $this->baseUrl . 'cards/' . $cardId . '/push');
+        // The Authorization path binds to the path only (query excluded per the token spec).
+        $pathWithoutQuery = \sprintf('/wltex/cards/%s', $cardId);
+        $token = $this->authenticator->createAuthorizationToken('POST', $pathWithoutQuery);
+
+        return $this->doRequest(
+            'POST',
+            $this->credentials->region->getBaseUrl() . $pathWithoutQuery . '?' . \http_build_query(['eventId' => $eventId, 'type' => $type]),
+            $token,
+            extraHeaders: [
+                'x-smcs-cc2' => $this->credentials->region->getCountryCode(),
+            ],
+        );
     }
 
     /**
-     * @param array<string, mixed>|null $body
+     * Server-initiated "Add to Samsung Wallet": POST /atw/v1/cards/{cardId} with "cdata".
      */
-    private function request(string $method, string $url, ?array $body = null): SamsungApiResponse
+    public function addCardForUser(string $cardId, array $cardData, ?array $account = null): SamsungApiResponse
     {
-        $token = $this->authenticator->getToken();
+        $path = \sprintf('/atw/v1/cards/%s', $cardId);
 
+        $cdata = [
+            'card' => $cardData,
+        ];
+
+        if (null !== $account) {
+            $cdata['account'] = $account;
+        }
+
+        return $this->request('POST', $path, 'CARD', 'cdata', $cdata);
+    }
+
+    /**
+     * Builds a security token around $payload and sends the request.
+     *
+     * @param array<string, mixed> $payload
+     */
+    private function request(
+        string $method,
+        string $path,
+        string $contentType,
+        string $bodyKey,
+        array $payload,
+    ): SamsungApiResponse {
+        $token = $this->authenticator->createAuthorizationToken($method, $path);
+        $body = [
+            $bodyKey => $this->cardTokenizer->tokenize($contentType, $payload),
+        ];
+
+        return $this->doRequest(
+            $method,
+            $this->credentials->region->getBaseUrl() . $path,
+            $token,
+            bodyKeys: $body,
+        );
+    }
+
+    /**
+     * @param array<string, mixed>|null $bodyKeys
+     * @param array<string, string>     $extraHeaders
+     */
+    private function doRequest(string $method, string $url, string $authorizationToken, ?array $bodyKeys = null, array $extraHeaders = []): SamsungApiResponse
+    {
         $options = [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token->getAccessToken(),
+            'headers' => $extraHeaders + [
+                'Authorization' => 'Bearer ' . $authorizationToken,
                 'Content-Type' => 'application/json',
+                'x-smcs-partner-id' => $this->credentials->partnerId,
+                'x-request-id' => bin2hex(random_bytes(12)), // identifier per API docs, <= 32 chars
             ],
         ];
 
-        if (null !== $body) {
-            $options['json'] = $body;
+        if (null !== $bodyKeys) {
+            $options['json'] = $bodyKeys;
         }
 
         try {
@@ -88,15 +146,21 @@ final class SamsungWalletClient
             throw new HttpRequestException(\sprintf('Samsung Wallet API request failed: %s', $e->getMessage()), $e);
         }
 
-        $decoded = '' !== $content ? json_decode($content, true, 512, \JSON_THROW_ON_ERROR) : [];
-        /** @var array<string, mixed> $data */
-        $data = \is_array($decoded) ? $decoded : [];
-
         if (429 === $statusCode) {
             $retryAfter = $response->getHeaders(false)['retry-after'][0] ?? null;
 
-            throw new RateLimitException($content, null !== $retryAfter ? (int) $retryAfter : null);
+            throw new RateLimitException($content, \ctype_digit((string) $retryAfter) ? (int) $retryAfter : null);
         }
+
+        // Some endpoints answer with an empty body on 2xx — tolerate that, and wrap
+        // malformed bodies (HTML proxies…) instead of leaking a raw \JsonException.
+        try {
+            $decoded = '' !== $content ? json_decode($content, true, 512, \JSON_THROW_ON_ERROR) : [];
+        } catch (\JsonException $e) {
+            throw new HttpRequestException(\sprintf('Samsung Wallet API returned non-JSON body (HTTP %d): %s', $statusCode, $e->getMessage()), $e);
+        }
+        /** @var array<string, mixed> $data */
+        $data = \is_array($decoded) ? $decoded : [];
 
         return new SamsungApiResponse($statusCode, $data, $content);
     }

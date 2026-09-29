@@ -13,4 +13,9 @@ final class RateLimitException extends ApiResponseException
     ) {
         parent::__construct(429, $responseBody, 'API rate limit exceeded (429).', $previous);
     }
+
+    public static function withoutRetryAfter(string $message): self
+    {
+        return new self($message);
+    }
 }

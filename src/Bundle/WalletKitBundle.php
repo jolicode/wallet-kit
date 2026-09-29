@@ -4,40 +4,15 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Bundle;
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-final class WalletKitBundle extends AbstractBundle
+/**
+ * Classic Bundle so Symfony auto-discovers {@see WalletKitExtension} in the
+ * DependencyInjection namespace and processes the "wallet_kit" config tree.
+ *
+ * Routes are NOT auto-registered (Symfony never calls loadRoutes() on bundles):
+ * apps import the platform route files they need, see docs/bundle.md.
+ */
+final class WalletKitBundle extends Bundle
 {
-    public function loadRoutes(RoutingConfigurator $routes): void
-    {
-        $routesDir = __DIR__ . '/Resources/config/routes/';
-
-        if ($this->hasAppleConfig()) {
-            $routes->import($routesDir . 'apple.php');
-        }
-
-        if ($this->hasGoogleConfig()) {
-            $routes->import($routesDir . 'google.php');
-        }
-
-        if ($this->hasSamsungConfig()) {
-            $routes->import($routesDir . 'samsung.php');
-        }
-    }
-
-    private function hasAppleConfig(): bool
-    {
-        return $this->container->hasParameter('wallet_kit.apple.certificate_path');
-    }
-
-    private function hasGoogleConfig(): bool
-    {
-        return $this->container->hasParameter('wallet_kit.google.service_account_json_path');
-    }
-
-    private function hasSamsungConfig(): bool
-    {
-        return $this->container->hasParameter('wallet_kit.samsung.partner_id');
-    }
 }

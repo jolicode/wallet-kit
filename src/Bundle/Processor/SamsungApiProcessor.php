@@ -29,87 +29,67 @@ final class SamsungApiProcessor implements PendingOperationProcessorInterface
         return WalletPlatformEnum::SAMSUNG;
     }
 
-    public function process(array $operations): void
+    public function process(array $operations): ProcessResult
     {
+        $result = new ProcessResult();
+
         foreach ($operations as $operation) {
-            $payload = $operation->payload;
-
-            if (!\array_key_exists('operationType', $payload)) {
-                $this->logger->warning('Skipping Samsung operation with missing operationType.');
-                continue;
-            }
-
-            $operationType = (string) $payload['operationType'];
-
             try {
-                match ($operationType) {
-                    'create' => $this->processCreate($payload),
-                    'update' => $this->processUpdate($payload),
-                    'change_state' => $this->processChangeState($payload),
-                    'push' => $this->processPush($payload),
-                    default => throw new UnknownOperationTypeException($operationType),
-                };
+                $this->processOperation($operation);
+                $result->addSuccess($operation);
             } catch (\Throwable $e) {
-                $this->logger->error('Samsung operation processing failed: {message}', [
-                    'message' => $e->getMessage(),
-                    'operation_type' => $operationType,
+                // Poison pills stay visible: corrupt payloads / typo'd operation
+                // types are recorded as failures, never silently dropped.
+                $this->logger->error('Samsung operation processing failed.', [
+                    'operation_id' => $operation->id,
                     'exception' => $e,
                 ]);
+                $result->addFailure($operation, $e->getMessage());
             }
         }
+
+        return $result;
+    }
+
+    private function processOperation(PendingOperation $operation): void
+    {
+        $payload = $operation->payload;
+
+        if (!\array_key_exists('operationType', $payload)) {
+            throw new \InvalidArgumentException('Missing "operationType" in Samsung operation payload.');
+        }
+
+        $operationType = (string) $payload['operationType'];
+
+        match ($operationType) {
+            'create' => $this->require($payload, ['card'], $operationType, fn (array $payload): string => $this->client->createCard($this->denormalizeCard($payload['card']))),
+            'update' => $this->require($payload, ['card', 'cardId'], $operationType, fn (array $payload): string => $this->client->updateCard($this->denormalizeCard($payload['card']), (string) $payload['cardId'])),
+            'push' => $this->require($payload, ['cardId', 'eventId', 'type'], $operationType, fn (array $payload): string => $this->client->pushCardUpdate((string) $payload['cardId'], (string) $payload['eventId'], (string) $payload['type'])),
+            default => throw new UnknownOperationTypeException($operationType),
+        };
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param array<string, mixed>                   $payload
+     * @param list<string>                           $requiredKeys
+     * @param callable(array<string, mixed>): mixed  $fn
      */
-    private function processCreate(array $payload): void
+    private function require(array $payload, array $requiredKeys, string $operationType, callable $fn): void
     {
-        if (!\array_key_exists('card', $payload)) {
-            return;
+        foreach ($requiredKeys as $key) {
+            if (!\array_key_exists($key, $payload)) {
+                throw new \InvalidArgumentException(\sprintf('Missing "%s" in Samsung "%s" operation payload.', $key, $operationType));
+            }
         }
 
+        $fn($payload);
+    }
+
+    private function denormalizeCard(mixed $cardPayload): Card
+    {
         /** @var Card $card */
-        $card = $this->denormalizer->denormalize($payload['card'], Card::class);
+        $card = $this->denormalizer->denormalize($cardPayload, Card::class);
 
-        $this->client->createCard($card);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     */
-    private function processUpdate(array $payload): void
-    {
-        if (!\array_key_exists('card', $payload) || !\array_key_exists('cardId', $payload)) {
-            return;
-        }
-
-        /** @var Card $card */
-        $card = $this->denormalizer->denormalize($payload['card'], Card::class);
-
-        $this->client->updateCard($card, (string) $payload['cardId']);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     */
-    private function processChangeState(array $payload): void
-    {
-        if (!\array_key_exists('cardId', $payload) || !\array_key_exists('state', $payload)) {
-            return;
-        }
-
-        $this->client->updateCardState((string) $payload['cardId'], (string) $payload['state']);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     */
-    private function processPush(array $payload): void
-    {
-        if (!\array_key_exists('cardId', $payload)) {
-            return;
-        }
-
-        $this->client->pushCardUpdate((string) $payload['cardId']);
+        return $card;
     }
 }

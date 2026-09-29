@@ -8,6 +8,7 @@ use Jolicode\WalletKit\Api\Auth\AppleApnsJwtProvider;
 use Jolicode\WalletKit\Api\Credentials\AppleCredentials;
 use Jolicode\WalletKit\Bundle\Apple\ApplePassProviderInterface;
 use Jolicode\WalletKit\Bundle\Controller\Apple\AppleWebServiceController;
+use Jolicode\WalletKit\Bundle\Processor\ApplePushProcessor;
 use Jolicode\WalletKit\Bundle\Repository\PassRegistrationRepositoryInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -54,6 +55,14 @@ return static function (ContainerConfigurator $container): void {
         ])
     ;
     $services->alias(ApplePushNotifier::class, 'wallet_kit.apple.push_notifier');
+
+    $services->set('wallet_kit.processor.apple_push', ApplePushProcessor::class)
+        ->args([
+            service(ApplePushNotifier::class),
+            service(PassRegistrationRepositoryInterface::class),
+        ])
+        ->tag('wallet_kit.pending_operation_processor')
+    ;
 
     $services->set('wallet_kit.controller.apple_web_service', AppleWebServiceController::class)
         ->args([

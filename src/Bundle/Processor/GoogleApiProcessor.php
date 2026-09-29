@@ -29,37 +29,48 @@ final class GoogleApiProcessor implements PendingOperationProcessorInterface
         return WalletPlatformEnum::GOOGLE;
     }
 
-    public function process(array $operations): void
+    public function process(array $operations): ProcessResult
     {
+        $result = new ProcessResult();
+
         foreach ($operations as $operation) {
-            $payload = $operation->payload;
-
-            if (!\array_key_exists('operationType', $payload) || !\array_key_exists('pair', $payload)) {
-                $this->logger->warning('Skipping Google operation with missing operationType/pair.', ['operation_id' => $operation->id ?? null]);
-                continue;
-            }
-
-            $operationType = (string) $payload['operationType'];
-
             try {
-                /** @var GoogleWalletPair $pair */
-                $pair = $this->denormalizer->denormalize($payload['pair'], GoogleWalletPair::class);
-
-                match ($operationType) {
-                    'create_or_update' => $this->client->createOrUpdatePass($pair),
-                    'create_class' => $this->client->createClass($pair),
-                    'update_class' => $this->client->updateClass($pair),
-                    'create_object' => $this->client->createObject($pair),
-                    'update_object' => $this->client->updateObject($pair),
-                    default => throw new UnknownOperationTypeException($operationType),
-                };
+                $this->processOperation($operation);
+                $result->addSuccess($operation);
             } catch (\Throwable $e) {
-                $this->logger->error('Google operation processing failed: {message}', [
-                    'message' => $e->getMessage(),
-                    'operation_type' => $operationType,
+                // Poison pills stay visible: corrupt payloads / typo'd operation
+                // types are recorded as failures, never silently dropped.
+                $this->logger->error('Google operation processing failed.', [
+                    'operation_id' => $operation->id,
                     'exception' => $e,
                 ]);
+                $result->addFailure($operation, $e->getMessage());
             }
         }
+
+        return $result;
+    }
+
+    private function processOperation(PendingOperation $operation): void
+    {
+        $payload = $operation->payload;
+
+        if (!\array_key_exists('operationType', $payload) || !\array_key_exists('pair', $payload)) {
+            throw new \InvalidArgumentException('Missing "operationType" or "pair" in Google operation payload.');
+        }
+
+        $operationType = (string) $payload['operationType'];
+
+        /** @var GoogleWalletPair $pair */
+        $pair = $this->denormalizer->denormalize($payload['pair'], GoogleWalletPair::class);
+
+        match ($operationType) {
+            'create_or_update' => $this->client->createOrUpdatePass($pair),
+            'create_class' => $this->client->createClass($pair),
+            'update_class' => $this->client->updateClass($pair),
+            'create_object' => $this->client->createObject($pair),
+            'update_object' => $this->client->updateObject($pair),
+            default => throw new UnknownOperationTypeException($operationType),
+        };
     }
 }

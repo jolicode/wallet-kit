@@ -48,6 +48,7 @@ final class WalletKitExtension extends Extension
         if (\array_key_exists('google', $config)) {
             $googleConfig = $config['google'];
             $container->setParameter('wallet_kit.google.service_account_json_path', $googleConfig['serviceAccountJsonPath']);
+            $container->setParameter('wallet_kit.google.secret_token', $googleConfig['secretToken']);
 
             $loader->load('google.php');
 
@@ -61,7 +62,8 @@ final class WalletKitExtension extends Extension
             $samsungConfig = $config['samsung'];
             $container->setParameter('wallet_kit.samsung.partner_id', $samsungConfig['partnerId']);
             $container->setParameter('wallet_kit.samsung.private_key_path', $samsungConfig['privateKeyPath']);
-            $container->setParameter('wallet_kit.samsung.service_id', $samsungConfig['serviceId']);
+            $container->setParameter('wallet_kit.samsung.certificate_id', $samsungConfig['certificateId']);
+            $container->setParameter('wallet_kit.samsung.public_key_path', $samsungConfig['publicKeyPath']);
             $container->setParameter('wallet_kit.samsung.region', $samsungConfig['region']);
 
             $loader->load('samsung.php');
@@ -74,7 +76,14 @@ final class WalletKitExtension extends Extension
 
         $container->setParameter('wallet_kit.batch_config', $batchConfig);
 
-        if (ContainerBuilder::willBeAvailable('symfony/messenger', MessageBusInterface::class, ['jolicode/wallet-kit'])) {
+        // The throttling stack is only loadable when every hard dependency is present:
+        // the pending-operation repository needs Doctrine, the handler needs Messenger
+        // and at least one platform processor must exist (they are gated per platform).
+        $anyPlatform = [] !== $batchConfig;
+        $messengerAvailable = ContainerBuilder::willBeAvailable('symfony/messenger', MessageBusInterface::class, ['jolicode/wallet-kit']);
+        $doctrineAvailable = ContainerBuilder::willBeAvailable('doctrine/doctrine-bundle', \Doctrine\ORM\EntityManagerInterface::class, ['jolicode/wallet-kit']);
+
+        if ($anyPlatform && $messengerAvailable && $doctrineAvailable) {
             $loader->load('throttling.php');
         }
     }

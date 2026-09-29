@@ -7,6 +7,8 @@ namespace Jolicode\WalletKit\Bundle\Messenger;
 use Jolicode\WalletKit\Bundle\Processor\PendingOperationProcessorInterface;
 use Jolicode\WalletKit\Bundle\Repository\PendingOperationRepositoryInterface;
 use Jolicode\WalletKit\Exception\Api\RateLimitException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
@@ -28,13 +30,17 @@ final class ProcessPendingOperationsHandler
         private readonly MessageBusInterface $messageBus,
         iterable $processors,
         private readonly array $batchConfig,
+        ?LoggerInterface $logger = null,
     ) {
         $map = [];
         foreach ($processors as $processor) {
             $map[$processor->supports()->value] = $processor;
         }
         $this->processorMap = $map;
+        $this->logger = $logger ?? new NullLogger();
     }
+
+    private readonly LoggerInterface $logger;
 
     public function __invoke(ProcessPendingOperationsMessage $message): void
     {
@@ -72,10 +78,9 @@ final class ProcessPendingOperationsHandler
         }
 
         try {
-            $processor->process($operations);
-            $this->repository->markSuccess($operations);
+            $result = $processor->process($operations);
         } catch (RateLimitException $e) {
-            // Rate-limited: put operations back in the queue and retry after delay.
+            // Platform throttling: put the whole batch back and retry after a delay.
             $this->repository->markFailed($operations, 'rate-limited', \PHP_INT_MAX);
             $retryAfter = $e->retryAfterSeconds ?? $batchInterval;
 
@@ -85,10 +90,21 @@ final class ProcessPendingOperationsHandler
             );
 
             return;
-        } catch (\Throwable $e) {
-            $this->repository->markFailed($operations, $e->getMessage(), self::MAX_ATTEMPTS);
+        }
 
-            throw $e;
+        // Operations are accounted individually: successes are removed, failures
+        // go back to pending (or failed once attempts cap) with their own error.
+        $this->repository->markSuccess($result->getSuccesses());
+
+        foreach ($result->getFailures() as ['operation' => $operation, 'error' => $error]) {
+            $this->repository->markFailed([$operation], $error, self::MAX_ATTEMPTS);
+        }
+        $failedCount = \count($result->getFailures());
+
+        if ($failedCount > 0) {
+            $this->logger->error(
+                \sprintf('Failed to process %d pending wallet operation(s) for %s.', $failedCount, $platformValue),
+            );
         }
 
         $remaining = $this->repository->countPending($message->batchGroupId);

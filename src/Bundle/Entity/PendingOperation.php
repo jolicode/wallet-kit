@@ -10,6 +10,7 @@ use Jolicode\WalletKit\Bundle\WalletPlatformEnum;
 #[ORM\Entity]
 #[ORM\Table(name: 'wallet_kit_pending_operation')]
 #[ORM\Index(columns: ['batch_group_id', 'status', 'id'])]
+#[ORM\Index(columns: ['status', 'processing_started_at'])]
 final class PendingOperation
 {
     #[ORM\Id]

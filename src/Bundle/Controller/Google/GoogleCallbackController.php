@@ -12,13 +12,22 @@ final class GoogleCallbackController
 {
     public function __construct(
         private readonly ?GoogleCallbackHandlerInterface $handler = null,
+        private readonly ?string $secretToken = null,
     ) {
     }
 
     public function handleCallback(Request $request): Response
     {
+        if (null !== $this->secretToken && !$this->hasValidSecret($request)) {
+            return new Response('', Response::HTTP_UNAUTHORIZED);
+        }
+
         /** @var array<string, mixed> $body */
-        $body = json_decode($request->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        try {
+            $body = json_decode($request->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return new Response('', Response::HTTP_BAD_REQUEST);
+        }
 
         if (null === $this->handler) {
             return new Response('', Response::HTTP_OK);
@@ -44,5 +53,13 @@ final class GoogleCallbackController
         }
 
         return new Response('', Response::HTTP_OK);
+    }
+
+    private function hasValidSecret(Request $request): bool
+    {
+        $header = $request->headers->get('Authorization') ?? '';
+        $provided = \str_starts_with($header, 'Bearer ') ? \substr($header, 7) : $header;
+
+        return hash_equals($this->secretToken ?? '', trim($provided));
     }
 }

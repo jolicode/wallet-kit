@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Tests\Api\Samsung;
 
-use Jolicode\WalletKit\Api\Auth\SamsungJwtAuthenticator;
+use Jolicode\WalletKit\Api\Auth\SamsungRequestAuthenticator;
 use Jolicode\WalletKit\Api\Credentials\SamsungCredentials;
+use Jolicode\WalletKit\Api\Samsung\SamsungRegionEnum;
 use Jolicode\WalletKit\Api\Samsung\SamsungWalletClient;
 use Jolicode\WalletKit\Exception\Api\RateLimitException;
 use Jolicode\WalletKit\Pass\Samsung\Model\Card;
@@ -38,8 +39,13 @@ final class SamsungWalletClientTest extends TestCase
     private function createClient(MockHttpClient $httpClient, ?NormalizerInterface $normalizer = null): SamsungWalletClient
     {
         $normalizer ??= $this->createStub(NormalizerInterface::class);
-        $credentials = new SamsungCredentials('partner-123', $this->privateKeyPath);
-        $authenticator = new SamsungJwtAuthenticator($credentials);
+        $credentials = new SamsungCredentials(
+            'partner-123',
+            $this->privateKeyPath,
+            'cert-0001',
+            region: SamsungRegionEnum::EU,
+        );
+        $authenticator = new SamsungRequestAuthenticator($credentials);
 
         return new SamsungWalletClient($httpClient, $normalizer, $authenticator, $credentials);
     }
@@ -53,13 +59,31 @@ final class SamsungWalletClientTest extends TestCase
         );
     }
 
-    public function testCreateCardSendsPost(): void
+    /**
+     * MockHttpClient normalizes headers to "Name: value" strings.
+     *
+     * @param list<string> $headers
+     *
+     * @return array<string, string>
+     */
+    private static function headerMap(array $headers): array
     {
-        $lastRequest = null;
-        $httpClient = new MockHttpClient(function ($method, $url) use (&$lastRequest) {
-            $lastRequest = ['method' => $method, 'url' => $url];
+        $map = [];
+        foreach ($headers as $line) {
+            [$name, $value] = explode(':', $line, 2);
+            $map[trim($name)] = trim($value);
+        }
 
-            return new MockResponse('{"cardId":"card-123"}', ['http_code' => 201]);
+        return $map;
+    }
+
+    public function testCreateCardSendsTokenizedTemplateRequest(): void
+    {
+        $capture = null;
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capture) {
+            $capture = ['method' => $method, 'url' => $url, 'headers' => $options['headers'] ?? [], 'body' => $options['body'] ?? null];
+
+            return new MockResponse('{"code":"0","msg":"SUCCESS"}', ['http_code' => 200]);
         });
 
         $normalizer = $this->createStub(NormalizerInterface::class);
@@ -68,34 +92,24 @@ final class SamsungWalletClientTest extends TestCase
         $client = $this->createClient($httpClient, $normalizer);
         $response = $client->createCard($this->createCard());
 
-        self::assertSame('POST', $lastRequest['method']);
-        self::assertStringContainsString('/cards', $lastRequest['url']);
+        self::assertNotNull($capture);
+        self::assertSame('POST', $capture['method']);
+        self::assertSame('https://api-eu1.mpay.samsung.com/partner/v1/card/template', $capture['url']);
+
+        $headers = self::headerMap($capture['headers']);
+        self::assertStringStartsWith('Bearer ey', $headers['Authorization'] ?? '');
+        self::assertSame('partner-123', $headers['x-smcs-partner-id'] ?? '');
+        self::assertArrayHasKey('x-request-id', $headers);
         self::assertTrue($response->isSuccessful());
     }
 
-    public function testGetCardSendsGet(): void
+    public function testUpdateCardPostsToPathWithCardId(): void
     {
-        $lastRequest = null;
-        $httpClient = new MockHttpClient(function ($method, $url) use (&$lastRequest) {
-            $lastRequest = ['method' => $method, 'url' => $url];
+        $capture = null;
+        $httpClient = new MockHttpClient(function ($method, $url) use (&$capture) {
+            $capture = ['method' => $method, 'url' => $url];
 
-            return new MockResponse('{}', ['http_code' => 200]);
-        });
-
-        $client = $this->createClient($httpClient);
-        $client->getCard('card-123');
-
-        self::assertSame('GET', $lastRequest['method']);
-        self::assertStringContainsString('/cards/card-123', $lastRequest['url']);
-    }
-
-    public function testUpdateCardSendsPut(): void
-    {
-        $lastRequest = null;
-        $httpClient = new MockHttpClient(function ($method, $url) use (&$lastRequest) {
-            $lastRequest = ['method' => $method, 'url' => $url];
-
-            return new MockResponse('{}', ['http_code' => 200]);
+            return new MockResponse('{"code":"0"}', ['http_code' => 200]);
         });
 
         $normalizer = $this->createStub(NormalizerInterface::class);
@@ -104,52 +118,75 @@ final class SamsungWalletClientTest extends TestCase
         $client = $this->createClient($httpClient, $normalizer);
         $client->updateCard($this->createCard(), 'card-123');
 
-        self::assertSame('PUT', $lastRequest['method']);
-        self::assertStringContainsString('/cards/card-123', $lastRequest['url']);
+        self::assertNotNull($capture);
+        self::assertSame('POST', $capture['method']);
+        self::assertSame('https://api-eu1.mpay.samsung.com/partner/v1/card/template/card-123', $capture['url']);
     }
 
-    public function testUpdateCardStateSendsPatch(): void
+    public function testPushCardUpdateUsesWltexEndpointWithCc2(): void
     {
-        $lastRequest = null;
-        $httpClient = new MockHttpClient(function ($method, $url) use (&$lastRequest) {
-            $lastRequest = ['method' => $method, 'url' => $url];
+        $capture = null;
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capture) {
+            $capture = ['method' => $method, 'url' => $url, 'headers' => $options['headers'] ?? []];
 
-            return new MockResponse('{}', ['http_code' => 200]);
+            return new MockResponse('{"code":"0"}', ['http_code' => 200]);
         });
 
         $client = $this->createClient($httpClient);
-        $client->updateCardState('card-123', 'expired');
+        $client->pushCardUpdate('card-123', 'event-1', 'STATE_CHANGED');
 
-        self::assertSame('PATCH', $lastRequest['method']);
-        self::assertStringContainsString('/cards/card-123', $lastRequest['url']);
+        self::assertNotNull($capture);
+        self::assertSame('POST', $capture['method']);
+        self::assertSame('https://api-eu1.mpay.samsung.com/wltex/cards/card-123?eventId=event-1&type=STATE_CHANGED', $capture['url']);
+
+        $headers = self::headerMap($capture['headers']);
+        self::assertSame('EU', $headers['x-smcs-cc2'] ?? '');
     }
 
-    public function testPushCardUpdateSendsPost(): void
-    {
-        $lastRequest = null;
-        $httpClient = new MockHttpClient(function ($method, $url) use (&$lastRequest) {
-            $lastRequest = ['method' => $method, 'url' => $url];
-
-            return new MockResponse('{}', ['http_code' => 200]);
-        });
-
-        $client = $this->createClient($httpClient);
-        $client->pushCardUpdate('card-123');
-
-        self::assertSame('POST', $lastRequest['method']);
-        self::assertStringContainsString('/cards/card-123/push', $lastRequest['url']);
-    }
-
-    public function testRateLimitExceptionOn429(): void
+    public function testRateLimitExceptionOn429CarriesRetryAfter(): void
     {
         $httpClient = new MockHttpClient(new MockResponse('{"error":"rate limited"}', [
             'http_code' => 429,
-            'response_headers' => ['retry-after' => '60'],
+            'response_headers' => ['Retry-After' => '60'],
         ]));
 
         $client = $this->createClient($httpClient);
 
-        $this->expectException(RateLimitException::class);
-        $client->getCard('card-123');
+        try {
+            $client->createCard($this->createCard());
+            self::fail('RateLimitException expected.');
+        } catch (RateLimitException $e) {
+            self::assertSame(60, $e->retryAfterSeconds);
+        }
+    }
+
+    public function test429WithHttpDateRetryAfterIsIgnored(): void
+    {
+        $httpClient = new MockHttpClient(new MockResponse('{"error":"rate limited"}', [
+            'http_code' => 429,
+            'response_headers' => ['Retry-After' => 'Wed, 21 Oct 2026 07:28:00 GMT'],
+        ]));
+
+        $client = $this->createClient($httpClient);
+
+        try {
+            $client->createCard($this->createCard());
+            self::fail('RateLimitException expected.');
+        } catch (RateLimitException $e) {
+            self::assertNull($e->retryAfterSeconds);
+        }
+    }
+
+    public function testNonJsonErrorBodyThrowsTypedException(): void
+    {
+        $httpClient = new MockHttpClient(new MockResponse('<html>Bad Gateway</html>', [
+            'http_code' => 502,
+        ]));
+
+        $client = $this->createClient($httpClient);
+
+        $this->expectException(\Jolicode\WalletKit\Exception\Api\HttpRequestException::class);
+        $this->expectExceptionMessage('non-JSON');
+        $client->createCard($this->createCard());
     }
 }

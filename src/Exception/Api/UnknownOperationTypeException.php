@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Exception\Api;
 
-final class UnknownOperationTypeException extends \RuntimeException
+use Jolicode\WalletKit\Exception\WalletKitException;
+
+final class UnknownOperationTypeException extends \LogicException implements WalletKitException
 {
     public function __construct(string $operationType, ?\Throwable $previous = null)
     {

@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: 'wallet_kit_pass_registration')]
 #[ORM\UniqueConstraint(name: 'unique_device_pass', columns: ['device_id', 'pass_type_id', 'serial_number'])]
+#[ORM\Index(name: 'push_token_idx', columns: ['push_token'])]
+#[ORM\Index(name: 'pass_type_serial_idx', columns: ['pass_type_id', 'serial_number'])]
 final class PassRegistration
 {
     #[ORM\Id]
@@ -67,6 +69,17 @@ final class PassRegistration
     public function getPushToken(): string
     {
         return $this->pushToken;
+    }
+
+    /**
+     * iOS may re-register with a rotated push token; registrations are unique
+     * per (device, pass type, serial) so the token is updatable in place.
+     */
+    public function updatePushToken(string $pushToken): void
+    {
+        if ($pushToken !== $this->pushToken) {
+            $this->pushToken = $pushToken;
+        }
     }
 
     public function getRegisteredAt(): \DateTimeImmutable

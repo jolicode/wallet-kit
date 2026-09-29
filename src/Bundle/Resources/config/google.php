@@ -8,6 +8,7 @@ use Jolicode\WalletKit\Api\Google\GoogleSaveLinkGenerator;
 use Jolicode\WalletKit\Api\Google\GoogleWalletClient;
 use Jolicode\WalletKit\Bundle\Controller\Google\GoogleCallbackController;
 use Jolicode\WalletKit\Bundle\Google\GoogleCallbackHandlerInterface;
+use Jolicode\WalletKit\Bundle\Processor\GoogleApiProcessor;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
@@ -40,6 +41,15 @@ return static function (ContainerConfigurator $container): void {
     ;
     $services->alias(GoogleWalletClient::class, 'wallet_kit.google.client');
 
+    $services->set('wallet_kit.processor.google_api', GoogleApiProcessor::class)
+        ->args([
+            service(GoogleWalletClient::class),
+            service('serializer'),
+            service('logger')->nullOnInvalid(),
+        ])
+        ->tag('wallet_kit.pending_operation_processor')
+    ;
+
     $services->set('wallet_kit.google.save_link_generator', GoogleSaveLinkGenerator::class)
         ->args([
             service('serializer'),
@@ -51,6 +61,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('wallet_kit.controller.google_callback', GoogleCallbackController::class)
         ->args([
             service(GoogleCallbackHandlerInterface::class)->nullOnInvalid(),
+            param('wallet_kit.google.secret_token'),
         ])
         ->tag('controller.service_arguments')
     ;

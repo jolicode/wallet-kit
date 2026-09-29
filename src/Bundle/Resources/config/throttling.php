@@ -2,14 +2,8 @@
 
 declare(strict_types=1);
 
-use Jolicode\WalletKit\Api\Apple\ApplePushNotifier;
-use Jolicode\WalletKit\Api\Google\GoogleWalletClient;
-use Jolicode\WalletKit\Api\Samsung\SamsungWalletClient;
 use Jolicode\WalletKit\Bundle\Google\ThrottledGoogleDispatcher;
 use Jolicode\WalletKit\Bundle\Messenger\ProcessPendingOperationsHandler;
-use Jolicode\WalletKit\Bundle\Processor\ApplePushProcessor;
-use Jolicode\WalletKit\Bundle\Processor\GoogleApiProcessor;
-use Jolicode\WalletKit\Bundle\Processor\SamsungApiProcessor;
 use Jolicode\WalletKit\Bundle\Push\ThrottledPushDispatcher;
 use Jolicode\WalletKit\Bundle\Repository\DoctrinePendingOperationRepository;
 use Jolicode\WalletKit\Bundle\Repository\PassRegistrationRepositoryInterface;
@@ -24,6 +18,10 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_it
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
 
+    // NOTE: platform processors are registered by apple.php / google.php / samsung.php
+    // (loaded only when each platform is configured). This file is loaded only when
+    // Doctrine + Messenger + at least one platform are available, per WalletKitExtension.
+
     // Repository
     $services->set('wallet_kit.pending_operation_repository', DoctrinePendingOperationRepository::class)
         ->args([
@@ -32,33 +30,6 @@ return static function (ContainerConfigurator $container): void {
     ;
     $services->alias(PendingOperationRepositoryInterface::class, 'wallet_kit.pending_operation_repository');
 
-    // Processors
-    $services->set('wallet_kit.processor.apple_push', ApplePushProcessor::class)
-        ->args([
-            service(ApplePushNotifier::class),
-            service(PassRegistrationRepositoryInterface::class),
-        ])
-        ->tag('wallet_kit.pending_operation_processor')
-    ;
-
-    $services->set('wallet_kit.processor.google_api', GoogleApiProcessor::class)
-        ->args([
-            service(GoogleWalletClient::class),
-            service('serializer'),
-            service('logger')->nullOnInvalid(),
-        ])
-        ->tag('wallet_kit.pending_operation_processor')
-    ;
-
-    $services->set('wallet_kit.processor.samsung_api', SamsungApiProcessor::class)
-        ->args([
-            service(SamsungWalletClient::class),
-            service('serializer'),
-            service('logger')->nullOnInvalid(),
-        ])
-        ->tag('wallet_kit.pending_operation_processor')
-    ;
-
     // Messenger handler
     $services->set('wallet_kit.messenger.handler.process_pending_operations', ProcessPendingOperationsHandler::class)
         ->args([
@@ -66,6 +37,7 @@ return static function (ContainerConfigurator $container): void {
             service('messenger.default_bus'),
             tagged_iterator('wallet_kit.pending_operation_processor'),
             param('wallet_kit.batch_config'),
+            service('logger')->nullOnInvalid(),
         ])
         ->tag('messenger.message_handler')
     ;
