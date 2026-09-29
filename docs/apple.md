@@ -121,7 +121,7 @@ if ($response->isSuccessful()) {
 
 ### Batch push
 
-Requests are fired concurrently (HTTP/2 multiplexing via Symfony HttpClient).
+Requests are dispatched concurrently (Symfony HttpClient keeps lazy requests in flight while reading responses one by one).
 
 ```php
 $responses = $notifier->sendBatchUpdateNotifications($pushTokens, 'pass.com.example.app');

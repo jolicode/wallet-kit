@@ -273,6 +273,19 @@ Run `php bin/console doctrine:schema:update` (or create a migration) to create t
 
 ## Google and Samsung callbacks
 
+> **Security:** both callback endpoints accept requests from a public network;
+> Google does not sign its callbacks, so implement `GoogleCallbackHandlerInterface`
+> with validation in mind (verify the objects actually belong to your issuer before
+> acting on the event). When you set `google.secret_token`, the endpoint requires a
+> matching `Authorization: Bearer <secret>` header — useful when fronted by a
+> proxy/edge that injects it.
+>
+> Samsung signs its server-to-server notifications with a JWT. Configure
+> `samsung.public_key_path` (Samsung's public certificate from the Partner site)
+> to have the bundle verify signatures and freshness before invoking your handler;
+> when unset the endpoint stays **fail-open** and logs a warning — do not leave it
+> that way in production.
+
 ### Google callback
 
 Route: `POST {prefix}/google/callback` (route name: `wallet_kit_google_callback`)
@@ -401,7 +414,11 @@ Source: [`ThrottledSamsungDispatcher`](../src/Bundle/Samsung/ThrottledSamsungDis
 
 ### Messenger transport setup
 
-Route the `ProcessPendingOperationsMessage` to an async transport:
+Route the `ProcessPendingOperationsMessage` to an **async** transport:
+
+> **Warning:** if the message is routed to a synchronous (or default) transport,
+> the `DelayStamp`s are ignored and batches drain in-process in a tight loop —
+> the throttling intervals become no-ops. Always route this message async.
 
 ```php
 // config/packages/messenger.php

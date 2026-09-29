@@ -1,4 +1,5 @@
 vendor/
 composer.lock
-google-sa.json
+*-sa.json
+google-sa*.json
 .env.local
