@@ -13,6 +13,12 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 final class GoogleSaveLinkGenerator
 {
+    /**
+     * Bounded lifetime for save-link JWTs, so a leaked link stops working after
+     * the TTL instead of minting pass additions forever (Google recommends an exp).
+     */
+    private const LINK_TTL_SECONDS = 3600;
+
     public function __construct(
         private readonly NormalizerInterface $normalizer,
         private readonly GoogleCredentials $credentials,
@@ -41,11 +47,15 @@ final class GoogleSaveLinkGenerator
         $classesKey = self::classesPayloadKey($pair->vertical);
         $objectsKey = self::objectsPayloadKey($pair->vertical);
 
+        $now = time();
+
         $header = self::base64UrlEncode(json_encode(['alg' => 'RS256', 'typ' => 'JWT'], \JSON_THROW_ON_ERROR));
         $claims = self::base64UrlEncode(json_encode([
             'iss' => $clientEmail,
             'aud' => 'google',
             'typ' => 'savetowallet',
+            'iat' => $now,
+            'exp' => $now + self::LINK_TTL_SECONDS,
             'payload' => [
                 $classesKey => [$normalizedClass],
                 $objectsKey => [$normalizedObject],

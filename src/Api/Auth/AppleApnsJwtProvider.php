@@ -34,6 +34,16 @@ final class AppleApnsJwtProvider
         return $this->cachedToken;
     }
 
+    /**
+     * Drops the cached JWT so the next getToken() mints a fresh one. Called by
+     * ApplePushNotifier when APNs reports an expired provider token (e.g. after
+     * host clock skew).
+     */
+    public function invalidate(): void
+    {
+        $this->cachedToken = null;
+    }
+
     private function createToken(): CachedToken
     {
         $keyPath = $this->credentials->apnsKeyPath;
@@ -92,32 +102,77 @@ final class AppleApnsJwtProvider
      */
     private static function derToRs(string $der): string
     {
-        $offset = 2;
+        $size = \strlen($der);
+        $offset = 0;
 
-        // Read R
-        if ("\x02" !== $der[$offset]) {
+        // Outer SEQUENCE
+        if ($offset >= $size || "\x30" !== $der[$offset]) {
+            throw new AuthenticationException('Invalid DER signature: expected SEQUENCE tag.');
+        }
+        ++$offset;
+
+        self::readDerLength($der, $offset);
+
+        // R INTEGER
+        if ($offset >= $size || "\x02" !== $der[$offset]) {
             throw new AuthenticationException('Invalid DER signature: expected integer tag for R.');
         }
         ++$offset;
-        $rLength = \ord($der[$offset]);
-        ++$offset;
-        $r = substr($der, $offset, $rLength);
+        $rLength = self::readDerLength($der, $offset);
+
+        if ($offset + $rLength > $size) {
+            throw new AuthenticationException('Invalid DER signature: R buffer underrun.');
+        }
+        $r = \substr($der, $offset, $rLength);
         $offset += $rLength;
 
-        // Read S
-        if ("\x02" !== $der[$offset]) {
+        // S INTEGER
+        if ($offset >= $size || "\x02" !== $der[$offset]) {
             throw new AuthenticationException('Invalid DER signature: expected integer tag for S.');
         }
         ++$offset;
-        $sLength = \ord($der[$offset]);
-        ++$offset;
-        $s = substr($der, $offset, $sLength);
+        $sLength = self::readDerLength($der, $offset);
 
-        // Pad or trim to 32 bytes each
+        if ($offset + $sLength > $size) {
+            throw new AuthenticationException('Invalid DER signature: S buffer underrun.');
+        }
+        $s = \substr($der, $offset, $sLength);
+
+        // Pad or trim each integer to its raw 32-byte int128-like width
         $r = str_pad(ltrim($r, "\x00"), 32, "\x00", \STR_PAD_LEFT);
         $s = str_pad(ltrim($s, "\x00"), 32, "\x00", \STR_PAD_LEFT);
 
         return $r . $s;
+    }
+
+    private static function readDerLength(string $der, int &$offset): int
+    {
+        $size = \strlen($der);
+
+        if ($offset >= $size) {
+            throw new AuthenticationException('Invalid DER signature: truncated length header.');
+        }
+
+        $first = \ord($der[$offset]);
+        ++$offset;
+
+        if (0 === ($first & 0x80)) {
+            return $first; // short form
+        }
+
+        $numBytes = $first & 0x7F;
+
+        if (0 === $numBytes || $numBytes > 4 || $offset + $numBytes > $size) {
+            throw new AuthenticationException('Invalid DER signature: unsupported length encoding.');
+        }
+
+        $length = 0;
+        for ($i = 0; $i < $numBytes; ++$i) {
+            $length = ($length << 8) | \ord($der[$offset]);
+            ++$offset;
+        }
+
+        return $length;
     }
 
     private static function base64UrlEncode(string $data): string

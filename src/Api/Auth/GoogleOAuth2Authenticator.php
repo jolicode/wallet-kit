@@ -6,7 +6,9 @@ namespace Jolicode\WalletKit\Api\Auth;
 
 use Jolicode\WalletKit\Api\Credentials\GoogleCredentials;
 use Jolicode\WalletKit\Exception\Api\AuthenticationException;
+use Jolicode\WalletKit\Exception\Api\HttpRequestException;
 use Jolicode\WalletKit\Exception\Api\MissingExtensionException;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class GoogleOAuth2Authenticator
@@ -75,27 +77,44 @@ final class GoogleOAuth2Authenticator
         $jwt = $signingInput . '.' . self::base64UrlEncode($signature);
 
         // Exchange JWT for access token
-        $response = $this->httpClient->request('POST', self::TOKEN_URL, [
-            'body' => [
-                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                'assertion' => $jwt,
-            ],
-        ]);
+        try {
+            $response = $this->httpClient->request('POST', self::TOKEN_URL, [
+                'body' => [
+                    'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                    'assertion' => $jwt,
+                ],
+            ]);
 
-        $statusCode = $response->getStatusCode();
-
-        if ($statusCode < 200 || $statusCode >= 300) {
-            throw new AuthenticationException(\sprintf('Google OAuth2 token request failed with status %d: %s', $statusCode, $response->getContent(false)));
+            $statusCode = $response->getStatusCode();
+            $content = $response->getContent(false);
+        } catch (TransportExceptionInterface $e) {
+            throw new HttpRequestException(\sprintf('Google OAuth2 token request transport failure: %s', $e->getMessage()), $e);
         }
 
-        /** @var array{access_token: string, expires_in: int} $data */
-        $data = $response->toArray();
+        if ($statusCode < 200 || $statusCode >= 300) {
+            throw new AuthenticationException(\sprintf('Google OAuth2 token request failed with status %d: %s', $statusCode, $content));
+        }
 
-        $expiresIn = $data['expires_in'];
+        $data = json_decode($content, true);
+
+        if (!\is_array($data)) {
+            throw new AuthenticationException(\sprintf('Google OAuth2 token endpoint returned non-JSON body (HTTP %d).', $statusCode));
+        }
+
+        $accessToken = \array_key_exists('access_token', $data) ? $data['access_token'] : null;
+        $expiresIn = \array_key_exists('expires_in', $data) ? $data['expires_in'] : null;
+
+        if (!\is_string($accessToken) || '' === $accessToken) {
+            throw new AuthenticationException(\sprintf('Google OAuth2 token response is missing a string "access_token": %s', json_encode($data, \JSON_THROW_ON_ERROR)));
+        }
+
+        if (!\is_int($expiresIn) || $expiresIn < 60) {
+            throw new AuthenticationException(\sprintf('Google OAuth2 token response has an invalid "expires_in" (%s).', \get_debug_type($expiresIn)));
+        }
 
         return new CachedToken(
-            $data['access_token'],
-            new \DateTimeImmutable(\sprintf('+%d seconds', max(60, $expiresIn - 60))),
+            $accessToken,
+            new \DateTimeImmutable(\sprintf('+%d seconds', \max(60, $expiresIn - 60))),
         );
     }
 

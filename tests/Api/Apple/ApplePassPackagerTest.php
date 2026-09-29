@@ -355,4 +355,141 @@ final class ApplePassPackagerTest extends TestCase
 
         return $path;
     }
+
+    /**
+     * The critical end-to-end guarantee: the "signature" ZIP entry is a detached
+     * CMS that verifies against manifest.json, using the real certificates from
+     * the packaging flow (leaf from the P12, CA passed as trust anchor).
+     */
+    public function testPackageSignatureIsVerifiableOverManifest(): void
+    {
+        $packager = $this->createPackager();
+        $pass = $this->createPass();
+
+        $iconPath = $this->createTempImage('roundtrip-icon');
+
+        try {
+            $pkpass = $packager->package($pass, ['icon.png' => $iconPath]);
+
+            $tmpZip = tempnam(sys_get_temp_dir(), 'wallet_kit_rt_zip_');
+            self::assertNotFalse($tmpZip);
+            file_put_contents($tmpZip, $pkpass);
+
+            $zip = new \ZipArchive();
+            self::assertTrue($zip->open($tmpZip));
+
+            $manifestFile = tempnam(sys_get_temp_dir(), 'wallet_kit_rt_manifest_');
+            $signatureFile = tempnam(sys_get_temp_dir(), 'wallet_kit_rt_sig_');
+            self::assertNotFalse($manifestFile);
+            self::assertNotFalse($signatureFile);
+
+            file_put_contents($manifestFile, $zip->getFromName('manifest.json'));
+            file_put_contents($signatureFile, $zip->getFromName('signature'));
+            $zip->close();
+
+            // === Round-trip: verify the PKCS#7 signature against the manifest ===
+            // PHP's openssl_cms_verify() mishandles detached DER input on some
+            // builds (content bytes get EOL-normalized), so use the openssl CLI —
+            // the exact same binary the packaging pipeline relies on.
+            if (false === (\shell_exec('command -v openssl'))) {
+                self::markTestSkipped('openssl CLI not available.');
+            }
+
+            /*
+             * Full PKI check: chain verification against the CA used as WWDR.
+             * (PKCS#7_DETACHED was requested in the packager, DER-in form.)
+             */
+            $cmd = \sprintf(
+                'openssl cms -verify -binary -inform DER -in %s -content %s -CAfile %s 2>&1',
+                \escapeshellarg($signatureFile),
+                \escapeshellarg($manifestFile),
+                \escapeshellarg($this->wwdrPath),
+            );
+            \exec($cmd, $outLines, $exitCode);
+
+            self::assertSame(
+                0,
+                $exitCode,
+                'PKCS#7 signature must verify against manifest.json (openssl output: ' . \implode("\n", $outLines) . ')',
+            );
+
+            @unlink($manifestFile);
+            @unlink($signatureFile);
+            @unlink($tmpZip);
+        } finally {
+            @unlink($iconPath);
+        }
+    }
+
+    public function testRejectsReservedImageFilename(): void
+    {
+        $packager = $this->createPackager();
+        $iconPath = $this->createTempImage('icon');
+        $evilPath = $this->createTempImage('evil');
+
+        try {
+            $this->expectException(PackagingException::class);
+            $this->expectExceptionMessage('Reserved or unsafe file name');
+
+            $packager->package($this->createPass(), [
+                'icon.png' => $iconPath,
+                'pass.json' => $evilPath,
+            ]);
+        } finally {
+            @unlink($iconPath);
+            @unlink($evilPath);
+        }
+    }
+
+    public function testRejectsPathTraversalInImageFilename(): void
+    {
+        $packager = $this->createPackager();
+        $iconPath = $this->createTempImage('icon');
+        $evilPath = $this->createTempImage('evil');
+
+        try {
+            $this->expectException(PackagingException::class);
+            $this->expectExceptionMessage('Reserved or unsafe file name');
+
+            $packager->package($this->createPass(), [
+                'icon.png' => $iconPath,
+                '../escape.png' => $evilPath,
+            ]);
+        } finally {
+            @unlink($iconPath);
+            @unlink($evilPath);
+        }
+    }
+
+    /**
+     * The shipped default resource (DER .cer) must convert to PEM and sign fine,
+     * and no temporary file may be left behind after the packager is destroyed.
+     */
+    public function testBuiltInWwdrResourceConvertsAndCleansUp(): void
+    {
+        $tmpDir = sys_get_temp_dir();
+        $expectedLeftovers = \array_values(\glob($tmpDir . '/wallet_kit_wwdr_pem_*') ?: []);
+
+        $serializer = BuilderTestSerializerFactory::create();
+        $credentials = new AppleCredentials(
+            certificatePath: $this->p12Path,
+            certificatePassword: 'test',
+            wwdrCertificatePath: null, // use built-in AppleWWDRCAG4.cer resource
+        );
+
+        $packager = new ApplePassPackager($serializer, $credentials);
+        $iconPath = $this->createTempImage('icon');
+
+        try {
+            $pkpass = $packager->package($this->createPass(), ['icon.png' => $iconPath]);
+            self::assertNotEmpty($pkpass);
+        } finally {
+            @unlink($iconPath);
+        }
+
+        unset($packager); // trigger __destruct: temp PEM files must be cleaned up
+
+        $leftovers = \array_values(\array_diff(\glob($tmpDir . '/wallet_kit_wwdr_pem_*') ?: [], $expectedLeftovers));
+        self::assertEmpty($leftovers, 'WWDR temp PEM file was not cleaned up: ' . \print_r($leftovers, true));
+    }
 }

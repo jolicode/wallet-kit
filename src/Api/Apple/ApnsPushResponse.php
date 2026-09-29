@@ -14,9 +14,26 @@ final class ApnsPushResponse
     ) {
     }
 
+    /**
+     * Records a transport-level failure (connection dropped, timeout…) so one
+     * failing token never breaks a whole batch.
+     */
+    public static function transportFailure(string $pushToken, string $message): self
+    {
+        return new self($pushToken, 0, \sprintf('transport error: %s', $message));
+    }
+
     public function isSuccessful(): bool
     {
         return 200 === $this->statusCode;
+    }
+
+    /**
+     * Server-side/transport failure: 5xx responses or a transport-level failure.
+     */
+    public function isFailed(): bool
+    {
+        return 0 === $this->statusCode || $this->statusCode >= 500;
     }
 
     public function isDeviceTokenInactive(): bool

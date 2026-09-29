@@ -12,7 +12,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 final class ApplePassPackager
 {
+    private const RESERVED_FILENAMES = ['pass.json', 'manifest.json', 'signature'];
+
     private readonly string $wwdrCertificatePath;
+
+    /** @var list<string> Temporary files created for signing/WLDR conversion */
+    private array $tempFiles = [];
 
     public function __construct(
         private readonly SerializerInterface $serializer,
@@ -28,6 +33,13 @@ final class ApplePassPackager
 
         $rawWwdrPath = $credentials->wwdrCertificatePath ?? __DIR__ . '/Resources/AppleWWDRCAG4.cer';
         $this->wwdrCertificatePath = $this->ensurePemWwdrCertificate($rawWwdrPath);
+    }
+
+    public function __destruct()
+    {
+        foreach ($this->tempFiles as $file) {
+            @unlink($file);
+        }
     }
 
     private function ensurePemWwdrCertificate(string $path): string
@@ -50,14 +62,21 @@ final class ApplePassPackager
             throw new PackagingException('Unable to create temporary file for WWDR certificate conversion.');
         }
 
-        file_put_contents($tmpPath, $pem);
+        if (false === file_put_contents($tmpPath, $pem)) {
+            @unlink($tmpPath);
+
+            throw new PackagingException('Unable to write converted WWDR certificate.');
+        }
+
+        $this->tempFiles[] = $tmpPath;
 
         return $tmpPath;
     }
 
     /**
-     * @param Pass                                 $pass          The Apple pass model
-     * @param array<string, string>                $images        Filename => local path or URL (e.g. ['icon.png' => '/path/to/icon.png'])
+     * @param Pass                                 $pass   The Apple pass model
+     * @param array<string, string>                $images Filename => local file path.
+     *                                                     Remote URLs are intentionally NOT supported (SSRF safety).
      * @param array<string, array<string, string>> $localizations Locale => [key => value] for .lproj/pass.strings
      *
      * @return string Raw .pkpass binary (ZIP)
@@ -75,20 +94,18 @@ final class ApplePassPackager
         /** @var array<string, string> $files filename => binary content */
         $files = ['pass.json' => $passJson];
 
-        foreach ($images as $filename => $pathOrUrl) {
-            $content = @file_get_contents($pathOrUrl);
-
-            if (false === $content) {
-                throw new PackagingException(\sprintf('Unable to read image "%s" from "%s".', $filename, $pathOrUrl));
-            }
-
-            $files[$filename] = $content;
+        foreach ($images as $filename => $path) {
+            $this->assertImageFilename($filename);
+            $files[$filename] = $this->readLocalImage($filename, $path);
         }
 
         // 3. Generate .lproj/pass.strings for each locale
         foreach ($localizations as $locale => $strings) {
             $stringsContent = $this->buildPassStrings($strings);
-            $files[\sprintf('%s.lproj/pass.strings', $locale)] = $stringsContent;
+
+            $localizationFilename = \sprintf('%s.lproj/pass.strings', $locale);
+            $this->assertImageFilename($localizationFilename);
+            $files[$localizationFilename] = $stringsContent;
         }
 
         // 4. Compute SHA1 hash of each file -> manifest.json
@@ -110,6 +127,26 @@ final class ApplePassPackager
     /**
      * @param array<string, string> $strings
      */
+    private function assertImageFilename(string $filename): void
+    {
+        // Reserved names protect the pass.json / manifest.json / signature contract,
+        // and path traversal keeps the archive safe for any consumer that extracts it.
+        if (\in_array($filename, self::RESERVED_FILENAMES, true) || \str_contains($filename, '..') || \str_starts_with($filename, '/')) {
+            throw new PackagingException(\sprintf('Reserved or unsafe file name in pass bundle: "%s".', $filename));
+        }
+    }
+
+    private function readLocalImage(string $filename, string $path): string
+    {
+        $content = @file_get_contents($path);
+
+        if (false === $content) {
+            throw new PackagingException(\sprintf('Unable to read image "%s" from local path "%s".', $filename, $path));
+        }
+
+        return $content;
+    }
+
     private function buildPassStrings(array $strings): string
     {
         $lines = [];
@@ -272,7 +309,9 @@ final class ApplePassPackager
             }
 
             foreach ($files as $filename => $content) {
-                $zip->addFromString($filename, $content);
+                if (false === $zip->addFromString($filename, $content)) {
+                    throw new PackagingException(\sprintf('Failed writing "%s" into the pass archive (disk full?).', $filename));
+                }
             }
 
             $zip->close();

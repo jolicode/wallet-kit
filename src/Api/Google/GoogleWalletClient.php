@@ -135,14 +135,21 @@ final class GoogleWalletClient
             throw new HttpRequestException(\sprintf('Google Wallet API request failed: %s', $e->getMessage()), $e);
         }
 
-        $decoded = '' !== $content ? json_decode($content, true, 512, \JSON_THROW_ON_ERROR) : [];
+        // Some endpoints answer with an empty body on 2xx — tolerate that, and
+        // wrap malformed bodies (HTML proxies…) instead of leaking \JsonException.
+        try {
+            $decoded = '' !== $content ? json_decode($content, true, 512, \JSON_THROW_ON_ERROR) : [];
+        } catch (\JsonException $e) {
+            throw new HttpRequestException(\sprintf('Google Wallet API returned non-JSON body (HTTP %d): %s', $statusCode, $e->getMessage()), $e);
+        }
         /** @var array<string, mixed> $data */
         $data = \is_array($decoded) ? $decoded : [];
 
         if (429 === $statusCode) {
             $retryAfter = $response->getHeaders(false)['retry-after'][0] ?? null;
 
-            throw new RateLimitException($content, null !== $retryAfter ? (int) $retryAfter : null);
+            // Retry-After may be an HTTP-date; only numeric seconds keep meaning here.
+            throw new RateLimitException($content, \ctype_digit((string) $retryAfter) ? (int) $retryAfter : null);
         }
 
         return new GoogleApiResponse($statusCode, $data, $content);
