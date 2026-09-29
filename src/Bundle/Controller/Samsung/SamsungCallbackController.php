@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Bundle\Controller\Samsung;
 
-use Jolicode\WalletKit\Bundle\Samsung\SamsungNotificationVerifier;
 use Jolicode\WalletKit\Bundle\Samsung\SamsungCallbackHandlerInterface;
+use Jolicode\WalletKit\Bundle\Samsung\SamsungNotificationVerifier;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -23,7 +23,7 @@ final class SamsungCallbackController
             return new Response('', Response::HTTP_UNAUTHORIZED);
         }
 
-        /** @var array<string, mixed> $body */
+        /* @var array<string, mixed> $body */
         try {
             $body = json_decode($request->getContent(), true, 512, \JSON_THROW_ON_ERROR);
         } catch (\JsonException) {

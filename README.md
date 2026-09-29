@@ -41,7 +41,7 @@ $context = (new WalletPlatformContext())
         classId: '3388000000012345.example_offer_class',
         objectId: '3388000000012345.example_offer_object',
         defaultReviewStatus: ReviewStatusEnum::APPROVED,
-        defaultGoogleObjectState: StateEnum::ACTIVE,
+        defaultObjectState: StateEnum::ACTIVE,
     )
     ->withSamsung(
         refId: 'coupon-samsung-001',
@@ -49,14 +49,13 @@ $context = (new WalletPlatformContext())
         appLinkName: 'Example Shop',
         appLinkData: 'https://example.com',
     );
-
 $built = WalletPass::offer(
     $context,
     title: '15% off',
     provider: 'Example Shop',
     redemptionChannel: RedemptionChannelEnum::BOTH,
 )
-    ->withBackgroundColorRgb('rgb(30, 60, 90)')
+    ->withBackgroundColor(Color::fromRgbString('rgb(30, 60, 90)'))
     ->addAppleBarcode(new Barcode(
         altText: 'Coupon',
         format: BarcodeFormatEnum::QR,

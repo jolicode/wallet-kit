@@ -391,7 +391,7 @@ final class ApplePassPackagerTest extends TestCase
             // PHP's openssl_cms_verify() mishandles detached DER input on some
             // builds (content bytes get EOL-normalized), so use the openssl CLI —
             // the exact same binary the packaging pipeline relies on.
-            if (false === (\shell_exec('command -v openssl'))) {
+            if (false === shell_exec('command -v openssl')) {
                 self::markTestSkipped('openssl CLI not available.');
             }
 
@@ -401,16 +401,16 @@ final class ApplePassPackagerTest extends TestCase
              */
             $cmd = \sprintf(
                 'openssl cms -verify -binary -inform DER -in %s -content %s -CAfile %s 2>&1',
-                \escapeshellarg($signatureFile),
-                \escapeshellarg($manifestFile),
-                \escapeshellarg($this->wwdrPath),
+                escapeshellarg($signatureFile),
+                escapeshellarg($manifestFile),
+                escapeshellarg($this->wwdrPath),
             );
-            \exec($cmd, $outLines, $exitCode);
+            exec($cmd, $outLines, $exitCode);
 
             self::assertSame(
                 0,
                 $exitCode,
-                'PKCS#7 signature must verify against manifest.json (openssl output: ' . \implode("\n", $outLines) . ')',
+                'PKCS#7 signature must verify against manifest.json (openssl output: ' . implode("\n", $outLines) . ')',
             );
 
             @unlink($manifestFile);
@@ -468,7 +468,7 @@ final class ApplePassPackagerTest extends TestCase
     public function testBuiltInWwdrResourceConvertsAndCleansUp(): void
     {
         $tmpDir = sys_get_temp_dir();
-        $expectedLeftovers = \array_values(\glob($tmpDir . '/wallet_kit_wwdr_pem_*') ?: []);
+        $expectedLeftovers = glob($tmpDir . '/wallet_kit_wwdr_pem_*') ?: [];
 
         $serializer = BuilderTestSerializerFactory::create();
         $credentials = new AppleCredentials(
@@ -489,7 +489,7 @@ final class ApplePassPackagerTest extends TestCase
 
         unset($packager); // trigger __destruct: temp PEM files must be cleaned up
 
-        $leftovers = \array_values(\array_diff(\glob($tmpDir . '/wallet_kit_wwdr_pem_*') ?: [], $expectedLeftovers));
-        self::assertEmpty($leftovers, 'WWDR temp PEM file was not cleaned up: ' . \print_r($leftovers, true));
+        $leftovers = array_diff(glob($tmpDir . '/wallet_kit_wwdr_pem_*') ?: [], $expectedLeftovers);
+        self::assertEmpty($leftovers, 'WWDR temp PEM file was not cleaned up: ' . print_r($leftovers, true));
     }
 }

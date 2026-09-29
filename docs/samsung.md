@@ -15,25 +15,27 @@
 
 ## Authentication
 
-Samsung Wallet uses RS256 JWTs signed with your partner private key. [`SamsungJwtAuthenticator`](../src/Api/Auth/SamsungJwtAuthenticator.php) handles token creation and caching.
+Samsung Wallet uses per-request RS256 JWS "Authorization Tokens" signed with your partner private key, as documented in the [Samsung security guide](https://developer.samsung.com/wallet/securityauthentication/restapiauthorizationtoken.html). [`SamsungRequestAuthenticator`](../src/Api/Auth/SamsungRequestAuthenticator.php) builds one token per API call, bound to the HTTP method and path.
 
 ```php
-use Jolicode\WalletKit\Api\Auth\SamsungJwtAuthenticator;
+use Jolicode\WalletKit\Api\Auth\SamsungRequestAuthenticator;
 use Jolicode\WalletKit\Api\Credentials\SamsungCredentials;
+use Jolicode\WalletKit\Api\Samsung\SamsungRegionEnum;
 
 $credentials = new SamsungCredentials(
     partnerId: 'your-partner-id',
     privateKeyPath: '/path/to/samsung-private-key.pem',
+    certificateId: 'YMtt',                // certificate identifier from the Samsung Partner site
+    region: SamsungRegionEnum::EU,        // us | eu | kr
 );
 
-$authenticator = new SamsungJwtAuthenticator($credentials);
+$authenticator = new SamsungRequestAuthenticator($credentials);
 
-$token = $authenticator->getToken();
-$token->getAccessToken(); // RS256 JWT string
-$token->isExpired();      // false (cached ~59 min)
+// Per-request binding (the token is minted fresh for every API call by the client):
+$token = $authenticator->createAuthorizationToken('POST', '/partner/v1/card/template');
 ```
 
-The JWT includes `iss` (partner ID), `iat`, and `exp` (1 hour) claims. Tokens are cached in memory and reused until 1 minute before expiry. The `openssl` PHP extension is required.
+The JWS header carries `cty: "AUTH"`, `ver: 3`, your `certificateId`, `partnerId` and a `utc` timestamp; the payload carries `API: {method, path}`. There is nothing to cache — the token binds to exactly one request. The `openssl` PHP extension is required.
 
 ---
 
@@ -61,16 +63,16 @@ $response = $client->updateCard($card, 'card-id-123');
 
 Samsung implicitly pushes updated data to the user's device when you call `updateCard()`.
 
-### Update card state
+### Card state
 
-```php
-$response = $client->updateCardState('card-id-123', 'USED');
-```
+Card state transitions are driven through card data updates (the normalized
+`Card` includes the state) — send them via `createCard()` / `updateCard()`.
+Consumer state changes then propagate by pushing new card data to devices:
 
 ### Push card update
 
 ```php
-$response = $client->pushCardUpdate('card-id-123');
+$response = $client->pushCardUpdate('card-id-123', 'event-1', 'CARD_UPDATED');
 ```
 
 Use `pushCardUpdate()` to explicitly re-push a card to the user's device without changing any data. This is useful when you need to trigger a refresh on the device after an external change.
@@ -91,15 +93,12 @@ A `429` status code throws a [`RateLimitException`](../src/Exception/Api/RateLim
 
 ## Card state management
 
-Samsung cards have a lifecycle driven by state transitions. Use `updateCard()` for data changes and `updateCardState()` for state-only transitions.
+Samsung cards have a lifecycle driven by card data. Use `updateCard()` for data/state changes (Samsung delivers updates to devices implicitly) and `pushCardUpdate()` to force an immediate refresh.
 
 | Scenario | Method | Push behavior |
 |----------|--------|---------------|
-| Change card data (title, barcode, ...) | `updateCard()` | Implicit push |
-| Transition state (e.g. mark as used) | `updateCardState()` | No implicit push |
-| Force refresh on device | `pushCardUpdate()` | Explicit push |
-
-When updating card data via `updateCard()`, Samsung automatically delivers the update to the user's device. After a state-only change via `updateCardState()`, call `pushCardUpdate()` if you need the device to reflect the change immediately.
+| Change card data/state (title, barcode, ...) | `updateCard()` | Implicit push |
+| Force refresh on device | `pushCardUpdate(cardId, eventId, type)` | Explicit pull notification |
 
 ---
 
@@ -111,7 +110,8 @@ When updating card data via `updateCard()`, Samsung automatically delivers the u
 |----------|------|----------|-------------|
 | `partnerId` | `string` | yes | Samsung partner ID |
 | `privateKeyPath` | `string` | yes | Path to the RSA private key (PEM) |
-| `serviceId` | `?string` | no | Optional service identifier |
+| `certificateId` | `string` | yes | Certificate identifier from the Samsung Partner site (required in every Authorization JWS) |
+| `publicKeyPath` | `?string` | no | Samsung public certificate (PEM) — verifies inbound notification signatures |
 
 Bundle configuration (`config/packages/wallet_kit.yaml`):
 
@@ -120,7 +120,8 @@ wallet_kit:
     samsung:
         partnerId: '%env(SAMSUNG_PARTNER_ID)%'
         privateKeyPath: '%env(SAMSUNG_PRIVATE_KEY_PATH)%'
-        serviceId: ~               # optional
+        certificateId: '%env(SAMSUNG_CERTIFICATE_ID)%'
+        publicKeyPath: ~           # optional: verify inbound notification JWS
         apiBatchSize: 100          # default
         apiBatchInterval: 30       # default (seconds)
 ```
@@ -136,8 +137,9 @@ Build a coupon card with the builder, create it via the API, update its state, a
 
 declare(strict_types=1);
 
-use Jolicode\WalletKit\Api\Auth\SamsungJwtAuthenticator;
+use Jolicode\WalletKit\Api\Auth\SamsungRequestAuthenticator;
 use Jolicode\WalletKit\Api\Credentials\SamsungCredentials;
+use Jolicode\WalletKit\Api\Samsung\SamsungRegionEnum;
 use Jolicode\WalletKit\Api\Samsung\SamsungWalletClient;
 use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Builder\WalletPlatformContext;
@@ -171,14 +173,18 @@ $card = $built->samsung();
 $credentials = new SamsungCredentials(
     partnerId: 'your-partner-id',
     privateKeyPath: '/path/to/private-key.pem',
+    certificateId: 'YMtt',                      // Samsung Partner site certificate identifier
+    publicKeyPath: null,                        // optional: verify inbound notifications
+    region: SamsungRegionEnum::EU,
 );
 
-$authenticator = new SamsungJwtAuthenticator($credentials);
+$authenticator = new SamsungRequestAuthenticator($credentials);
 
 $client = new SamsungWalletClient(
     httpClient: $httpClient,       // Symfony HttpClientInterface
     normalizer: $normalizer,       // Symfony NormalizerInterface
     authenticator: $authenticator,
+    credentials: $credentials,
 );
 
 // 3. Create the card
@@ -190,11 +196,8 @@ if (!$response->isSuccessful()) {
 
 $cardId = $response->getData()['cardId'];
 
-// 4. Later: mark the card as used
-$client->updateCardState($cardId, 'USED');
-
-// 5. Push the state change to the device
-$client->pushCardUpdate($cardId);
+// 4. Push fresh card data to registered devices
+$client->pushCardUpdate($cardId, 'event-' . $cardId, 'CARD_UPDATED');
 ```
 
 ---
@@ -208,8 +211,9 @@ When not using the Symfony bundle, wire the services manually:
 
 declare(strict_types=1);
 
-use Jolicode\WalletKit\Api\Auth\SamsungJwtAuthenticator;
+use Jolicode\WalletKit\Api\Auth\SamsungRequestAuthenticator;
 use Jolicode\WalletKit\Api\Credentials\SamsungCredentials;
+use Jolicode\WalletKit\Api\Samsung\SamsungRegionEnum;
 use Jolicode\WalletKit\Api\Samsung\SamsungWalletClient;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -219,10 +223,10 @@ use Symfony\Component\Serializer\Serializer;
 $credentials = new SamsungCredentials(
     partnerId: 'your-partner-id',
     privateKeyPath: '/path/to/private-key.pem',
-    serviceId: null,
+    certificateId: 'YMtt',
 );
 
-$authenticator = new SamsungJwtAuthenticator($credentials);
+$authenticator = new SamsungRequestAuthenticator($credentials);
 
 $serializer = new Serializer(
     [new ObjectNormalizer()],
@@ -233,7 +237,8 @@ $client = new SamsungWalletClient(
     httpClient: HttpClient::create(),
     normalizer: $serializer,
     authenticator: $authenticator,
+    credentials: $credentials,
 );
 ```
 
-For production use, register the normalizers from this package (see [`tests/Builder/BuilderTestSerializerFactory.php`](../tests/Builder/BuilderTestSerializerFactory.php) for the full list) to ensure Samsung models like [`SamsungImage`](../src/Pass/Samsung/Model/Shared/SamsungImage.php) and [`SamsungBarcode`](../src/Pass/Samsung/Model/Shared/SamsungBarcode.php) are serialized correctly.
+For production use, build the Serializer with [`WalletSerializerFactory::create()`](../src/Builder/WalletSerializerFactory.php) — it registers every normalizer this package ships (including the Samsung ones like [`SamsungImage`](../src/Pass/Samsung/Model/Shared/SamsungImage.php) and [`SamsungBarcode`](../src/Pass/Samsung/Model/Shared/SamsungBarcode.php)).

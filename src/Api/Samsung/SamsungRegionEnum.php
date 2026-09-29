@@ -29,6 +29,6 @@ enum SamsungRegionEnum: string
      */
     public function getCountryCode(): string
     {
-        return \mb_strtoupper($this->value);
+        return mb_strtoupper($this->value);
     }
 }

@@ -112,7 +112,7 @@ All JSON via Symfony Serializer normalizers (100+). Tests wire the stack via `Bu
 - `mutateApple()` and `mutateSamsung()` callbacks allow post-build platform-specific customization
 - Color value object supports `rgb()`, `hex()`, and `googleColor()` output formats
 - Use `\array_key_exists()` instead of `isset()` or `empty()` in all PHP code
-- All concrete classes are `final class`
+- All Api/Bundle service classes are `final class` — **but not the `Pass\` model layer** (the builder mutates model instances post-build, so models stay non-final)
 
 ### Documentation
 

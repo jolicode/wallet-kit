@@ -109,12 +109,12 @@ final class GoogleOAuth2Authenticator
         }
 
         if (!\is_int($expiresIn) || $expiresIn < 60) {
-            throw new AuthenticationException(\sprintf('Google OAuth2 token response has an invalid "expires_in" (%s).', \get_debug_type($expiresIn)));
+            throw new AuthenticationException(\sprintf('Google OAuth2 token response has an invalid "expires_in" (%s).', get_debug_type($expiresIn)));
         }
 
         return new CachedToken(
             $accessToken,
-            new \DateTimeImmutable(\sprintf('+%d seconds', \max(60, $expiresIn - 60))),
+            new \DateTimeImmutable(\sprintf('+%d seconds', max(60, $expiresIn - 60))),
         );
     }
 

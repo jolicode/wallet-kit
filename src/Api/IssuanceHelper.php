@@ -20,7 +20,7 @@ final class IssuanceHelper
      */
     public function appleAddToWalletUrl(string $passDownloadUrl): string
     {
-        if (!\str_starts_with($passDownloadUrl, 'https://')) {
+        if (!str_starts_with($passDownloadUrl, 'https://')) {
             throw new \ValueError('Apple pass download URLs must be served over HTTPS.');
         }
 
@@ -45,9 +45,9 @@ final class IssuanceHelper
      * Samsung: "Data Transmit Link" — opens the Add to Samsung Wallet page with the
      * card payload in the "cdata" query token.
      *
-     * @param string $cardId     Card identifier from the Samsung Partner site.
-     * @param string $cdataToken Signed card payload, produced by SamsungCardTokenizer
-     *                           (base64url — already query-safe).
+     * @param string $cardId     card identifier from the Samsung Partner site
+     * @param string $cdataToken signed card payload, produced by SamsungCardTokenizer
+     *                           (base64url — already query-safe)
      */
     public function samsungAddToWalletUrl(string $cardId, string $cdataToken): string
     {

@@ -79,9 +79,19 @@ final class WalletKitExtension extends Extension
         // The throttling stack is only loadable when every hard dependency is present:
         // the pending-operation repository needs Doctrine, the handler needs Messenger
         // and at least one platform processor must exist (they are gated per platform).
+        // NOTE: doctrine is checked through the DoctrineBundle class, because the
+        // bare EntityManagerInterface also exists when only doctrine/orm is installed
+        // (the "service doctrine.orm.entity_manager" would then be missing at runtime).
         $anyPlatform = [] !== $batchConfig;
         $messengerAvailable = ContainerBuilder::willBeAvailable('symfony/messenger', MessageBusInterface::class, ['jolicode/wallet-kit']);
-        $doctrineAvailable = ContainerBuilder::willBeAvailable('doctrine/doctrine-bundle', \Doctrine\ORM\EntityManagerInterface::class, ['jolicode/wallet-kit']);
+
+        // NOTE: doctrine is checked through the DoctrineBundle class, because the
+        // bare EntityManagerInterface also exists when only doctrine/orm is installed
+        // (the "service doctrine.orm.entity_manager" would then be missing at runtime).
+        // Passing the class by string keeps static analysis happy on installs
+        // where doctrine/doctrine-bundle is not a dependency (dev/test contexts).
+        $doctrineBundleClass = 'Doctrine\\Bundle\\DoctrineBundle\\DoctrineBundle';
+        $doctrineAvailable = ContainerBuilder::willBeAvailable('doctrine/doctrine-bundle', $doctrineBundleClass, ['jolicode/wallet-kit']);
 
         if ($anyPlatform && $messengerAvailable && $doctrineAvailable) {
             $loader->load('throttling.php');

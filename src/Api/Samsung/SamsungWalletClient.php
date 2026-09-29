@@ -68,7 +68,7 @@ final class SamsungWalletClient
 
         return $this->doRequest(
             'POST',
-            $this->credentials->region->getBaseUrl() . $pathWithoutQuery . '?' . \http_build_query(['eventId' => $eventId, 'type' => $type]),
+            $this->credentials->region->getBaseUrl() . $pathWithoutQuery . '?' . http_build_query(['eventId' => $eventId, 'type' => $type]),
             $token,
             extraHeaders: [
                 'x-smcs-cc2' => $this->credentials->region->getCountryCode(),
@@ -149,7 +149,7 @@ final class SamsungWalletClient
         if (429 === $statusCode) {
             $retryAfter = $response->getHeaders(false)['retry-after'][0] ?? null;
 
-            throw new RateLimitException($content, \ctype_digit((string) $retryAfter) ? (int) $retryAfter : null);
+            throw new RateLimitException($content, ctype_digit((string) $retryAfter) ? (int) $retryAfter : null);
         }
 
         // Some endpoints answer with an empty body on 2xx — tolerate that, and wrap

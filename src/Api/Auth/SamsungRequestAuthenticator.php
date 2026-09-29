@@ -36,10 +36,10 @@ final class SamsungRequestAuthenticator
 
     /**
      * @param string $method HTTP method of the request, e.g. "GET"/"POST".
-     * @param string $path    API path only (excluding scheme/host/query),
-     *                        e.g. "/partner/v1/card/template/{cardId}".
+     * @param string $path   API path only (excluding scheme/host/query),
+     *                       e.g. "/partner/v1/card/template/{cardId}".
      *
-     * @return string The fresh JWS, ready to be sent as "Authorization: Bearer …".
+     * @return string the fresh JWS, ready to be sent as "Authorization: Bearer …"
      */
     public function createAuthorizationToken(string $method, string $path): string
     {
@@ -60,7 +60,7 @@ final class SamsungRequestAuthenticator
 
         $payload = Jwt::base64UrlEncode(json_encode([
             'API' => [
-                'method' => \strtoupper($method),
+                'method' => strtoupper($method),
                 'path' => $path,
             ],
         ], \JSON_THROW_ON_ERROR));
@@ -73,8 +73,8 @@ final class SamsungRequestAuthenticator
         $signingInput = $header . '.' . $payload;
         $signature = '';
 
-        if (!\openssl_sign($signingInput, $signature, $this->privateKey, \OPENSSL_ALGO_SHA256)) {
-            throw new AuthenticationException(\sprintf('Failed to sign Samsung authorization token: %s', \openssl_error_string() ?: 'unknown error'));
+        if (!openssl_sign($signingInput, $signature, $this->privateKey, \OPENSSL_ALGO_SHA256)) {
+            throw new AuthenticationException(\sprintf('Failed to sign Samsung authorization token: %s', openssl_error_string() ?: 'unknown error'));
         }
 
         return $signingInput . '.' . Jwt::base64UrlEncode($signature);
@@ -82,13 +82,13 @@ final class SamsungRequestAuthenticator
 
     private static function loadPrivateKey(string $path): \OpenSSLAsymmetricKey
     {
-        $content = @\file_get_contents($path);
+        $content = @file_get_contents($path);
 
         if (false === $content) {
             throw new AuthenticationException(\sprintf('Unable to read Samsung private key at "%s".', $path));
         }
 
-        $key = \openssl_pkey_get_private($content);
+        $key = openssl_pkey_get_private($content);
 
         if (false === $key) {
             throw new AuthenticationException('Unable to parse Samsung private key.');

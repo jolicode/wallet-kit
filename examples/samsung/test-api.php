@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/vendor/autoload.php';
-
-(new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
-
 use Jolicode\WalletKit\Api\Auth\SamsungJwtAuthenticator;
 use Jolicode\WalletKit\Api\Credentials\SamsungCredentials;
 use Jolicode\WalletKit\Api\IssuanceHelper;
@@ -17,6 +13,10 @@ use Jolicode\WalletKit\Builder\WalletSerializerFactory;
 use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
 use Symfony\Component\HttpClient\HttpClient;
+
+require __DIR__ . '/vendor/autoload.php';
+
+(new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
 
 $partnerId = $_ENV['SAMSUNG_PARTNER_ID'] ?? throw new RuntimeException('Missing SAMSUNG_PARTNER_ID in .env');
 $privateKeyPath = $_ENV['SAMSUNG_PRIVATE_KEY_PATH'] ?? throw new RuntimeException('Missing SAMSUNG_PRIVATE_KEY_PATH in .env');

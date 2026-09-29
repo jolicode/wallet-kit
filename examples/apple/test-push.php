@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/vendor/autoload.php';
-
-(new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
-
 use Jolicode\WalletKit\Api\Apple\ApplePushNotifier;
 use Jolicode\WalletKit\Api\Auth\AppleApnsJwtProvider;
 use Jolicode\WalletKit\Api\Credentials\AppleCredentials;
 use Symfony\Component\HttpClient\HttpClient;
+
+require __DIR__ . '/vendor/autoload.php';
+
+(new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
 
 $teamId = $_ENV['APPLE_TEAM_IDENTIFIER'] ?? throw new RuntimeException('Missing APPLE_TEAM_IDENTIFIER in .env');
 $passTypeId = $_ENV['APPLE_PASS_TYPE_IDENTIFIER'] ?? throw new RuntimeException('Missing APPLE_PASS_TYPE_IDENTIFIER in .env');

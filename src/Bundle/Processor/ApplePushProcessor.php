@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Bundle\Processor;
 
+use Jolicode\WalletKit\Api\Apple\ApplePushNotifier;
 use Jolicode\WalletKit\Bundle\Entity\PendingOperation;
-use Jolicode\WalletKit\Bundle\Processor\PendingOperationProcessorInterface;
 use Jolicode\WalletKit\Bundle\Repository\PassRegistrationRepositoryInterface;
 use Jolicode\WalletKit\Bundle\WalletPlatformEnum;
 use Jolicode\WalletKit\Exception\Api\RateLimitException;
@@ -68,9 +68,7 @@ final class ApplePushProcessor implements PendingOperationProcessorInterface
                 } elseif ($response->isRateLimited()) {
                     // APNs throttling: hand the whole batch back with the rate-limit
                     // delay path instead of silently reporting success.
-                    throw RateLimitException::withoutRetryAfter(
-                        \sprintf('APNs rate-limited update for pass type "%s".', $passTypeId),
-                    );
+                    throw RateLimitException::withoutRetryAfter(\sprintf('APNs rate-limited update for pass type "%s".', $passTypeId));
                 } elseif ($response->isSuccessful()) {
                     $result->addSuccess($operation);
                 } else {

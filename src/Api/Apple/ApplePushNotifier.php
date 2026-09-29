@@ -92,10 +92,7 @@ final class ApplePushNotifier
                 'body' => '{}',
             ]);
         } catch (TransportExceptionInterface $e) {
-            throw new HttpRequestException(
-                \sprintf('APNS push request failed for token "%s…": %s', \substr($pushToken, 0, 6), $e->getMessage()),
-                $e,
-            );
+            throw new HttpRequestException(\sprintf('APNS push request failed for token "%s…": %s', substr($pushToken, 0, 6), $e->getMessage()), $e);
         }
     }
 
@@ -122,10 +119,7 @@ final class ApplePushNotifier
             $headers = $response->getHeaders(false);
             $content = $response->getContent(false);
         } catch (TransportExceptionInterface $e) {
-            throw new HttpRequestException(
-                \sprintf('APNS push response failed for token "%s…": %s', \substr($pushToken, 0, 6), $e->getMessage()),
-                $e,
-            );
+            throw new HttpRequestException(\sprintf('APNS push response failed for token "%s…": %s', substr($pushToken, 0, 6), $e->getMessage()), $e);
         }
 
         $apnsId = $headers['apns-id'][0] ?? null;

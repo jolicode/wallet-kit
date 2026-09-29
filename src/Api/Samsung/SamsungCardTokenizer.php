@@ -33,13 +33,13 @@ final class SamsungCardTokenizer
             throw new MissingExtensionException('The "openssl" PHP extension is required for Samsung card data tokens.');
         }
 
-        $key = @\file_get_contents($credentials->privateKeyPath);
+        $key = @file_get_contents($credentials->privateKeyPath);
 
         if (false === $key) {
             throw new \RuntimeException(\sprintf('Unable to read Samsung private key at "%s".', $credentials->privateKeyPath));
         }
 
-        $privateKey = \openssl_pkey_get_private($key);
+        $privateKey = openssl_pkey_get_private($key);
         $this->privateKey = false === $privateKey ? null : $privateKey;
     }
 
@@ -48,7 +48,7 @@ final class SamsungCardTokenizer
      * their card flow expects (e.g. {"card": …}, {"cardTemplate": …}).
      *
      * @param string               $contentType JWS header "cty" value, e.g. "CARD" or "NOTIFICATION".
-     * @param array<string, mixed> $payload     The full JWT payload to sign.
+     * @param array<string, mixed> $payload     the full JWT payload to sign
      */
     public function tokenize(string $contentType, array $payload): string
     {
@@ -60,7 +60,7 @@ final class SamsungCardTokenizer
 
         $header = Jwt::base64UrlEncode(json_encode([
             'alg' => 'RS256',
-            'cty' => \strtoupper($contentType),
+            'cty' => strtoupper($contentType),
             'ver' => self::TOKEN_VERSION,
             'certificateId' => $this->credentials->certificateId,
             'partnerId' => $this->credentials->partnerId,
@@ -72,8 +72,8 @@ final class SamsungCardTokenizer
         $signingInput = $header . '.' . $payloadJson;
         $signature = '';
 
-        if (!\openssl_sign($signingInput, $signature, $this->privateKey, \OPENSSL_ALGO_SHA256)) {
-            throw new \RuntimeException(\sprintf('Failed to sign Samsung card data token: %s', \openssl_error_string() ?: 'unknown error'));
+        if (!openssl_sign($signingInput, $signature, $this->privateKey, \OPENSSL_ALGO_SHA256)) {
+            throw new \RuntimeException(\sprintf('Failed to sign Samsung card data token: %s', openssl_error_string() ?: 'unknown error'));
         }
 
         return $signingInput . '.' . Jwt::base64UrlEncode($signature);

@@ -74,9 +74,9 @@ final class ApplePassPackager
     }
 
     /**
-     * @param Pass                                 $pass   The Apple pass model
-     * @param array<string, string>                $images Filename => local file path.
-     *                                                     Remote URLs are intentionally NOT supported (SSRF safety).
+     * @param Pass                                 $pass          The Apple pass model
+     * @param array<string, string>                $images        Filename => local file path.
+     *                                                            Remote URLs are intentionally NOT supported (SSRF safety).
      * @param array<string, array<string, string>> $localizations Locale => [key => value] for .lproj/pass.strings
      *
      * @return string Raw .pkpass binary (ZIP)
@@ -124,14 +124,11 @@ final class ApplePassPackager
         return $this->createZip($files);
     }
 
-    /**
-     * @param array<string, string> $strings
-     */
     private function assertImageFilename(string $filename): void
     {
         // Reserved names protect the pass.json / manifest.json / signature contract,
         // and path traversal keeps the archive safe for any consumer that extracts it.
-        if (\in_array($filename, self::RESERVED_FILENAMES, true) || \str_contains($filename, '..') || \str_starts_with($filename, '/')) {
+        if (\in_array($filename, self::RESERVED_FILENAMES, true) || str_contains($filename, '..') || str_starts_with($filename, '/')) {
             throw new PackagingException(\sprintf('Reserved or unsafe file name in pass bundle: "%s".', $filename));
         }
     }

@@ -6,6 +6,7 @@ $finder = (new PhpCsFixer\Finder())
         __DIR__ . '/tests',
         __DIR__ . '/examples',
     ])
+    ->exclude(['vendor']) // example projects vendor their own dependencies
 ;
 
 return (new PhpCsFixer\Config())

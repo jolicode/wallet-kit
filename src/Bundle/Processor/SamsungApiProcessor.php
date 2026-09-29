@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Jolicode\WalletKit\Bundle\Processor;
 
 use Jolicode\WalletKit\Api\Samsung\SamsungWalletClient;
+use Jolicode\WalletKit\Bundle\Entity\PendingOperation;
 use Jolicode\WalletKit\Bundle\WalletPlatformEnum;
 use Jolicode\WalletKit\Exception\Api\UnknownOperationTypeException;
 use Jolicode\WalletKit\Pass\Samsung\Model\Card;
@@ -62,17 +63,17 @@ final class SamsungApiProcessor implements PendingOperationProcessorInterface
         $operationType = (string) $payload['operationType'];
 
         match ($operationType) {
-            'create' => $this->require($payload, ['card'], $operationType, fn (array $payload): string => $this->client->createCard($this->denormalizeCard($payload['card']))),
-            'update' => $this->require($payload, ['card', 'cardId'], $operationType, fn (array $payload): string => $this->client->updateCard($this->denormalizeCard($payload['card']), (string) $payload['cardId'])),
-            'push' => $this->require($payload, ['cardId', 'eventId', 'type'], $operationType, fn (array $payload): string => $this->client->pushCardUpdate((string) $payload['cardId'], (string) $payload['eventId'], (string) $payload['type'])),
+            'create' => $this->require($payload, ['card'], $operationType, fn (array $payload): mixed => $this->client->createCard($this->denormalizeCard($payload['card']))),
+            'update' => $this->require($payload, ['card', 'cardId'], $operationType, fn (array $payload): mixed => $this->client->updateCard($this->denormalizeCard($payload['card']), (string) $payload['cardId'])),
+            'push' => $this->require($payload, ['cardId', 'eventId', 'type'], $operationType, fn (array $payload): mixed => $this->client->pushCardUpdate((string) $payload['cardId'], (string) $payload['eventId'], (string) $payload['type'])),
             default => throw new UnknownOperationTypeException($operationType),
         };
     }
 
     /**
-     * @param array<string, mixed>                   $payload
-     * @param list<string>                           $requiredKeys
-     * @param callable(array<string, mixed>): mixed  $fn
+     * @param array<string, mixed>                  $payload
+     * @param list<string>                          $requiredKeys
+     * @param callable(array<string, mixed>): mixed $fn
      */
     private function require(array $payload, array $requiredKeys, string $operationType, callable $fn): void
     {

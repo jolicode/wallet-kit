@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/vendor/autoload.php';
-
-(new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
-
 use Jolicode\WalletKit\Api\Credentials\GoogleCredentials;
 use Jolicode\WalletKit\Api\Google\GoogleSaveLinkGenerator;
 use Jolicode\WalletKit\Builder\WalletPass;
@@ -15,6 +11,10 @@ use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\ReviewStatusEnum;
 use Jolicode\WalletKit\Pass\Android\Model\Shared\StateEnum;
+
+require __DIR__ . '/vendor/autoload.php';
+
+(new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
 
 // === Config (from .env) ===
 $issuerId = $_ENV['GOOGLE_WALLET_ISSUER_ID'] ?? throw new RuntimeException('Missing GOOGLE_WALLET_ISSUER_ID in .env');

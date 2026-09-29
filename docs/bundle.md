@@ -64,7 +64,8 @@ return static function (WalletKitConfig $config): void {
     $config->samsung()
         ->partnerId('%env(SAMSUNG_PARTNER_ID)%')
         ->privateKeyPath('%kernel.project_dir%/var/credentials/samsung-private.pem')
-        ->serviceId('%env(SAMSUNG_SERVICE_ID)%')
+        ->certificateId('%env(SAMSUNG_CERTIFICATE_ID)%')
+        ->publicKeyPath(null) // optional: verify inbound notification signatures
         ->apiBatchSize(100)
         ->apiBatchInterval(30)
     ;
@@ -112,7 +113,7 @@ Source: [`WalletKitExtension`](../src/Bundle/DependencyInjection/WalletKitExtens
 | Service ID | Class |
 |---|---|
 | `wallet_kit.credentials.samsung` | `SamsungCredentials` |
-| `wallet_kit.auth.samsung_jwt` | `SamsungJwtAuthenticator` |
+| `wallet_kit.auth.samsung_request` | `SamsungRequestAuthenticator` |
 | `wallet_kit.samsung.client` | `SamsungWalletClient` |
 | `wallet_kit.controller.samsung_callback` | `SamsungCallbackController` |
 
@@ -168,13 +169,27 @@ The factory also exposes `getGoogleCredentials()`, `getSamsungCredentials()`, an
 
 ## Apple Web Service
 
-The bundle implements the 5 endpoints required by the [Apple Web Service protocol](https://developer.apple.com/documentation/walletpasses/adding-a-web-service-to-update-passes). Routes are registered automatically when the `apple` config node is present.
+The bundle implements the 5 endpoints required by the [Apple Web Service protocol](https://developer.apple.com/documentation/walletpasses/adding-a-web-service-to-update-passes). Routes live in `Resources/config/routes/` — apps import the platform files they use (see [Routing](#routing) below).
 
 Source: [`AppleWebServiceController`](../src/Bundle/Controller/Apple/AppleWebServiceController.php)
 
 ### Endpoints
 
 All routes use the configured `route_prefix` (default: `/wallet-kit`).
+
+### Routing
+
+Symfony does not auto-register bundle routes — you import the platform file(s) you
+configured. Add to `config/routes.yaml`:
+
+```yaml
+wallet_kit_apple:
+    resource: '@WalletKitBundle/Resources/config/routes/apple.php'
+```
+
+For Google/Samsung callbacks, similarly import `routes/google.php` / `routes/samsung.php`
+when those platforms are configured. Importing a file whose platform is not configured
+makes its routes 500 on stray requests, so only import the platform files you use.
 
 | Method | Path | Route name | Action |
 |---|---|---|---|
@@ -199,7 +214,8 @@ final class MyApplePassProvider implements ApplePassProviderInterface
     public function getPass(string $passTypeIdentifier, string $serialNumber): BuiltWalletPass
     {
         // Look up the pass by serial number in your database,
-        // build it via the WalletPassBuilder, and return the result.
+        // Build via the fluent entry point, e.g.:
+        //   WalletPass::offer($context, title: '10% off', provider: 'Shop', redemptionChannel: RedemptionChannelEnum::BOTH)->with...->build()
     }
 
     /**
@@ -496,7 +512,7 @@ namespace App\Controller;
 use Jolicode\WalletKit\Api\Apple\ApplePassPackager;
 use Jolicode\WalletKit\Api\Google\GoogleSaveLinkGenerator;
 use Jolicode\WalletKit\Api\Samsung\SamsungWalletClient;
-use Jolicode\WalletKit\Builder\WalletPassBuilder;
+use Jolicode\WalletKit\Builder\WalletPass;
 use Jolicode\WalletKit\Bundle\Google\ThrottledGoogleDispatcher;
 use Jolicode\WalletKit\Bundle\Push\ThrottledPushDispatcher;
 use Jolicode\WalletKit\Bundle\Samsung\ThrottledSamsungDispatcher;
@@ -508,7 +524,6 @@ final class WalletController
 {
     public function __construct(
         private readonly WalletContextFactory $contextFactory,
-        private readonly WalletPassBuilder $builder,
         private readonly ApplePassPackager $applePackager,
         private readonly GoogleSaveLinkGenerator $googleSaveLink,
         private readonly SamsungWalletClient $samsungClient,
@@ -518,16 +533,19 @@ final class WalletController
     ) {
     }
 
-    public function issuePass(string $userId): JsonResponse
+    public function issueOffer(string $userId): JsonResponse
     {
         $context = $this->contextFactory->createContext();
 
-        $built = $this->builder
-            ->boardingPass()
-            ->description('Flight to Paris')
-            ->serialNumber('flight-' . $userId)
-            // ... add fields, colors, etc.
-            ->build($context)
+        $built = WalletPass::offer(
+            $context,
+            title: '10% off next order',
+            provider: 'Example Shop',
+            redemptionChannel: RedemptionChannelEnum::BOTH,
+        )
+            ->withBackgroundColor(Color::fromRgbString('rgb(30, 60, 90)'))
+            // ... add fields, images, etc.
+            ->build()
         ;
 
         // Apple: package and return a download URL

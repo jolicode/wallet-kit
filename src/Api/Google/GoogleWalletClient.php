@@ -149,7 +149,7 @@ final class GoogleWalletClient
             $retryAfter = $response->getHeaders(false)['retry-after'][0] ?? null;
 
             // Retry-After may be an HTTP-date; only numeric seconds keep meaning here.
-            throw new RateLimitException($content, \ctype_digit((string) $retryAfter) ? (int) $retryAfter : null);
+            throw new RateLimitException($content, ctype_digit((string) $retryAfter) ? (int) $retryAfter : null);
         }
 
         return new GoogleApiResponse($statusCode, $data, $content);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Jolicode\WalletKit\Bundle\Repository;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\UniqueConstraintViolationException;
 use Jolicode\WalletKit\Bundle\Entity\PassRegistration;
 
 final class DoctrinePassRegistrationRepository implements PassRegistrationRepositoryInterface

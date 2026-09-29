@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/vendor/autoload.php';
-
-(new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
-
 use Jolicode\WalletKit\Api\Apple\ApplePassPackager;
 use Jolicode\WalletKit\Api\Credentials\AppleCredentials;
 use Jolicode\WalletKit\Builder\WalletPass;
@@ -13,6 +9,10 @@ use Jolicode\WalletKit\Builder\WalletPlatformContext;
 use Jolicode\WalletKit\Builder\WalletSerializerFactory;
 use Jolicode\WalletKit\Common\Color;
 use Jolicode\WalletKit\Pass\Android\Model\Offer\RedemptionChannelEnum;
+
+require __DIR__ . '/vendor/autoload.php';
+
+(new Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/.env');
 
 $teamId = $_ENV['APPLE_TEAM_IDENTIFIER'] ?? throw new RuntimeException('Missing APPLE_TEAM_IDENTIFIER in .env');
 $passTypeId = $_ENV['APPLE_PASS_TYPE_IDENTIFIER'] ?? throw new RuntimeException('Missing APPLE_PASS_TYPE_IDENTIFIER in .env');

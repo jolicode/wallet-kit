@@ -175,7 +175,7 @@ APNS keys (Step 9) are optional for the first run.
 
 ## Step 7 — Package and sign a .pkpass
 
-Copy [`examples/apple/test-packager.php`](../../examples/apple/test-packager.php) into your folder. It reads everything from `.env.local` — no edits needed.
+Copy [`examples/apple/test-packager.php`](../../examples/apple/test-packager.php) **and the [`examples/apple/assets/`](../../examples/apple/assets/) folder** into your folder (the script loads `assets/icon.png` / `icon@2x.png` / `icon@3x.png`). It reads everything from `.env.local` — no edits needed.
 
 The script builds an **Offer (coupon) pass** via `WalletPass::offer(...)` and writes `sample.pkpass` next to itself. If you want to try another vertical (loyalty, event ticket, store card, …), swap the `WalletPass::offer(...)` call — the builder reports missing required parameters clearly at runtime.
 

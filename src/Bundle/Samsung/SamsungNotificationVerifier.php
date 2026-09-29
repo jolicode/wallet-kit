@@ -39,7 +39,7 @@ final class SamsungNotificationVerifier
     }
 
     /**
-     * @return bool true when the request is verified (or verification is disabled).
+     * @return bool true when the request is verified (or verification is disabled)
      */
     public function verify(Request $request): bool
     {
@@ -61,20 +61,20 @@ final class SamsungNotificationVerifier
         }
 
         $header = $request->headers->get('Authorization') ?? '';
-        $jws = trim(\str_starts_with($header, 'Bearer ') ? substr($header, 7) : $header);
-        $parts = \explode('.', $jws);
+        $jws = trim(str_starts_with($header, 'Bearer ') ? substr($header, 7) : $header);
+        $parts = explode('.', $jws);
 
         if (3 !== \count($parts)) {
             return false;
         }
         [$headB64, $payloadB64, $sigB64] = $parts;
-        $signature = \base64_decode($sigB64, true);
+        $signature = base64_decode($sigB64, true);
 
         if (false === $signature) {
             return false;
         }
 
-        $verified = \openssl_verify(
+        $verified = openssl_verify(
             $headB64 . '.' . $payloadB64,
             $signature,
             $publicKey,
@@ -96,9 +96,9 @@ final class SamsungNotificationVerifier
             return false;
         }
 
-        $ageSeconds = (\time() * 1000 - $payload['utc']) / 1000;
+        $ageSeconds = (time() * 1000 - $payload['utc']) / 1000;
 
-        return \abs($ageSeconds) <= self::MAX_CLOCK_SKEW_SECONDS;
+        return abs($ageSeconds) <= self::MAX_CLOCK_SKEW_SECONDS;
     }
 
     private function hasOpenSsl(): bool
@@ -106,14 +106,16 @@ final class SamsungNotificationVerifier
         return \extension_loaded('openssl');
     }
 
-    private static function loadPublicKey(string $path): \OpenSSLAsymmetricKey|false
+    private static function loadPublicKey(string $path): ?\OpenSSLAsymmetricKey
     {
-        $content = \file_get_contents($path);
+        $content = @file_get_contents($path);
 
         if (false === $content) {
-            return false;
+            return null;
         }
 
-        return \openssl_pkey_get_public($content);
+        $key = openssl_pkey_get_public($content);
+
+        return false === $key ? null : $key;
     }
 }

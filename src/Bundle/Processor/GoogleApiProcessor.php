@@ -6,6 +6,7 @@ namespace Jolicode\WalletKit\Bundle\Processor;
 
 use Jolicode\WalletKit\Api\Google\GoogleWalletClient;
 use Jolicode\WalletKit\Builder\GoogleWalletPair;
+use Jolicode\WalletKit\Bundle\Entity\PendingOperation;
 use Jolicode\WalletKit\Bundle\WalletPlatformEnum;
 use Jolicode\WalletKit\Exception\Api\UnknownOperationTypeException;
 use Psr\Log\LoggerInterface;

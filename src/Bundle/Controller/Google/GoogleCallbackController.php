@@ -22,7 +22,7 @@ final class GoogleCallbackController
             return new Response('', Response::HTTP_UNAUTHORIZED);
         }
 
-        /** @var array<string, mixed> $body */
+        /* @var array<string, mixed> $body */
         try {
             $body = json_decode($request->getContent(), true, 512, \JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
@@ -58,7 +58,7 @@ final class GoogleCallbackController
     private function hasValidSecret(Request $request): bool
     {
         $header = $request->headers->get('Authorization') ?? '';
-        $provided = \str_starts_with($header, 'Bearer ') ? \substr($header, 7) : $header;
+        $provided = str_starts_with($header, 'Bearer ') ? substr($header, 7) : $header;
 
         return hash_equals($this->secretToken ?? '', trim($provided));
     }

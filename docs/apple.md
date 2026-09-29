@@ -267,7 +267,7 @@ foreach ($responses as $response) {
 
 ## Without the bundle
 
-If you are not using the Symfony bundle, you need to build the `Serializer` manually. The test factory at [`tests/Builder/BuilderTestSerializerFactory.php`](../tests/Builder/BuilderTestSerializerFactory.php) shows the full list of normalizers.
+If you are not using the Symfony bundle, build the `Serializer` with [`WalletSerializerFactory::create()`](../src/Builder/WalletSerializerFactory.php) — it registers every normalizer this package ships.
 
 For Apple-only usage, you need at minimum the Apple normalizers:
 

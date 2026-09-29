@@ -123,7 +123,7 @@ final class AppleApnsJwtProvider
         if ($offset + $rLength > $size) {
             throw new AuthenticationException('Invalid DER signature: R buffer underrun.');
         }
-        $r = \substr($der, $offset, $rLength);
+        $r = substr($der, $offset, $rLength);
         $offset += $rLength;
 
         // S INTEGER
@@ -136,7 +136,7 @@ final class AppleApnsJwtProvider
         if ($offset + $sLength > $size) {
             throw new AuthenticationException('Invalid DER signature: S buffer underrun.');
         }
-        $s = \substr($der, $offset, $sLength);
+        $s = substr($der, $offset, $sLength);
 
         // Pad or trim each integer to its raw 32-byte int128-like width
         $r = str_pad(ltrim($r, "\x00"), 32, "\x00", \STR_PAD_LEFT);

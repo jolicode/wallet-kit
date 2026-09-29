@@ -410,11 +410,10 @@ final class IssuanceHelper
     public function googleAddToWalletUrl(GoogleWalletPair $pair): string;
 
     /**
-     * Samsung: generates a deep link to add the card.
-     * Uses the Samsung Wallet deep link scheme.
-     * @return string https://a.]]wallet.samsung.com/...
+     * Samsung: "Data Transmit Link" to add the card.
+     * @return string https://a.wallet.samsung.com/wallet/card/{cardId}?cdata={token}
      */
-    public function samsungAddToWalletUrl(string $cardId, string $partnerId): string;
+    public function samsungAddToWalletUrl(string $cardId, string $cdataToken): string;
 }
 ```
 

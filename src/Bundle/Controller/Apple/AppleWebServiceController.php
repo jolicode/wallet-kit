@@ -32,7 +32,7 @@ final class AppleWebServiceController
             return new Response('', Response::HTTP_UNAUTHORIZED);
         }
 
-        /** @var array<string, mixed> $body */
+        /* @var array<string, mixed> $body */
         try {
             $body = json_decode($request->getContent(), true, 512, \JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
