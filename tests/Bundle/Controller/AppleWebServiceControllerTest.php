@@ -46,11 +46,11 @@ final class AppleWebServiceControllerTest extends TestCase
 
         $connection->executeStatement('CREATE TABLE wallet_kit_pass_registration (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            device_id STRING NOT NULL,
-            pass_type_id STRING NOT NULL,
-            serial_number STRING NOT NULL,
-            push_token STRING NOT NULL,
-            created_at STRING NOT NULL
+            deviceId STRING NOT NULL,
+            passTypeId STRING NOT NULL,
+            serialNumber STRING NOT NULL,
+            pushToken STRING NOT NULL,
+            registeredAt STRING NOT NULL
         )');
 
         $this->repository = new DoctrinePassRegistrationRepository($this->entityManager);
@@ -105,7 +105,7 @@ final class AppleWebServiceControllerTest extends TestCase
 
     private function authHeader(string $token = 'token-A'): array
     {
-        return ['Authorization' => 'ApplePass ' . $token];
+        return ['HTTP_AUTHORIZATION' => 'ApplePass ' . $token];
     }
 
     public function testRegisterDeviceWithoutAuthReturns401(): void
