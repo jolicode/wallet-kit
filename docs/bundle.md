@@ -269,6 +269,61 @@ Columns: `id`, `device_id`, `pass_type_id`, `serial_number`, `push_token`, `regi
 
 Run `php bin/console doctrine:schema:update` (or create a migration) to create the table.
 
+### Registration lifecycle
+
+The web service is resilient to iOS re-registration behaviors:
+
+- **First registration** answers `201 Created`.
+- **Re-registration with a rotated push token** (iOS updates, re-added passes...): the token is updated in place on the existing row — other devices' registrations for the same pass are untouched — and answers `200`. Token rotations are logged, with the raw token *hashed* (first 12 hex chars of its SHA-256), never stored in logs.
+- **Re-registration with identical data** is an idempotent no-op: nothing is written, answers `200`.
+
+**Unregistration always answers `200`**, even when no matching registration row exists (device mismatch, row pruned by a previous APNs 410, ...). Apple's protocol expects a 2xx on DELETE: answering an error status leaves zombie registrations — the device keeps retrying while the row keeps receiving pushes. When the pass itself is unknown (or the authentication token does not match the pass' configured token), the controller still answers `401`; the tolerant 2xx applies to authenticated requests whose registration data does not match. A warning is logged whenever a device mismatch or pruned registration is detected.
+
+The default [`DoctrinePassRegistrationRepository`](../src/Bundle/Repository/DoctrinePassRegistrationRepository.php) reports what a `register()` call actually did through a `RegistrationResult` (created / push token rotated / unchanged). Custom implementations of [`PassRegistrationRepositoryInterface`](../src/Bundle/Repository/PassRegistrationRepositoryInterface.php) should return the same value object.
+
+### AppleRegistrationHandlerInterface (optional hook)
+
+If your application manages external push infrastructure keyed by registration state (e.g. SNS platform endpoints and subscriptions, when pushes are fanned out through a service rather than sent to APNs directly), implement [`AppleRegistrationHandlerInterface`](../src/Bundle/Apple/AppleRegistrationHandlerInterface.php) to keep it in sync:
+
+```php
+use Jolicode\WalletKit\Bundle\Apple\AppleRegistrationHandlerInterface;
+
+final class MyRegistrationHandler implements AppleRegistrationHandlerInterface
+{
+    public function onDeviceRegistered(string $deviceId, string $passTypeId, string $serialNumber, string $pushToken): void
+    {
+        // A device registered for the first time: create your external
+        // push resource (e.g. SNS platform endpoint + subscription) here.
+    }
+
+    public function onPushTokenRotated(
+        string $deviceId,
+        string $passTypeId,
+        string $serialNumber,
+        string $previousPushToken,
+        string $newPushToken,
+    ): void {
+        // Apple rotated the push token: update the external resource's token
+        // attribute instead of tearing down and recreating its subscription.
+    }
+
+    public function onDeviceUnregistered(string $deviceId, string $passTypeId, string $serialNumber): void
+    {
+        // The registration row was removed: clean up the external resource.
+    }
+}
+```
+
+Register it and the bundle wires it into the web service automatically:
+
+```php
+// config/services.php
+$services->set(AppleRegistrationHandlerInterface::class, MyRegistrationHandler::class)
+    ->args([/* your dependencies */]);
+```
+
+The hook is best-effort: every callback runs inside a try/catch — an exception is logged as a warning and the Apple Web Service contract is preserved (`201`/`200` on register, `200` on unregister). `onDeviceUnregistered` fires only when a registration row was actually removed; the stale-token pruning done by the APNs push processor does not go through this hook.
+
 ---
 
 ## Google and Samsung callbacks

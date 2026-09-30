@@ -6,6 +6,8 @@ namespace Jolicode\WalletKit\Bundle\Controller\Apple;
 
 use Jolicode\WalletKit\Api\Apple\ApplePassPackager;
 use Jolicode\WalletKit\Bundle\Apple\ApplePassProviderInterface;
+use Jolicode\WalletKit\Bundle\Apple\AppleRegistrationHandlerInterface;
+use Jolicode\WalletKit\Bundle\Repository\PassRegistrationOutcome;
 use Jolicode\WalletKit\Bundle\Repository\PassRegistrationRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -21,6 +23,7 @@ final class AppleWebServiceController
         private readonly PassRegistrationRepositoryInterface $registrationRepository,
         private readonly ApplePassProviderInterface $passProvider,
         private readonly ApplePassPackager $passPackager,
+        private readonly ?AppleRegistrationHandlerInterface $registrationHandler = null,
         ?LoggerInterface $logger = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
@@ -45,9 +48,30 @@ final class AppleWebServiceController
             $pushToken = (string) $body['pushToken'];
         }
 
-        $created = $this->registrationRepository->register($deviceId, $passTypeId, $serialNumber, $pushToken);
+        $result = $this->registrationRepository->register($deviceId, $passTypeId, $serialNumber, $pushToken);
 
-        return new Response('', $created ? Response::HTTP_CREATED : Response::HTTP_OK);
+        if (PassRegistrationOutcome::Created === $result->outcome) {
+            $this->notifyRegistrationHandler(
+                'onDeviceRegistered',
+                fn (AppleRegistrationHandlerInterface $registrationHandler) => $registrationHandler->onDeviceRegistered($deviceId, $passTypeId, $serialNumber, $pushToken),
+            );
+        } elseif (PassRegistrationOutcome::TokenUpdated === $result->outcome) {
+            $this->logPushTokenRotation($deviceId, $passTypeId, $serialNumber, $pushToken);
+
+            $this->notifyRegistrationHandler(
+                'onPushTokenRotated',
+                fn (AppleRegistrationHandlerInterface $registrationHandler) => $registrationHandler->onPushTokenRotated(
+                    $deviceId,
+                    $passTypeId,
+                    $serialNumber,
+                    (string) $result->previousPushToken,
+                    $pushToken,
+                ),
+            );
+        }
+        // Unchanged: idempotent no-op — nothing logged, no hook called.
+
+        return new Response('', PassRegistrationOutcome::Created === $result->outcome ? Response::HTTP_CREATED : Response::HTTP_OK);
     }
 
     public function unregisterDevice(Request $request, string $deviceId, string $passTypeId, string $serialNumber): Response
@@ -56,9 +80,29 @@ final class AppleWebServiceController
             return new Response('', Response::HTTP_UNAUTHORIZED);
         }
 
-        $this->registrationRepository->unregister($deviceId, $passTypeId, $serialNumber);
+        $removed = $this->registrationRepository->unregister($deviceId, $passTypeId, $serialNumber);
 
-        return new Response('', Response::HTTP_NO_CONTENT);
+        if (false === $removed) {
+            // Apple expects a 2xx on unregister even when registration data does not
+            // match the stored row (device mismatch, pruned rows...): a failure answer
+            // leaves zombie registrations that keep receiving pushes. Replying 2xx
+            // indiscriminately is safe — the authentication token already proved the
+            // caller owns this pass.
+            $this->logger->warning('Apple Wallet pass unregistration without matching device', [
+                'deviceId' => $deviceId,
+                'passTypeId' => $passTypeId,
+                'serialNumber' => $serialNumber,
+            ]);
+
+            return new Response('', Response::HTTP_OK);
+        }
+
+        $this->notifyRegistrationHandler(
+            'onDeviceUnregistered',
+            fn (AppleRegistrationHandlerInterface $registrationHandler) => $registrationHandler->onDeviceUnregistered($deviceId, $passTypeId, $serialNumber),
+        );
+
+        return new Response('', Response::HTTP_OK);
     }
 
     public function getSerialNumbers(Request $request, string $deviceId, string $passTypeId): Response
@@ -145,6 +189,37 @@ final class AppleWebServiceController
         }
 
         return new Response('', Response::HTTP_OK);
+    }
+
+    private function logPushTokenRotation(string $deviceId, string $passTypeId, string $serialNumber, string $newPushToken): void
+    {
+        $this->logger->info('Apple Wallet pass push token rotated', [
+            'deviceId' => $deviceId,
+            'passTypeId' => $passTypeId,
+            'serialNumber' => $serialNumber,
+            // Hashed: the raw push token must not end up in logs.
+            'pushTokenHash' => substr(hash('sha256', $newPushToken), 0, 12),
+        ]);
+    }
+
+    /**
+     * @param \Closure(AppleRegistrationHandlerInterface): void $call
+     */
+    private function notifyRegistrationHandler(string $lifecycleStep, \Closure $call): void
+    {
+        if (null === $this->registrationHandler) {
+            return;
+        }
+
+        try {
+            $call($this->registrationHandler);
+        } catch (\Throwable $exception) {
+            // Best-effort: an application handler failure must never break the
+            // Apple Web Service contract with the device.
+            $this->logger->warning(\sprintf('Apple Wallet registration handler %s failed: %s', $lifecycleStep, $exception->getMessage()), [
+                'exception' => $exception::class,
+            ]);
+        }
     }
 
     private function authenticatePassRequest(Request $request, string $passTypeId, string $serialNumber): bool

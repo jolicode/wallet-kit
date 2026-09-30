@@ -7,6 +7,7 @@ use Jolicode\WalletKit\Api\Apple\ApplePushNotifier;
 use Jolicode\WalletKit\Api\Auth\AppleApnsJwtProvider;
 use Jolicode\WalletKit\Api\Credentials\AppleCredentials;
 use Jolicode\WalletKit\Bundle\Apple\ApplePassProviderInterface;
+use Jolicode\WalletKit\Bundle\Apple\AppleRegistrationHandlerInterface;
 use Jolicode\WalletKit\Bundle\Controller\Apple\AppleWebServiceController;
 use Jolicode\WalletKit\Bundle\Processor\ApplePushProcessor;
 use Jolicode\WalletKit\Bundle\Repository\PassRegistrationRepositoryInterface;
@@ -69,6 +70,7 @@ return static function (ContainerConfigurator $container): void {
             service(PassRegistrationRepositoryInterface::class),
             service(ApplePassProviderInterface::class),
             service('wallet_kit.apple.packager'),
+            service(AppleRegistrationHandlerInterface::class)->nullOnInvalid(),
             service('logger')->nullOnInvalid(),
         ])
         ->tag('controller.service_arguments')

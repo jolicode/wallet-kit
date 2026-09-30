@@ -7,6 +7,7 @@ namespace Jolicode\WalletKit\Tests\Bundle\DependencyInjection;
 use Jolicode\WalletKit\Bundle\DependencyInjection\WalletKitExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
 final class WalletKitExtensionTest extends TestCase
 {
@@ -66,6 +67,13 @@ final class WalletKitExtensionTest extends TestCase
         self::assertTrue($container->hasDefinition('wallet_kit.apple.packager'));
         self::assertTrue($container->hasDefinition('wallet_kit.apple.push_notifier'));
         self::assertTrue($container->hasDefinition('wallet_kit.controller.apple_web_service'));
+
+        // No AppleRegistrationHandlerInterface service in the app → the
+        // controller's handler argument is optional (null-on-invalid), not a
+        // hard requirement: it resolves to null instead of a compile error.
+        $handlerArgument = $container->getDefinition('wallet_kit.controller.apple_web_service')->getArgument(3);
+        self::assertInstanceOf(Reference::class, $handlerArgument);
+        self::assertSame(ContainerBuilder::NULL_ON_INVALID_REFERENCE, $handlerArgument->getInvalidBehavior());
 
         // The Apple processor joins the throttling tag set, even though the
         // Messenger stack itself is (optionally) not installed.

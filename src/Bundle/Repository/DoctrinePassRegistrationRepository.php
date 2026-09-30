@@ -15,8 +15,12 @@ final class DoctrinePassRegistrationRepository implements PassRegistrationReposi
     ) {
     }
 
-    public function register(string $deviceId, string $passTypeId, string $serialNumber, string $pushToken): bool
-    {
+    public function register(
+        string $deviceId,
+        string $passTypeId,
+        string $serialNumber,
+        string $pushToken,
+    ): RegistrationResult {
         $repository = $this->entityManager->getRepository(PassRegistration::class);
         $existing = $repository->findOneBy([
             'deviceId' => $deviceId,
@@ -25,11 +29,7 @@ final class DoctrinePassRegistrationRepository implements PassRegistrationReposi
         ]);
 
         if (null !== $existing) {
-            // iOS re-registers with the same identifiers but a rotated push token.
-            $existing->updatePushToken($pushToken);
-            $this->entityManager->flush();
-
-            return false;
+            return $this->updateExistingRegistration($existing, $pushToken);
         }
 
         $this->entityManager->persist(new PassRegistration($deviceId, $passTypeId, $serialNumber, $pushToken));
@@ -39,6 +39,7 @@ final class DoctrinePassRegistrationRepository implements PassRegistrationReposi
         } catch (UniqueConstraintViolationException) {
             // Concurrent duplicate: treat as already-registered and still refresh the token.
             $this->entityManager->clear();
+
             $existing = $repository->findOneBy([
                 'deviceId' => $deviceId,
                 'passTypeId' => $passTypeId,
@@ -46,18 +47,39 @@ final class DoctrinePassRegistrationRepository implements PassRegistrationReposi
             ]);
 
             if (null !== $existing) {
-                $existing->updatePushToken($pushToken);
-                $this->entityManager->flush();
-                $this->entityManager->refresh($existing);
+                return $this->updateExistingRegistration($existing, $pushToken);
             }
 
-            return false;
+            // The other transaction deleted its row between our failed insert and re-read.
+            $this->entityManager->persist(new PassRegistration($deviceId, $passTypeId, $serialNumber, $pushToken));
+
+            try {
+                $this->entityManager->flush();
+            } catch (UniqueConstraintViolationException) {
+                return RegistrationResult::unchanged();
+            }
+
+            return RegistrationResult::created();
         }
 
-        return true;
+        return RegistrationResult::created();
     }
 
-    public function unregister(string $deviceId, string $passTypeId, string $serialNumber): void
+    private function updateExistingRegistration(PassRegistration $registration, string $pushToken): RegistrationResult
+    {
+        if ($registration->getPushToken() === $pushToken) {
+            // Nothing changed: a true no-op — no UPDATE, no flush.
+            return RegistrationResult::unchanged();
+        }
+
+        $result = RegistrationResult::rotated($registration->getPushToken());
+        $registration->updatePushToken($pushToken);
+        $this->entityManager->flush();
+
+        return $result;
+    }
+
+    public function unregister(string $deviceId, string $passTypeId, string $serialNumber): bool
     {
         $registration = $this->entityManager->getRepository(PassRegistration::class)->findOneBy([
             'deviceId' => $deviceId,
@@ -66,11 +88,13 @@ final class DoctrinePassRegistrationRepository implements PassRegistrationReposi
         ]);
 
         if (null === $registration) {
-            return;
+            return false;
         }
 
         $this->entityManager->remove($registration);
         $this->entityManager->flush();
+
+        return true;
     }
 
     /**

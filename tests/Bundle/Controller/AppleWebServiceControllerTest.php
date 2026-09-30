@@ -11,6 +11,7 @@ use Doctrine\ORM\ORMSetup;
 use Jolicode\WalletKit\Api\Apple\ApplePassPackager;
 use Jolicode\WalletKit\Api\Credentials\AppleCredentials;
 use Jolicode\WalletKit\Bundle\Apple\ApplePassProviderInterface;
+use Jolicode\WalletKit\Bundle\Apple\AppleRegistrationHandlerInterface;
 use Jolicode\WalletKit\Bundle\Controller\Apple\AppleWebServiceController;
 use Jolicode\WalletKit\Bundle\Repository\DoctrinePassRegistrationRepository;
 use Jolicode\WalletKit\Bundle\Repository\PassRegistrationRepositoryInterface;
@@ -23,6 +24,7 @@ final class AppleWebServiceControllerTest extends TestCase
     private EntityManagerInterface $entityManager;
     private PassRegistrationRepositoryInterface $repository;
     private AppleWebServiceController $controller;
+    private SpyAppleRegistrationHandler $spy;
     private string $passTypeId = 'pass.com.example';
 
     protected function setUp(): void
@@ -54,6 +56,7 @@ final class AppleWebServiceControllerTest extends TestCase
         )');
 
         $this->repository = new DoctrinePassRegistrationRepository($this->entityManager);
+        $this->spy = new SpyAppleRegistrationHandler();
 
         $certFile = $this->createCertificates();
         $credentials = new AppleCredentials(
@@ -69,6 +72,7 @@ final class AppleWebServiceControllerTest extends TestCase
             $this->repository,
             new StubApplePassProvider(),
             $packager,
+            $this->spy,
         );
     }
 
@@ -134,7 +138,7 @@ final class AppleWebServiceControllerTest extends TestCase
 
     public function testRegisterDeviceCreatesThenUpdatesRegistration(): void
     {
-        // First registration → 201 created
+        // First registration → 201 created, handler notified once
         $first = $this->controller->registerDevice(
             $this->request('POST', '/x', $this->authHeader(), '{"pushToken": "pt-one"}'),
             'device-1',
@@ -142,8 +146,12 @@ final class AppleWebServiceControllerTest extends TestCase
             'SERIAL-001',
         );
         self::assertSame(201, $first->getStatusCode());
+        self::assertSame(
+            [['device-1', $this->passTypeId, 'SERIAL-001', 'pt-one']],
+            $this->spy->arguments['onDeviceRegistered'] ?? [],
+        );
 
-        // iOS re-register (token rotation) → 200 already-registered
+        // iOS re-register with a rotated token → 200, rotation hook with the NEW token
         $second = $this->controller->registerDevice(
             $this->request('POST', '/x', $this->authHeader(), '{"pushToken": "pt-rotated"}'),
             'device-1',
@@ -151,12 +159,33 @@ final class AppleWebServiceControllerTest extends TestCase
             'SERIAL-001',
         );
         self::assertSame(200, $second->getStatusCode());
+        self::assertSame(
+            [['device-1', $this->passTypeId, 'SERIAL-001', 'pt-one', 'pt-rotated']],
+            $this->spy->arguments['onPushTokenRotated'] ?? [],
+            'rotation hook carries previous and new token',
+        );
+        self::assertCount(1, $this->spy->arguments['onDeviceRegistered'] ?? [], 'rotation is not a new registration');
 
         // The rotated token must have replaced the stale one.
         self::assertSame(['pt-rotated'], $this->repository->findPushTokens(
             $this->passTypeId,
             'SERIAL-001',
         ));
+    }
+
+    public function testRegisterDeviceIsIdempotentWhenNothingChanged(): void
+    {
+        $this->repository->register('device-1', $this->passTypeId, 'SERIAL-001', 'pt-1');
+
+        $response = $this->controller->registerDevice(
+            $this->request('POST', '/x', $this->authHeader(), '{"pushToken": "pt-1"}'),
+            'device-1',
+            $this->passTypeId,
+            'SERIAL-001',
+        );
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame([], $this->spy->calls, 'unchanged registration must not fire the handler');
     }
 
     public function testRegisterDeviceRejectsMalformedJsonWith400(): void
@@ -221,7 +250,7 @@ final class AppleWebServiceControllerTest extends TestCase
         self::assertSame(400, $response->getStatusCode());
     }
 
-    public function testUnregisterDeviceReturns204AndRemovesRow(): void
+    public function testUnregisterDeviceReturns200AndRemovesRow(): void
     {
         $this->repository->register('device-1', $this->passTypeId, 'SERIAL-001', 'pt-1');
 
@@ -232,8 +261,80 @@ final class AppleWebServiceControllerTest extends TestCase
             'SERIAL-001',
         );
 
-        self::assertSame(204, $response->getStatusCode());
-        self::assertSame([], json_decode($response->getContent() ?: '[]', true) ?? [], 'no body');
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('', $response->getContent(), 'no body');
+        self::assertSame(
+            [['device-1', $this->passTypeId, 'SERIAL-001']],
+            $this->spy->arguments['onDeviceUnregistered'] ?? [],
+            'row removal fires the unregistration hook',
+        );
+        self::assertSame([], $this->repository->findPushTokens($this->passTypeId, 'SERIAL-001'));
+    }
+
+    public function testUnregisterDeviceWithPrunedRegistrationStillReturns200(): void
+    {
+        // The pass exists (auth passes for SERIAL-002) but no registration row:
+        // the row was already removed (or never created). Apple expects 2xx even
+        // when nothing matched — a failed answer leaves zombie registrations that
+        // keep receiving pushes.
+        $response = $this->controller->unregisterDevice(
+            $this->request('DELETE', '/x', $this->authHeader('token-B')),
+            'device-9',
+            $this->passTypeId,
+            'SERIAL-002',
+        );
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame([], $this->spy->calls, 'no hook without an actual removal');
+    }
+
+    public function testUnregisterDeviceWithDeviceMismatchStillReturns200ButKeepsRow(): void
+    {
+        $this->repository->register('device-1', $this->passTypeId, 'SERIAL-001', 'pt-1');
+
+        // device-2 asks to unregister device-1's registration: authentication passed
+        // (auth token is per-pass, not per-device) but the registration is not its own.
+        $response = $this->controller->unregisterDevice(
+            $this->request('DELETE', '/x', $this->authHeader()),
+            'device-2',
+            $this->passTypeId,
+            'SERIAL-001',
+        );
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame(['pt-1'], $this->repository->findPushTokens($this->passTypeId, 'SERIAL-001'), 'other device row untouched');
+        self::assertSame([], $this->spy->calls, 'no hook without an actual removal');
+    }
+
+    public function testUnregisterDeviceWithHandlerErrorStillReturns200(): void
+    {
+        $this->spy->throwOn('onDeviceUnregistered');
+        $this->repository->register('device-1', $this->passTypeId, 'SERIAL-001', 'pt-1');
+
+        $response = $this->controller->unregisterDevice(
+            $this->request('DELETE', '/x', $this->authHeader()),
+            'device-1',
+            $this->passTypeId,
+            'SERIAL-001',
+        );
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame([], $this->repository->findPushTokens($this->passTypeId, 'SERIAL-001'), 'row still removed');
+    }
+
+    public function testRegisterDeviceWithHandlerErrorStillRegisters(): void
+    {
+        $this->spy->throwOn('onDeviceRegistered');
+
+        $response = $this->controller->registerDevice(
+            $this->request('POST', '/x', $this->authHeader(), '{"pushToken": "pt-1"}'),
+            'device-1',
+            $this->passTypeId,
+            'SERIAL-001',
+        );
+
+        self::assertSame(201, $response->getStatusCode());
+        self::assertSame(['pt-1'], $this->repository->findPushTokens($this->passTypeId, 'SERIAL-001'), 'row registered despite handler failure');
     }
 
     public function testUnregisterDeviceRequiresAuth(): void
@@ -303,5 +404,60 @@ final class StubApplePassProvider implements ApplePassProviderInterface
     public function getLastModified(string $passTypeIdentifier, string $serialNumber): \DateTimeImmutable
     {
         return new \DateTimeImmutable('2026-01-01 00:00:00');
+    }
+}
+
+/**
+ * Records every handler call; optionally throws to prove the web service
+ * contract survives application-handler failures.
+ *
+ * @internal
+ */
+final class SpyAppleRegistrationHandler implements AppleRegistrationHandlerInterface
+{
+    /** @var array<string, int> */
+    public array $calls = [];
+
+    /** @var array<string, list<array{string, string, string, string}>> */
+    public array $arguments = [];
+
+    private ?string $throwOn = null;
+
+    public function throwOn(?string $method): void
+    {
+        $this->throwOn = $method;
+    }
+
+    public function onDeviceRegistered(string $deviceId, string $passTypeId, string $serialNumber, string $pushToken): void
+    {
+        $this->record(__FUNCTION__, \func_get_args());
+    }
+
+    public function onPushTokenRotated(
+        string $deviceId,
+        string $passTypeId,
+        string $serialNumber,
+        string $previousPushToken,
+        string $newPushToken,
+    ): void {
+        $this->record(__FUNCTION__, \func_get_args());
+    }
+
+    public function onDeviceUnregistered(string $deviceId, string $passTypeId, string $serialNumber): void
+    {
+        $this->record(__FUNCTION__, \func_get_args());
+    }
+
+    /**
+     * @param list<mixed> $arguments
+     */
+    private function record(string $method, array $arguments): void
+    {
+        $this->calls[$method] = ($this->calls[$method] ?? 0) + 1;
+        $this->arguments[$method][] = $arguments;
+
+        if ($this->throwOn === $method) {
+            throw new \RuntimeException(\sprintf('%s failed on purpose', $method));
+        }
     }
 }
