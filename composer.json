@@ -24,6 +24,20 @@
         "symfony/serializer": "^7.4 || ^8.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^12.0"
+        "phpunit/phpunit": "^12.0",
+        "symfony/http-client": "^7.4 || ^8.0",
+        "symfony/framework-bundle": "^7.4 || ^8.0",
+        "symfony/routing": "^7.4 || ^8.0",
+        "symfony/messenger": "^7.4 || ^8.0",
+        "doctrine/orm": "^3.0"
+    },
+    "suggest": {
+        "symfony/http-client": "Required for Google/Samsung API clients and Apple push notifications",
+        "symfony/framework-bundle": "Required for the Symfony bundle (routes, DI, controllers)",
+        "symfony/routing": "Required for the Symfony bundle route generation",
+        "symfony/messenger": "Required for throttled bulk operations",
+        "doctrine/orm": "Required for default PassRegistration and PendingOperation Doctrine repositories",
+        "ext-openssl": "Required for Apple .pkpass signing and JWT generation",
+        "ext-zip": "Required for Apple .pkpass packaging"
     }
 }

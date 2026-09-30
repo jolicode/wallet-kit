@@ -11,12 +11,17 @@ jobs:
         steps:
             - name: checkout
               uses: actions/checkout@v4
-            - name: setup
-              uses: castor-php/setup-castor@v0.1.0
+            # composer 2.10 changed ComposerApplication's constructor and broke
+            # the castor tool installer in fresh environments; run the pinned
+            # tool PHAR directly (same version castor pins locally) until then.
+            - name: install php-cs-fixer 3.85.1
+              run: |
+                  curl -fsSL -o php-cs-fixer.phar https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/download/v3.85.1/php-cs-fixer.phar
+                  chmod +x php-cs-fixer.phar
             - name: php-cs-fixer check
               env:
                   PHP_CS_FIXER_IGNORE_ENV: 1
-              run: castor qa:cs:check
+              run: php php-cs-fixer.phar fix --dry-run --diff -v
 
     spec-check:
         runs-on: ubuntu-latest
@@ -53,10 +58,15 @@ jobs:
                   coverage: none
             - name: composer install
               run: composer install --no-interaction --no-ansi
-            - name: setup-castor
-              uses: castor-php/setup-castor@v0.1.0
+            # castor's tool installer breaks on composer 2.10 in fresh CI
+            # environments; run the pinned phpstan PHAR directly (same version
+            # castor pins locally) until castor-php-qa adapts.
+            - name: install phpstan 2.1.17
+              run: |
+                  curl -fsSL -o phpstan.phar https://github.com/phpstan/phpstan/releases/download/2.1.17/phpstan.phar
+                  chmod +x phpstan.phar
             - name: phpstan
-              run: castor qa:phpstan
+              run: php phpstan.phar analyse --configuration phpstan.neon --memory-limit=-1 --no-progress -v
 
     tests:
         runs-on: ubuntu-latest

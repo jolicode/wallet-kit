@@ -84,6 +84,17 @@ trait CommonWalletBuilderTrait
     public function withAppleWebService(?string $url, ?string $authenticationToken = null): static
     {
         $this->common->webServiceURL = $url;
+        if (null !== $url) {
+            if (!str_starts_with($url, 'https://')) {
+                throw new \ValueError('Apple requires the Web Service URL to be served over HTTPS.');
+            }
+
+            if (null === $authenticationToken) {
+                // Apple needs a 16+ character authentication token; 32 hex chars
+                // from CSPRNG comfortably give headroom.
+                $authenticationToken = bin2hex(random_bytes(16));
+            }
+        }
         $this->common->authenticationToken = $authenticationToken;
 
         return $this;

@@ -22,7 +22,7 @@ After `build()`, you get a [`BuiltWalletPass`](../src/Builder/BuiltWalletPass.ph
 - `$built->google()->issuerClass` / `$built->google()->passObject` → Google class and object (throws [`GoogleWalletPairNotAvailableException`](../src/Exception/GoogleWalletPairNotAvailableException.php) if there was no Google slice)
 - `$built->samsung()` → Samsung [`Card`](../src/Pass/Samsung/Model/Card.php) envelope (throws [`SamsungCardNotAvailableException`](../src/Exception/SamsungCardNotAvailableException.php) if there was no Samsung slice)
 
-Serialize with **Symfony Serializer** and the normalizers from this package (see [`tests/Builder/BuilderTestSerializerFactory.php`](../tests/Builder/BuilderTestSerializerFactory.php) for a full list).
+Serialize with **Symfony Serializer** — [`WalletSerializerFactory::create()`](../src/Builder/WalletSerializerFactory.php) registers every normalizer this package ships.
 
 ---
 
@@ -244,7 +244,7 @@ $built = WalletPass::offer(
     provider: 'Example Coffee',
     redemptionChannel: RedemptionChannelEnum::INSTORE,
 )
-    ->withBackgroundColorRgb('rgb(40, 80, 120)')
+    ->withBackgroundColor(Color::fromRgbString('rgb(40, 80, 120)'))
     ->addAppleBarcode(new Barcode(
         altText: 'Promo',
         format: BarcodeFormatEnum::PDF417,
@@ -403,7 +403,7 @@ These methods come from [`CommonWalletBuilderTrait`](../src/Builder/CommonWallet
 | `addAppleBarcode` | Adds a barcode on the Apple pass; the **first** one is mirrored on Google unless you override. |
 | `withGoogleBarcodeOverride` | Forces the Google object barcode. |
 | `withAppleBackgroundColor` / `withGoogleHexBackgroundColor` | Colors per platform. |
-| `withBackgroundColorRgb` | Sets Apple RGB and derives Google hex when possible. |
+| `withBackgroundColor` | Single color: `Color::fromRgbString('rgb(40, 80, 120)')` renders both Apple RGB and Google hex. |
 | `withAppleForegroundColor` / `withAppleLabelColor` | Apple-only styling. |
 | `withGrouping` | Apple `groupingIdentifier` + Google `GroupingInfo`. |
 | `withAppleWebService` | Apple pass update web service URL and token. |

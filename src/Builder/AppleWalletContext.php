@@ -16,6 +16,8 @@ final class AppleWalletContext
         public readonly string $organizationName,
         public readonly string $description,
         public readonly int $formatVersion = 1,
+        public readonly ?string $webServiceURL = null,
+        public readonly ?string $authenticationToken = null,
     ) {
     }
 }

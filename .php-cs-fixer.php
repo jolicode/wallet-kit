@@ -1,7 +1,12 @@
 <?php
 
 $finder = (new PhpCsFixer\Finder())
-    ->in([__DIR__ . '/src', __DIR__ . '/tests'])
+    ->in([
+        __DIR__ . '/src',
+        __DIR__ . '/tests',
+        __DIR__ . '/examples',
+    ])
+    ->exclude(['vendor']) // example projects vendor their own dependencies
 ;
 
 return (new PhpCsFixer\Config())
